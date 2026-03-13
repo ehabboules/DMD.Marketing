@@ -1,0 +1,157 @@
+@page "/features"
+@using DMD.Marketing.Components
+
+<PageTitle>Features — DMD Inventory</PageTitle>
+
+<!-- Page Header -->
+<div style="background:linear-gradient(135deg,var(--dmd-navy-dark),var(--dmd-navy));padding:8rem 0 4rem;margin-top:68px;">
+    <MudContainer MaxWidth="MaxWidth.Medium" Style="text-align:center;">
+        <p class="section-label">Platform Features</p>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;margin:0 0 1rem;">
+            Built for the full retail workflow
+        </h1>
+        <p style="color:rgba(255,255,255,0.65);font-size:1.05rem;margin:0;line-height:1.7;">
+            Every feature in DMD Inventory was designed around how real retail businesses
+            actually operate — from opening the cash register to closing the books.
+        </p>
+    </MudContainer>
+</div>
+
+<!-- Feature Groups -->
+@foreach (var group in _featureGroups)
+{
+    <section class="section @(group.Dark ? "section-dark" : "")">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudGrid AlignItems="AlignItems.Center" Spacing="6">
+                <MudItem xs="12" md="@(group.ImageRight ? 5 : 7)">
+                    @if (!group.ImageRight)
+                    {
+                        <FeatureGroupIllustration GroupName="@group.Name" />
+                    }
+                    else
+                    {
+                        <div>
+                            <p class="section-label">@group.Label</p>
+                            <h2 class="section-title" style="@(group.Dark ? "color:#fff;" : "")">@group.Name</h2>
+                            <p class="@(group.Dark ? "section-subtitle section-subtitle-white" : "section-subtitle")" style="margin:1rem 0 2rem;max-width:100%;">
+                                @group.Description
+                            </p>
+                            <MudGrid Spacing="2">
+                                @foreach (var feat in group.Features)
+                                {
+                                    <MudItem xs="12">
+                                        <div style="display:flex;gap:12px;align-items:flex-start;">
+                                            <div style="width:32px;height:32px;border-radius:8px;background:var(--dmd-teal-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">
+                                                @feat.Icon
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:600;@(group.Dark ? "color:#fff;" : "color:var(--dmd-navy);")margin-bottom:2px;">@feat.Title</div>
+                                                <div style="font-size:0.88rem;@(group.Dark ? "color:rgba(255,255,255,0.55);" : "color:var(--dmd-text-muted);")line-height:1.55;">@feat.Desc</div>
+                                            </div>
+                                        </div>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </div>
+                    }
+                </MudItem>
+
+                <MudItem xs="12" md="@(group.ImageRight ? 7 : 5)">
+                    @if (group.ImageRight)
+                    {
+                        <FeatureGroupIllustration GroupName="@group.Name" />
+                    }
+                    else
+                    {
+                        <div>
+                            <p class="section-label">@group.Label</p>
+                            <h2 class="section-title" style="@(group.Dark ? "color:#fff;" : "")">@group.Name</h2>
+                            <p class="@(group.Dark ? "section-subtitle section-subtitle-white" : "section-subtitle")" style="margin:1rem 0 2rem;max-width:100%;">
+                                @group.Description
+                            </p>
+                            <MudGrid Spacing="2">
+                                @foreach (var feat in group.Features)
+                                {
+                                    <MudItem xs="12">
+                                        <div style="display:flex;gap:12px;align-items:flex-start;">
+                                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,191,165,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">
+                                                @feat.Icon
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:600;@(group.Dark ? "color:#fff;" : "color:var(--dmd-navy);")margin-bottom:2px;">@feat.Title</div>
+                                                <div style="font-size:0.88rem;@(group.Dark ? "color:rgba(255,255,255,0.55);" : "color:var(--dmd-text-muted);")line-height:1.55;">@feat.Desc</div>
+                                            </div>
+                                        </div>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </div>
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+}
+
+<!-- Bottom CTA -->
+<section style="background:var(--dmd-gray);padding:4rem 0;text-align:center;">
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin:0 0 1rem;">
+            See it live in 30 minutes
+        </h2>
+        <p style="color:var(--dmd-text-muted);margin:0 0 2rem;line-height:1.7;">
+            Book a free demo and we'll walk you through every feature — tailored to your type of business.
+        </p>
+        <a href="/contact" style="background:var(--dmd-teal);color:var(--dmd-navy);font-weight:700;font-size:1rem;padding:0.9rem 2.5rem;border-radius:10px;text-decoration:none;display:inline-block;">
+            Book Free Demo →
+        </a>
+    </MudContainer>
+</section>
+
+@code {
+    private record FeatureDetail(string Icon, string Title, string Desc);
+    private record FeatureGroup(string Label, string Name, string Description, bool Dark, bool ImageRight, List<FeatureDetail> Features);
+
+    private List<FeatureGroup> _featureGroups = new()
+    {
+        new("Point of Sale", "Blazing-fast POS terminal", "A checkout experience your cashiers will love. Scan products, apply discounts, handle split payments, and print receipts — all in seconds.", false, true,
+            new()
+            {
+                new("🔍", "Barcode & search",       "Scan barcodes or search by name, SKU, or category instantly."),
+                new("💳", "Multiple payment types",  "Cash, card, or mixed payments — fully configurable per store."),
+                new("🏷️", "Order & line discounts",  "Apply dollar or percentage discounts at item or order level."),
+                new("🧾", "Receipt printing",         "Print or email receipts with your store's branding."),
+                new("⚠️", "Age restriction alerts",   "Automatic warnings for restricted products at checkout."),
+            }),
+
+        new("Inventory", "Multi-warehouse inventory control", "Know exactly what you have, where it is, and when to reorder — across every location in real time.", true, false,
+            new()
+            {
+                new("🏭", "Multiple warehouses",     "Track stock independently across warehouses, branches, or storage rooms."),
+                new("🔄", "Stock transfers",          "Move items between locations with a full movement audit trail."),
+                new("📉", "Low stock alerts",         "Automatic notifications when products fall below reorder thresholds."),
+                new("📋", "Purchase orders",          "Create POs and auto-update stock when shipments are received."),
+                new("📸", "Product images",           "Attach one image per product, stored securely on Cloudflare R2."),
+            }),
+
+        new("Finance & Reporting", "Reports that actually help you decide", "From daily sales summaries to profit margin analysis — DMD gives you the numbers you need without the spreadsheet headache.", false, true,
+            new()
+            {
+                new("📊", "Sales reports",            "Daily, weekly, and monthly breakdowns with filtering by product and category."),
+                new("💰", "Cash session tracking",    "Open/close registers with reconciliation and discrepancy flagging."),
+                new("🧮", "Tax calculations",          "Federal + provincial tax per product, auto-applied at checkout."),
+                new("📤", "Expense tracking",          "Log and categorize store expenses for accurate P&L reporting."),
+                new("🗂️", "Export-ready data",         "Download reports as CSV or PDF for your accountant."),
+            }),
+
+        new("Platform", "Security, languages & scale", "DMD is built as a cloud SaaS with one database per customer — your data is fully isolated and always accessible.", true, false,
+            new()
+            {
+                new("🌐", "3 Languages",              "Full UI in English, French, and Arabic with RTL layout support."),
+                new("🔒", "Isolated databases",       "Each customer has their own private PostgreSQL database on Railway."),
+                new("👥", "Roles & permissions",      "Define exactly what each user can see and do — cashier to admin."),
+                new("☁️", "Cloud-hosted",              "No servers to manage — accessible from any device, anywhere."),
+                new("🔑", "OAuth2 / JWT auth",         "Secure token-based authentication via OpenIddict."),
+            }),
+    };
+}

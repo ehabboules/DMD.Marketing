@@ -1,0 +1,213 @@
+@inherits LayoutComponentBase
+@using DMD.Marketing.Layout
+
+<MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+
+    <!-- ─── APP BAR ─── -->
+    <MudAppBar Elevation="2" Fixed="true" Dense="false">
+
+        <!-- Logo -->
+        <MudLink Href="/" Underline="Underline.None" Color="Color.Inherit">
+            <MudText Typo="Typo.h6"
+                     Style="font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.5px;">
+                DMD <span style="color:var(--mud-palette-primary);">Inventory</span>
+            </MudText>
+        </MudLink>
+
+        <MudSpacer />
+
+        <!-- Desktop nav links -->
+        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+            <MudLink Href="/#features" Color="Color.Inherit" Underline="Underline.None" Class="mx-3 nav-appbar-link">Features</MudLink>
+            <MudLink Href="/features"  Color="Color.Inherit" Underline="Underline.None" Class="mx-3 nav-appbar-link">Details</MudLink>
+            <MudLink Href="/pricing"   Color="Color.Inherit" Underline="Underline.None" Class="mx-3 nav-appbar-link">Pricing</MudLink>
+            <MudLink Href="/contact"   Color="Color.Inherit" Underline="Underline.None" Class="mx-3 nav-appbar-link">Contact</MudLink>
+        </MudHidden>
+
+        <!-- Dark / Light mode toggle -->
+        <MudTooltip Text="@(_isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode")">
+            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                           Color="Color.Inherit"
+                           OnClick="ToggleDarkMode" />
+        </MudTooltip>
+
+        <!-- Login CTA — desktop only -->
+        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+            <MudButton Href="https://app.dmd-inventory.com"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Class="ml-2 rounded-pill"
+                       Target="_blank">
+                Login
+            </MudButton>
+        </MudHidden>
+
+        <!-- Mobile hamburger -->
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                           Color="Color.Inherit"
+                           Edge="Edge.End"
+                           OnClick="ToggleMobileDrawer" />
+        </MudHidden>
+
+    </MudAppBar>
+
+    <!-- ─── MOBILE DRAWER ─── -->
+    <MudDrawer @bind-Open="_mobileDrawerOpen"
+               Anchor="Anchor.End"
+               Elevation="2"
+               Variant="DrawerVariant.Temporary">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6"
+                     Style="font-family:'Syne',sans-serif;font-weight:800;">
+                DMD <span style="color:var(--mud-palette-primary);">Inventory</span>
+            </MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="/#features" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Star">Features</MudNavLink>
+            <MudNavLink Href="/features"  Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.List">Details</MudNavLink>
+            <MudNavLink Href="/pricing"   Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Pricing</MudNavLink>
+            <MudNavLink Href="/contact"   Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Mail">Contact</MudNavLink>
+            <MudDivider Class="my-2" />
+            <MudNavLink Href="https://app.dmd-inventory.com"
+                        Icon="@Icons.Material.Filled.Login">
+                Login
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <!-- ─── MAIN CONTENT ─── -->
+    <MudMainContent>
+        @Body
+        <Footer />
+    </MudMainContent>
+
+</MudLayout>
+
+<!-- ─── SCROLL TO TOP ─── -->
+<MudScrollToTop>
+    <MudFab Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.KeyboardArrowUp"
+            Size="Size.Medium" />
+</MudScrollToTop>
+
+<style>
+    /* ── AppBar nav links ── */
+    .nav-appbar-link {
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0.9;
+        transition: opacity 0.2s;
+    }
+    .nav-appbar-link:hover {
+        opacity: 1;
+        text-decoration: none !important;
+    }
+
+    /* ── Mobile drawer active link ── */
+    .mud-nav-link.mud-nav-link-active {
+        background: linear-gradient(90deg, rgba(0,191,165,0.12) 0%, transparent 100%) !important;
+        border-left: 3px solid #00BFA5;
+        font-weight: 600;
+    }
+
+    /* ── Smooth page transitions ── */
+    .mud-main-content {
+        animation: fadeIn 0.25s ease-in;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0);   }
+    }
+</style>
+
+@code {
+    private bool _isDarkMode        = false;
+    private bool _mobileDrawerOpen  = false;
+
+    private void ToggleDarkMode()     => _isDarkMode       = !_isDarkMode;
+    private void ToggleMobileDrawer() => _mobileDrawerOpen = !_mobileDrawerOpen;
+
+    private MudTheme _theme = new MudTheme
+    {
+        // ── Light palette ──
+        PaletteLight = new PaletteLight
+        {
+            Primary          = "#00BFA5",
+            PrimaryDarken    = "#00897B",
+            PrimaryLighten   = "#E0F7F4",
+            Secondary        = "#1A237E",
+            Error            = "#E53935",
+            Background       = "#FFFFFF",
+            Surface          = "#FFFFFF",
+            AppbarBackground = "#1A237E",
+            DrawerBackground = "#FFFFFF",
+            DrawerText       = "rgba(26,35,126,0.87)",
+            TextPrimary      = "#1A237E",
+            TextSecondary    = "#607D8B",
+        },
+
+        // ── Dark palette ──
+        PaletteDark = new PaletteDark
+        {
+            Primary          = "#00BFA5",
+            PrimaryDarken    = "#00796B",
+            Secondary        = "#7986CB",
+            Background       = "#0F0F1A",
+            Surface          = "#1A1A2E",
+            AppbarBackground = "#0F0F1A",
+            DrawerBackground = "#1A1A2E",
+            DrawerText       = "rgba(255,255,255,0.87)",
+            TextPrimary      = "rgba(255,255,255,0.87)",
+            TextSecondary    = "rgba(255,255,255,0.60)",
+            Error            = "#EF5350",
+        },
+
+        // ── Typography ──
+        Typography = new Typography
+        {
+            Default = new Default
+            {
+                FontFamily = new[] { "DM Sans", "sans-serif" }
+            },
+            H1 = new H1
+            {
+                FontFamily = new[] { "Syne", "sans-serif" },
+                FontWeight = 800
+            },
+            H2 = new H2
+            {
+                FontFamily = new[] { "Syne", "sans-serif" },
+                FontWeight = 800
+            },
+            H3 = new H3
+            {
+                FontFamily = new[] { "Syne", "sans-serif" },
+                FontWeight = 700
+            },
+            H4 = new H4
+            {
+                FontFamily = new[] { "Syne", "sans-serif" },
+                FontWeight = 700
+            },
+            Button = new Button
+            {
+                FontFamily = new[] { "DM Sans", "sans-serif" },
+                FontWeight = 600
+            },
+        },
+
+        // ── Layout ──
+        LayoutProperties = new LayoutProperties
+        {
+            DrawerWidthLeft  = "260px",
+            DrawerWidthRight = "280px",
+            AppbarHeight     = "64px",
+        }
+    };
+}

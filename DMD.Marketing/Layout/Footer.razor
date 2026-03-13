@@ -1,0 +1,47 @@
+@namespace DMD.Marketing.Layout
+
+<footer class="dmd-footer">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid>
+            <MudItem xs="12" sm="4">
+                <div class="footer-logo">DMD <span>Inventory</span></div>
+                <p style="font-size:0.9rem;line-height:1.7;margin:0.5rem 0 0;">
+                    Smart POS &amp; inventory management<br />built for modern retail businesses.
+                </p>
+            </MudItem>
+
+            <MudItem xs="6" sm="2">
+                <p style="color:#fff;font-weight:600;font-size:0.9rem;margin:0 0 1rem;">Product</p>
+                <ul class="footer-links">
+                    <li><a href="/features">Features</a></li>
+                    <li><a href="/pricing">Pricing</a></li>
+                    <li><a href="/contact">Request Demo</a></li>
+                </ul>
+            </MudItem>
+
+            <MudItem xs="6" sm="2">
+                <p style="color:#fff;font-weight:600;font-size:0.9rem;margin:0 0 1rem;">Company</p>
+                <ul class="footer-links">
+                    <li><a href="/contact">Contact Us</a></li>
+                </ul>
+            </MudItem>
+
+            <MudItem xs="12" sm="4">
+                <p style="color:#fff;font-weight:600;font-size:0.9rem;margin:0 0 1rem;">Ready to get started?</p>
+                <p style="font-size:0.88rem;margin:0 0 1rem;line-height:1.6;">
+                    Join retail businesses already managing their inventory smarter with DMD.
+                </p>
+                <a href="/contact" class="nav-cta" style="display:inline-block;padding:0.6rem 1.4rem;border-radius:8px;font-size:0.9rem;">
+                    Book a Free Demo →
+                </a>
+            </MudItem>
+        </MudGrid>
+
+        <hr class="footer-divider" />
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <p style="margin:0;font-size:0.82rem;">© @DateTime.Now.Year DMD Inventory. All rights reserved.</p>
+            <p style="margin:0;font-size:0.82rem;">Built with ❤️ for retail businesses</p>
+        </div>
+    </MudContainer>
+</footer>

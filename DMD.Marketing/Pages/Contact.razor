@@ -1,0 +1,222 @@
+@page "/contact"
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@inject EmailService EmailService
+
+<PageTitle>Contact & Demo — DMD Inventory</PageTitle>
+
+<!-- Header -->
+<div style="background:linear-gradient(135deg,var(--dmd-navy-dark),var(--dmd-navy));padding:8rem 0 4rem;margin-top:68px;text-align:center;">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <p class="section-label">Get in touch</p>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;margin:0 0 1rem;">
+            Book your free demo
+        </h1>
+        <p style="color:rgba(255,255,255,0.65);font-size:1.05rem;margin:0;">
+            Fill in the form below and we'll reach out within one business day to schedule your personalized walkthrough.
+        </p>
+    </MudContainer>
+</div>
+
+<section class="section section-gray">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid Spacing="6" AlignItems="AlignItems.Start">
+
+            <!-- Left: Info -->
+            <MudItem xs="12" md="4">
+                <div style="padding-top:1rem;">
+                    <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--dmd-navy);margin:0 0 1.5rem;">
+                        What to expect
+                    </h2>
+
+                    @foreach (var step in _steps)
+                    {
+                        <div style="display:flex;gap:16px;margin-bottom:1.75rem;align-items:flex-start;">
+                            <div style="width:40px;height:40px;border-radius:50%;background:var(--dmd-teal);display:flex;align-items:center;justify-content:center;color:var(--dmd-navy);font-weight:800;font-size:0.95rem;flex-shrink:0;">
+                                @step.Number
+                            </div>
+                            <div>
+                                <div style="font-weight:600;color:var(--dmd-navy);margin-bottom:3px;">@step.Title</div>
+                                <div style="font-size:0.88rem;color:var(--dmd-text-muted);line-height:1.55;">@step.Desc</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div style="background:var(--dmd-teal-light);border:1px solid rgba(0,191,165,0.3);border-radius:12px;padding:1.25rem;margin-top:2rem;">
+                        <div style="font-weight:700;color:var(--dmd-navy);margin-bottom:4px;">💬 Prefer email?</div>
+                        <div style="font-size:0.88rem;color:var(--dmd-text-muted);">
+                            Reach us directly at<br />
+                            <a href="mailto:hello@dmd-inventory.com" style="color:var(--dmd-teal);font-weight:600;">hello@dmd-inventory.com</a>
+                        </div>
+                    </div>
+                </div>
+            </MudItem>
+
+            <!-- Right: Form -->
+            <MudItem xs="12" md="8">
+                @if (_submitted)
+                {
+                    <div style="background:#fff;border-radius:20px;padding:4rem 3rem;text-align:center;box-shadow:0 8px 48px rgba(26,35,126,0.08);">
+                        <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+                        <h2 style="font-family:'Syne',sans-serif;font-weight:800;color:var(--dmd-navy);margin:0 0 0.75rem;">
+                            Demo request received!
+                        </h2>
+                        <p style="color:var(--dmd-text-muted);margin:0 0 2rem;line-height:1.7;">
+                            Thanks <strong>@_model.Name</strong> — we'll be in touch within one business day
+                            to schedule your personalized demo of DMD Inventory.
+                        </p>
+                        <a href="/" style="background:var(--dmd-teal);color:var(--dmd-navy);font-weight:700;padding:0.8rem 2rem;border-radius:10px;text-decoration:none;display:inline-block;">
+                            Back to Home
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="contact-card">
+                        <h3 style="font-family:'Syne',sans-serif;font-weight:700;color:var(--dmd-navy);margin:0 0 1.75rem;font-size:1.3rem;">
+                            Tell us about your business
+                        </h3>
+
+                        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+
+                            <MudGrid Spacing="3">
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Name"
+                                                  For="() => _model.Name"
+                                                  Label="Full Name *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Email"
+                                                  For="() => _model.Email"
+                                                  Label="Email Address *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  InputType="InputType.Email" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Company"
+                                                  For="() => _model.Company"
+                                                  Label="Company / Store Name *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Phone"
+                                                  For="() => _model.Phone"
+                                                  Label="Phone (optional)"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  InputType="InputType.Telephone" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudSelect T="string"
+                                               @bind-Value="_model.BusinessType"
+                                               For="() => _model.BusinessType"
+                                               Label="Business Type *"
+                                               Variant="Variant.Outlined"
+                                               FullWidth="true">
+                                        @foreach (var type in _businessTypes)
+                                        {
+                                            <MudSelectItem T="string" Value="@type">@type</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="_model.Message"
+                                                  For="() => _model.Message"
+                                                  Label="Tell us about your needs *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  Lines="4"
+                                                  HelperText="E.g. how many locations, products, users — or any specific questions." />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    @if (!string.IsNullOrEmpty(_errorMessage))
+                                    {
+                                        <MudAlert Severity="Severity.Error" Class="mb-3">@_errorMessage</MudAlert>
+                                    }
+                                    <MudButton ButtonType="ButtonType.Submit"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               Size="Size.Large"
+                                               FullWidth="true"
+                                               Disabled="_sending"
+                                               Style="height:52px;font-size:1rem;font-weight:700;border-radius:10px;">
+                                        @if (_sending)
+                                        {
+                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                            <span>Sending...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Book My Free Demo →</span>
+                                        }
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </div>
+                }
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</section>
+
+@code {
+    private ContactFormModel _model = new();
+    private bool _submitted = false;
+    private bool _sending   = false;
+    private string _errorMessage = string.Empty;
+
+    private List<string> _businessTypes = new()
+    {
+        "General Retail",
+        "Grocery / Supermarket",
+        "Nuts & Dry Goods",
+        "Electronics",
+        "Clothing & Fashion",
+        "Restaurant / Café",
+        "Pharmacy",
+        "Other",
+    };
+
+    private record DemoStep(string Number, string Title, string Desc);
+    private List<DemoStep> _steps = new()
+    {
+        new("1", "Submit this form",        "Takes less than 2 minutes. Tell us about your business."),
+        new("2", "We reach out",             "Our team contacts you within one business day to confirm timing."),
+        new("3", "30-min live walkthrough",  "We demo the full system — POS, inventory, reports — tailored to your store type."),
+        new("4", "Get started",              "If it's a fit, we onboard you and have your store live within a day."),
+    };
+
+    private async Task HandleSubmit()
+    {
+        _sending = true;
+        _errorMessage = string.Empty;
+
+        try
+        {
+            var success = await EmailService.SendDemoRequestAsync(_model);
+
+            if (success)
+            {
+                _submitted = true;
+            }
+            else
+            {
+                _errorMessage = "Something went wrong sending your request. Please email us directly at hello@dmd-inventory.com";
+            }
+        }
+        catch
+        {
+            _errorMessage = "An unexpected error occurred. Please try again or contact us directly.";
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+}

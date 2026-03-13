@@ -1,0 +1,13 @@
+@namespace DMD.Marketing.Components
+
+<div class="feature-card">
+    <div class="feature-icon-wrap">@Icon</div>
+    <h3 class="feature-card-title">@Title</h3>
+    <p class="feature-card-desc">@Description</p>
+</div>
+
+@code {
+    [Parameter] public string Icon { get; set; } = "⭐";
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "";
+}

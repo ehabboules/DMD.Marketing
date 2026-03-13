@@ -1,0 +1,19 @@
+@using DMD.Marketing.Layout
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not Found</PageTitle>
+        <LayoutView Layout="typeof(MainLayout)">
+            <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16 text-center">
+                <MudText Typo="Typo.h3" Class="mb-4" Style="color:var(--dmd-navy)">Page Not Found</MudText>
+                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">
+                    Back to Home
+                </MudButton>
+            </MudContainer>
+        </LayoutView>
+    </NotFound>
+</Router>

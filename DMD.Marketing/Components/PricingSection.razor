@@ -1,0 +1,127 @@
+@namespace DMD.Marketing.Components
+
+<MudGrid Spacing="3" Justify="Justify.Center">
+    @foreach (var plan in _plans)
+    {
+        <MudItem xs="12" sm="6" md="4">
+            <div class="pricing-card @(plan.Featured ? "featured" : "")">
+                @if (plan.Featured)
+                {
+                    <div class="pricing-badge">⭐ Most Popular</div>
+                }
+                <div class="pricing-plan-name">@plan.Name</div>
+                <p style="font-size:0.88rem;color:var(--dmd-text-muted);margin:0 0 0.5rem;">@plan.Tagline</p>
+                <div class="pricing-price"><sup>$</sup>@plan.Price</div>
+                <div class="pricing-price-period">per month, billed monthly</div>
+
+                <ul class="pricing-feature-list">
+                    @foreach (var f in (ShowAllFeatures ? plan.AllFeatures : plan.KeyFeatures))
+                    {
+                        <li>
+                            <span class="@(f.Included ? "check-icon" : "cross-icon")">
+                                @(f.Included ? "✓" : "✗")
+                            </span>
+                            @f.Text
+                        </li>
+                    }
+                </ul>
+
+                <a href="/contact"
+                   style="display:block;text-align:center;padding:0.8rem;border-radius:10px;font-weight:700;font-size:0.95rem;text-decoration:none;transition:all 0.2s;
+                          @(plan.Featured
+                              ? "background:var(--dmd-teal);color:var(--dmd-navy);"
+                              : "background:var(--dmd-navy);color:#fff;")">
+                    Get Started →
+                </a>
+            </div>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [Parameter] public bool ShowAllFeatures { get; set; } = true;
+
+    private record PlanFeature(string Text, bool Included = true);
+    private record PricingPlan(string Name, string Tagline, int Price, bool Featured,
+        List<PlanFeature> KeyFeatures, List<PlanFeature> AllFeatures);
+
+    private List<PricingPlan> _plans = new()
+    {
+        new("Starter", "Perfect for small shops", 29, false,
+            KeyFeatures: new()
+            {
+                new("1 Warehouse"),
+                new("2 User accounts"),
+                new("POS Terminal"),
+                new("Basic reporting"),
+                new("Email support"),
+                new("Multi-language", false),
+                new("Purchase orders", false),
+            },
+            AllFeatures: new()
+            {
+                new("1 Warehouse"),
+                new("2 User accounts"),
+                new("POS Terminal"),
+                new("Basic reporting"),
+                new("Email support"),
+                new("Cash session management"),
+                new("Product catalog (unlimited)"),
+                new("Multi-language", false),
+                new("Purchase orders", false),
+                new("Expense tracking", false),
+                new("API access", false),
+            }),
+
+        new("Business", "For growing retailers", 79, true,
+            KeyFeatures: new()
+            {
+                new("3 Warehouses"),
+                new("10 User accounts"),
+                new("POS Terminal"),
+                new("Advanced reporting"),
+                new("Multi-language (EN/FR/AR)"),
+                new("Purchase orders"),
+                new("Priority email support"),
+            },
+            AllFeatures: new()
+            {
+                new("3 Warehouses"),
+                new("10 User accounts"),
+                new("POS Terminal"),
+                new("Advanced reporting"),
+                new("Multi-language (EN/FR/AR)"),
+                new("Purchase orders"),
+                new("Expense tracking"),
+                new("Cash session management"),
+                new("Product images (R2 storage)"),
+                new("Priority email + chat support"),
+                new("API access", false),
+            }),
+
+        new("Enterprise", "Unlimited scale", 199, false,
+            KeyFeatures: new()
+            {
+                new("Unlimited warehouses"),
+                new("Unlimited users"),
+                new("Everything in Business"),
+                new("API access"),
+                new("Custom onboarding"),
+                new("Priority phone support"),
+                new("SLA guarantee"),
+            },
+            AllFeatures: new()
+            {
+                new("Unlimited warehouses"),
+                new("Unlimited users"),
+                new("Everything in Business"),
+                new("API access"),
+                new("Custom onboarding"),
+                new("Priority phone support"),
+                new("SLA guarantee"),
+                new("Custom integrations"),
+                new("Dedicated account manager"),
+                new("Data export & backup tools"),
+            })
+    };
+}

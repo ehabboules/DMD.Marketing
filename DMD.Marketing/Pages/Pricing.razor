@@ -1,0 +1,85 @@
+@page "/pricing"
+@using DMD.Marketing.Components
+
+<PageTitle>Pricing — DMD Inventory</PageTitle>
+
+<!-- Header -->
+<div style="background:linear-gradient(135deg,var(--dmd-navy-dark),var(--dmd-navy));padding:8rem 0 4rem;margin-top:68px;text-align:center;">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <p class="section-label">Pricing</p>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;margin:0 0 1rem;">
+            Honest pricing, no surprises
+        </h1>
+        <p style="color:rgba(255,255,255,0.65);font-size:1.05rem;margin:0;">
+            Cancel anytime. No setup fees. No long-term contracts.
+        </p>
+    </MudContainer>
+</div>
+
+<!-- Plans -->
+<section class="section section-gray">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <PricingSection ShowAllFeatures="true" />
+    </MudContainer>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <div style="text-align:center;margin-bottom:3rem;">
+            <p class="section-label">FAQ</p>
+            <h2 class="section-title">Common questions</h2>
+        </div>
+
+        <MudExpansionPanels Elevation="0">
+            @foreach (var faq in _faqs)
+            {
+                <MudExpansionPanel Style="border:1px solid var(--dmd-gray-mid);border-radius:10px!important;margin-bottom:0.75rem;">
+                    <TitleContent>
+                        <MudText Style="font-weight:600;color:var(--dmd-navy);">@faq.Q</MudText>
+                    </TitleContent>
+                    <ChildContent>
+                        <MudText Style="color:var(--dmd-text-muted);line-height:1.7;">@faq.A</MudText>
+                    </ChildContent>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+    </MudContainer>
+</section>
+
+<!-- CTA -->
+<section style="background:var(--dmd-navy);padding:4rem 0;text-align:center;">
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:#fff;margin:0 0 1rem;">
+            Not sure which plan fits?
+        </h2>
+        <p style="color:rgba(255,255,255,0.6);margin:0 0 2rem;line-height:1.7;">
+            Book a free demo and we'll help you pick the right plan for your business size and needs.
+        </p>
+        <a href="/contact" style="background:var(--dmd-teal);color:var(--dmd-navy);font-weight:700;font-size:1rem;padding:0.9rem 2.5rem;border-radius:10px;text-decoration:none;display:inline-block;">
+            Talk to Us →
+        </a>
+    </MudContainer>
+</section>
+
+@code {
+    private record FaqItem(string Q, string A);
+
+    private List<FaqItem> _faqs = new()
+    {
+        new("Can I cancel anytime?",
+            "Yes — DMD Inventory is month-to-month. You can cancel at any time from your account settings with no cancellation fees."),
+        new("Is there a free trial?",
+            "We offer a free 30-minute live demo instead of a self-serve trial, so we can set up your catalog and walk you through everything personalized to your business."),
+        new("Can I change plans later?",
+            "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle."),
+        new("Do you support multiple locations?",
+            "Yes — the Business and Enterprise plans support multiple warehouses/locations. Each location gets its own stock tracking and transfer management."),
+        new("What payment methods do you accept?",
+            "We accept all major credit cards. Canadian businesses can also pay via bank transfer — contact us for details."),
+        new("Is my data secure?",
+            "Every customer gets a completely separate private database — your data is never mixed with other customers. Backups are taken daily."),
+        new("Do you support French and Arabic?",
+            "Yes — DMD Inventory has full UI support for English (Canadian), French (Canadian), and Arabic with RTL layout, included in Business and Enterprise plans."),
+    };
+}

@@ -1,0 +1,202 @@
+@page "/"
+@using DMD.Marketing.Components
+
+<PageTitle>DMD Inventory — Smart POS & Retail Management</PageTitle>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════ -->
+<section class="hero-section">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
+    <MudContainer MaxWidth="MaxWidth.Large" Style="position:relative;z-index:2;">
+        <MudGrid AlignItems="AlignItems.Center">
+            <MudItem xs="12" md="6">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        🚀 Now available for Canadian retailers
+                    </div>
+                    <h1 class="hero-title">
+                        Inventory &amp; POS<br />
+                        that works as hard<br />
+                        as <span class="accent">you do</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        DMD Inventory gives small and medium retail businesses a powerful,
+                        bilingual POS system with multi-warehouse inventory, smart reporting,
+                        and real-time stock tracking — all in one platform.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/contact" class="btn-primary mud-button-root">
+                            Book a Free Demo →
+                        </a>
+                        <a href="/features" class="btn-outline mud-button-root">
+                            See Features
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div>
+                            <div class="hero-stat-number">3</div>
+                            <div class="hero-stat-label">Languages supported</div>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number">∞</div>
+                            <div class="hero-stat-label">Products per catalog</div>
+                        </div>
+                        <div>
+                            <div class="hero-stat-number">$29</div>
+                            <div class="hero-stat-label">Starting per month</div>
+                        </div>
+                    </div>
+                </div>
+            </MudItem>
+
+            <MudItem xs="12" md="6" Class="d-none d-md-flex justify-center">
+                <div style="position:relative;">
+                    <!-- POS Terminal illustration placeholder -->
+                    <div style="
+                        width:420px;height:340px;
+                        background:rgba(255,255,255,0.05);
+                        border:1px solid rgba(0,191,165,0.25);
+                        border-radius:20px;
+                        backdrop-filter:blur(10px);
+                        display:flex;align-items:center;justify-content:center;
+                        flex-direction:column;gap:1rem;
+                        box-shadow:0 32px 80px rgba(0,0,0,0.3);
+                    ">
+                        <div style="font-size:5rem;">🖥️</div>
+                        <div style="font-family:'Syne',sans-serif;color:#fff;font-size:1.4rem;font-weight:700;">DMD POS Terminal</div>
+                        <div style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Real-time · Fast · Reliable</div>
+                        <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+                            <span style="background:rgba(0,191,165,0.2);color:#00BFA5;padding:4px 14px;border-radius:100px;font-size:0.8rem;font-weight:600;">EN</span>
+                            <span style="background:rgba(0,191,165,0.2);color:#00BFA5;padding:4px 14px;border-radius:100px;font-size:0.8rem;font-weight:600;">FR</span>
+                            <span style="background:rgba(0,191,165,0.2);color:#00BFA5;padding:4px 14px;border-radius:100px;font-size:0.8rem;font-weight:600;">AR</span>
+                        </div>
+                    </div>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</section>
+
+<!-- ══ FEATURES PREVIEW ══════════════════════════════════════════════ -->
+<section class="section section-gray" id="features">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <div style="text-align:center;margin-bottom:3rem;">
+            <p class="section-label">What's included</p>
+            <h2 class="section-title">Everything your store needs</h2>
+            <p class="section-subtitle">
+                From POS to purchase orders, DMD Inventory covers every aspect
+                of running your retail business — out of the box.
+            </p>
+        </div>
+
+        <MudGrid Spacing="3">
+            @foreach (var feature in _features)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <FeatureCard Icon="@feature.Icon"
+                                 Title="@feature.Title"
+                                 Description="@feature.Description" />
+                </MudItem>
+            }
+        </MudGrid>
+
+        <div style="text-align:center;margin-top:3rem;">
+            <a href="/features" class="btn-primary mud-button-root" style="display:inline-block;padding:0.85rem 2rem;border-radius:10px;background:var(--dmd-navy);color:#fff;text-decoration:none;font-weight:700;font-size:1rem;">
+                See All Features →
+            </a>
+        </div>
+    </MudContainer>
+</section>
+
+<!-- ══ WHY DMD ════════════════════════════════════════════════════════ -->
+<section class="section section-dark">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid AlignItems="AlignItems.Center" Spacing="6">
+            <MudItem xs="12" md="5">
+                <p class="section-label">Why DMD</p>
+                <h2 class="section-title" style="color:#fff;">
+                    Built for Canadian<br />retail — from day one
+                </h2>
+                <p class="section-subtitle section-subtitle-white" style="margin:1rem 0 0;max-width:100%;">
+                    DMD Inventory was designed with Canadian retailers in mind —
+                    full bilingual support (English &amp; French), provincial tax
+                    calculations, Interac-ready payment processing, and Arabic RTL
+                    for multicultural communities.
+                </p>
+            </MudItem>
+            <MudItem xs="12" md="7">
+                <MudGrid Spacing="3">
+                    @foreach (var point in _whyPoints)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(0,191,165,0.2);border-radius:14px;padding:1.5rem;">
+                                <div style="font-size:1.8rem;margin-bottom:0.75rem;">@point.Icon</div>
+                                <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;margin-bottom:0.4rem;">@point.Title</div>
+                                <div style="font-size:0.88rem;color:rgba(255,255,255,0.55);line-height:1.6;">@point.Desc</div>
+                            </div>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</section>
+
+<!-- ══ PRICING PREVIEW ══════════════════════════════════════════════ -->
+<section class="section">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <div style="text-align:center;margin-bottom:3.5rem;">
+            <p class="section-label">Simple pricing</p>
+            <h2 class="section-title">Transparent, no surprises</h2>
+            <p class="section-subtitle">Start free, scale as you grow. No hidden fees, no long-term contracts.</p>
+        </div>
+        <PricingSection ShowAllFeatures="false" />
+        <div style="text-align:center;margin-top:2.5rem;">
+            <a href="/pricing" style="color:var(--dmd-teal);font-weight:600;text-decoration:none;font-size:0.95rem;">
+                Compare all plans in detail →
+            </a>
+        </div>
+    </MudContainer>
+</section>
+
+<!-- ══ CTA BANNER ════════════════════════════════════════════════════ -->
+<section style="background:linear-gradient(135deg,var(--dmd-teal-dark),var(--dmd-teal));padding:4rem 0;">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <div style="text-align:center;">
+            <h2 style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--dmd-navy);margin:0 0 1rem;">
+                Ready to transform your store?
+            </h2>
+            <p style="color:rgba(26,35,126,0.7);margin:0 0 2rem;font-size:1.05rem;">
+                Book a free 30-minute demo and see DMD Inventory in action.
+            </p>
+            <a href="/contact" style="background:var(--dmd-navy);color:#fff;font-weight:700;font-size:1rem;padding:0.9rem 2.5rem;border-radius:10px;text-decoration:none;display:inline-block;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:transform 0.2s;">
+                Book Your Free Demo →
+            </a>
+        </div>
+    </MudContainer>
+</section>
+
+@code {
+    private record FeatureItem(string Icon, string Title, string Description);
+    private record WhyPoint(string Icon, string Title, string Desc);
+
+    private List<FeatureItem> _features = new()
+    {
+        new("🖥️",  "POS Terminal",          "Fast, intuitive point-of-sale with barcode scanning, split payments, and receipt printing."),
+        new("📦",  "Multi-Warehouse",        "Manage inventory across multiple locations with real-time stock transfers and alerts."),
+        new("📊",  "Smart Reporting",        "Sales reports, profit margins, stock valuations — all in clear, actionable dashboards."),
+        new("🧾",  "Purchase Orders",        "Create and track purchase orders from suppliers with automated stock updates on receipt."),
+        new("👥",  "User & Role Management", "Granular permissions per user — cashier, manager, or admin — with full audit trails."),
+        new("💰",  "Cash Sessions",          "Open and close cash registers with daily reconciliation and discrepancy tracking."),
+    };
+
+    private List<WhyPoint> _whyPoints = new()
+    {
+        new("🇨🇦", "Canadian Tax Ready",    "Federal + provincial tax per product, pre-configured for all provinces."),
+        new("🌐", "3 Languages",             "English, French, and Arabic with full RTL support built in."),
+        new("🔒", "Secure & Isolated",       "Every customer gets their own private database — your data stays yours."),
+        new("📱", "Any Device",              "Works on desktop, tablet, or POS terminal — no app install required."),
+    };
+}

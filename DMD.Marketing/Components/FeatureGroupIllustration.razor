@@ -1,0 +1,39 @@
+@namespace DMD.Marketing.Components
+
+<div style="
+    min-height:280px;
+    border-radius:20px;
+    background:@_bg;
+    border:1px solid @_border;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:1rem;
+    padding:2rem;
+">
+    <div style="font-size:4rem;">@_emoji</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;color:@_color;font-size:1.1rem;text-align:center;">@GroupName</div>
+</div>
+
+@code {
+    [Parameter] public string GroupName { get; set; } = "";
+
+    private string _emoji  = "📦";
+    private string _bg     = "var(--dmd-gray)";
+    private string _border = "var(--dmd-gray-mid)";
+    private string _color  = "var(--dmd-navy)";
+
+    protected override void OnParametersSet()
+    {
+        (_emoji, _bg, _border, _color) = GroupName switch
+        {
+            var n when n.Contains("POS")       => ("🖥️", "var(--dmd-teal-light)", "rgba(0,191,165,0.3)", "var(--dmd-navy)"),
+            var n when n.Contains("warehouse") => ("🏭", "rgba(255,255,255,0.05)", "rgba(0,191,165,0.2)", "#fff"),
+            var n when n.Contains("Report")    => ("📊", "var(--dmd-gray)", "var(--dmd-gray-mid)", "var(--dmd-navy)"),
+            var n when n.Contains("Security") || n.Contains("language") || n.Contains("scale")
+                                               => ("🔒", "rgba(255,255,255,0.05)", "rgba(0,191,165,0.2)", "#fff"),
+            _                                  => ("📦", "var(--dmd-gray)", "var(--dmd-gray-mid)", "var(--dmd-navy)"),
+        };
+    }
+}
