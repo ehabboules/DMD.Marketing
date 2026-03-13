@@ -103,7 +103,7 @@ h1, h2, h3, h4 {
 /* ── Hero Section ───────────────────────────── */
 .hero-section {
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--dmd-navy-dark) 0%, var(--dmd-navy) 50%, #1B3A8C 100%);
+    background: linear-gradient(160deg, #F8FAFF 0%, #EEF2FF 45%, #E8F8F5 100%);
     display: flex;
     align-items: center;
     position: relative;
@@ -115,29 +115,29 @@ h1, h2, h3, h4 {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(0,191,165,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,191,165,0.06) 1px, transparent 1px);
+        linear-gradient(rgba(26,35,126,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,35,126,0.04) 1px, transparent 1px);
     background-size: 60px 60px;
 }
 
 .hero-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.25;
+    filter: blur(100px);
+    opacity: 0.18;
     animation: floatOrb 8s ease-in-out infinite;
 }
 
 .hero-orb-1 {
-    width: 500px; height: 500px;
+    width: 600px; height: 600px;
     background: var(--dmd-teal);
-    top: -100px; right: -100px;
+    top: -150px; right: -150px;
 }
 
 .hero-orb-2 {
-    width: 300px; height: 300px;
-    background: var(--dmd-red);
-    bottom: 50px; left: -80px;
+    width: 400px; height: 400px;
+    background: var(--dmd-navy-light);
+    bottom: 0; left: -100px;
     animation-delay: -3s;
 }
 
@@ -171,20 +171,25 @@ h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-size: clamp(2.8rem, 5vw, 4.2rem);
     font-weight: 800;
-    color: var(--dmd-white);
+    color: var(--dmd-navy);
     line-height: 1.1;
     margin: 0 0 1.5rem;
     animation: fadeSlideUp 0.6s ease 0.1s both;
 }
 
-.hero-title .accent { color: var(--dmd-teal); }
+.hero-title .accent {
+    background: linear-gradient(135deg, var(--dmd-teal), var(--dmd-teal-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
 
 .hero-subtitle {
     font-size: 1.15rem;
-    color: rgba(255,255,255,0.75);
+    color: var(--dmd-text-muted);
     line-height: 1.7;
     margin: 0 0 2.5rem;
-    font-weight: 300;
+    font-weight: 400;
     animation: fadeSlideUp 0.6s ease 0.2s both;
 }
 
@@ -212,19 +217,20 @@ h1, h2, h3, h4 {
 }
 
 .btn-outline {
-    border: 2px solid rgba(255,255,255,0.35) !important;
-    color: var(--dmd-white) !important;
+    border: 2px solid var(--dmd-navy) !important;
+    color: var(--dmd-navy) !important;
     font-weight: 600 !important;
     font-size: 1rem !important;
     padding: 0.85rem 2rem !important;
     border-radius: 10px !important;
     background: transparent !important;
-    transition: border-color 0.2s, background 0.2s !important;
+    transition: border-color 0.2s, background 0.2s, color 0.2s !important;
 }
 
 .btn-outline:hover {
     border-color: var(--dmd-teal) !important;
-    background: rgba(0,191,165,0.1) !important;
+    background: var(--dmd-teal-light) !important;
+    color: var(--dmd-teal-dark) !important;
 }
 
 .hero-stats {
@@ -238,13 +244,94 @@ h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 800;
-    color: var(--dmd-teal);
+    color: var(--dmd-teal-dark);
 }
 
 .hero-stat-label {
     font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
+    color: var(--dmd-text-muted);
     margin-top: 2px;
+}
+
+/* ── Hero Product Card ──────────────────────── */
+.hero-app-card {
+    width: 400px;
+    background: #ffffff;
+    border: 1px solid var(--dmd-gray-mid);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow:
+        0 4px 6px rgba(26,35,126,0.04),
+        0 20px 60px rgba(26,35,126,0.10),
+        0 0 0 1px rgba(26,35,126,0.04);
+    animation: fadeSlideUp 0.7s ease 0.3s both;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-app-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--dmd-teal), var(--dmd-navy-light));
+    border-radius: 24px 24px 0 0;
+}
+
+.hero-app-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--dmd-gray-mid);
+}
+
+.hero-live-badge {
+    margin-left: auto;
+    background: #ECFDF5;
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+.hero-app-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.hero-app-stat {
+    background: var(--dmd-gray);
+    border-radius: 12px;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.hero-app-stat-val {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--dmd-navy);
+}
+
+.hero-app-stat-key {
+    font-size: 0.7rem;
+    color: var(--dmd-text-muted);
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+.hero-lang-badge {
+    background: var(--dmd-teal-light);
+    color: var(--dmd-teal-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
 }
 
 /* ── Section Shared ─────────────────────────── */

@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 230" width="560" height="460">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&amp;display=swap');
+    </style>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#00000035"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000025"/>
+    </filter>
+    <filter id="termShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="3" dy="4" stdDeviation="4" flood-color="#00000045"/>
+    </filter>
+
+    <!-- Gradient for terminal body - light/white -->
+    <linearGradient id="termGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f4f8;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#e2eaf2;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ccd8e8;stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Gradient for screen -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a3a6e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0d2045;stop-opacity:1"/>
+    </linearGradient>
+
+    <!-- Oval clip path -->
+    <clipPath id="ovalClip">
+      <ellipse cx="140" cy="105" rx="128" ry="95"/>
+    </clipPath>
+  </defs>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--   WIDE TEAL OVAL BACKGROUND               -->
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Outer slight shadow ring -->
+  <ellipse cx="140" cy="106" rx="128" ry="95" fill="rgba(0,0,0,0.08)"/>
+  <!-- Main oval -->
+  <ellipse cx="140" cy="104" rx="128" ry="95" fill="#29C5D6"/>
+  <!-- Inner highlight arc for depth -->
+  <ellipse cx="140" cy="96" rx="112" ry="78" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2.5"/>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--   SHOPPING CART  (centered, shifted left) -->
+  <!-- ══════════════════════════════════════════ -->
+  <g filter="url(#softShadow)">
+    <!-- Cart handle -->
+    <path d="M 48 78 L 66 78 L 71 92 L 168 92"
+          fill="none" stroke="white" stroke-width="8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Cart basket -->
+    <path d="M 71 92 L 78 145 L 160 145 L 170 92 Z"
+          fill="white" opacity="0.97"/>
+    <!-- Basket grid lines -->
+    <line x1="107" y1="92" x2="104" y2="145" stroke="#29C5D6" stroke-width="1.4" opacity="0.35"/>
+    <line x1="132" y1="92" x2="135" y2="145" stroke="#29C5D6" stroke-width="1.4" opacity="0.35"/>
+    <line x1="75"  y1="118" x2="164" y2="118" stroke="#29C5D6" stroke-width="1.4" opacity="0.35"/>
+    <!-- Bottom bar -->
+    <rect x="76" y="140" width="86" height="8" rx="4" fill="#c8eef4"/>
+    <!-- Wheels -->
+    <circle cx="94"  cy="158" r="10" fill="white"/>
+    <circle cx="94"  cy="158" r="6"  fill="#29C5D6"/>
+    <circle cx="94"  cy="158" r="2.5" fill="white"/>
+    <circle cx="145" cy="158" r="10" fill="white"/>
+    <circle cx="145" cy="158" r="6"  fill="#29C5D6"/>
+    <circle cx="145" cy="158" r="2.5" fill="white"/>
+  </g>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--   CC TERMINAL — 45° TILTED, LIGHT/WHITE   -->
+  <!--   Exceeds oval top-right                  -->
+  <!-- ══════════════════════════════════════════ -->
+  <g transform="translate(192, 58) rotate(-42)" filter="url(#termShadow)">
+
+    <!-- Terminal body - light gradient -->
+    <rect x="-24" y="-55" width="48" height="100" rx="9" fill="url(#termGrad)"/>
+
+    <!-- Left edge accent strip (teal) -->
+    <rect x="-24" y="-55" width="6" height="100" rx="9" fill="#29C5D6" opacity="0.6"/>
+
+    <!-- Top camera/indicator dot -->
+    <circle cx="0" cy="-48" r="3" fill="#bfcfe0"/>
+    <circle cx="0" cy="-48" r="1.5" fill="#29C5D6"/>
+
+    <!-- Screen -->
+    <rect x="-18" y="-42" width="36" height="34" rx="5" fill="url(#screenGrad)"/>
+    <!-- Screen inner glow -->
+    <rect x="-16" y="-40" width="32" height="30" rx="4" fill="#0f2855" opacity="0.7"/>
+
+    <!-- DMD on screen (white) -->
+    <text x="0" y="-28"
+          text-anchor="middle"
+          font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+          font-weight="900"
+          font-size="10"
+          fill="white"
+          letter-spacing="1">DMD</text>
+
+    <!-- POS on screen (teal/blue) -->
+    <text x="0" y="-16"
+          text-anchor="middle"
+          font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+          font-weight="900"
+          font-size="11"
+          fill="#4FC3F7"
+          letter-spacing="1.5">POS</text>
+
+    <!-- Screen reflection -->
+    <rect x="-14" y="-38" width="12" height="8" rx="2" fill="white" opacity="0.07"/>
+
+    <!-- Card slot -->
+    <rect x="-16" y="-2" width="32" height="5" rx="2.5" fill="#b8c8dc"/>
+    <!-- Card slot inner -->
+    <rect x="-14" y="-1" width="28" height="3" rx="1.5" fill="#9aaec0"/>
+
+    <!-- NFC symbol (teal) -->
+    <path d="M -7 10 Q 0 6 7 10"  fill="none" stroke="#29C5D6" stroke-width="2"   stroke-linecap="round"/>
+    <path d="M -11 13 Q 0 7 11 13" fill="none" stroke="#29C5D6" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Keypad area background -->
+    <rect x="-18" y="20" width="36" height="22" rx="4" fill="#dce8f0" opacity="0.6"/>
+
+    <!-- Keypad dots - 3x3 -->
+    <circle cx="-9"  cy="26" r="3.5" fill="#b0c4d8"/>
+    <circle cx="0"   cy="26" r="3.5" fill="#b0c4d8"/>
+    <circle cx="9"   cy="26" r="3.5" fill="#b0c4d8"/>
+    <circle cx="-9"  cy="35" r="3.5" fill="#b0c4d8"/>
+    <circle cx="0"   cy="35" r="3.5" fill="#b0c4d8"/>
+    <!-- Green confirm button -->
+    <circle cx="9"   cy="35" r="3.5" fill="#4CAF50"/>
+    <!-- Green button shine -->
+    <circle cx="10"  cy="34" r="1.2" fill="rgba(255,255,255,0.4)"/>
+
+  </g>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--   DMD POS TEXT — BELOW OVAL, CENTERED     -->
+  <!-- ══════════════════════════════════════════ -->
+  <!-- D red -->
+  <text x="84"  y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#E53935">D</text>
+  <!-- M green -->
+  <text x="107" y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#43A047">M</text>
+  <!-- D blue -->
+  <text x="133" y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#1E88E5">D</text>
+  <!-- space -->
+  <!-- P dark -->
+  <text x="161" y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#1a2b4a">P</text>
+  <!-- O dark -->
+  <text x="182" y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#1a2b4a">O</text>
+  <!-- S dark -->
+  <text x="202" y="218"
+        font-family="'Nunito', 'Trebuchet MS', 'Arial Black', sans-serif"
+        font-weight="900" font-size="32" fill="#1a2b4a">S</text>
+
+</svg>
