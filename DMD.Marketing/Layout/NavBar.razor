@@ -2,13 +2,66 @@
 @inject NavigationManager Nav
 
 <nav class="dmd-navbar">
+
+    <!-- Burger icon (left) -->
+    <button class="dmd-burger @(_menuOpen ? "dmd-burger--open" : "")"
+            aria-label="Toggle menu"
+            @onclick="ToggleMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
     <a href="/" class="dmd-logo">DMD <span>Inventory</span></a>
 
-    <ul class="nav-links">
-        <li><a href="/#features">Features</a></li>
-        <li><a href="/features">Details</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/contact">Contact</a></li>
+    <ul class="nav-links @(_menuOpen ? "nav-links--open" : "")">
+        <li><a href="/#features" @onclick="CloseMenu">Features</a></li>
+        <li><a href="/features" @onclick="CloseMenu">Details</a></li>
+        <li><a href="/pricing" @onclick="CloseMenu">Pricing</a></li>
+        <li><a href="/contact" @onclick="CloseMenu">Contact</a></li>
         <li><a href="https://app.dmd-inventory.com" class="nav-cta" target="_blank">Login</a></li>
     </ul>
 </nav>
+
+<style>
+    .dmd-burger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 38px;
+        height: 38px;
+        padding: 6px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 8px;
+        flex-shrink: 0;
+        transition: background 0.2s ease;
+    }
+
+    .dmd-burger:hover {
+        background: rgba(255,255,255,0.10);
+    }
+
+    .dmd-burger span {
+        display: block;
+        height: 2px;
+        width: 100%;
+        background: currentColor;
+        border-radius: 2px;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+        transform-origin: center;
+    }
+
+    /* Animate to X when open */
+    .dmd-burger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .dmd-burger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .dmd-burger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+</style>
+
+@code {
+    private bool _menuOpen = false;
+    private void ToggleMenu() => _menuOpen = !_menuOpen;
+    private void CloseMenu()  => _menuOpen = false;
+}

@@ -1,0 +1,730 @@
+@* ╔══════════════════════════════════════════════════════════════╗
+   ║  DMD.Marketing — Hero Section                               ║
+   ║  Location: DMD.Marketing/Components/Sections/Hero.razor     ║
+   ╚══════════════════════════════════════════════════════════════╝ *@
+
+<section class="hero-section">
+
+    <!-- ── Mesh background layers ── -->
+    <div class="hero-bg">
+        <div class="hero-bg__blob hero-bg__blob--1"></div>
+        <div class="hero-bg__blob hero-bg__blob--2"></div>
+        <div class="hero-bg__blob hero-bg__blob--3"></div>
+        <div class="hero-bg__grid"></div>
+    </div>
+
+    <div class="hero-inner">
+
+        <!-- ══════════════════════════════
+             LEFT — Copy
+        ══════════════════════════════ -->
+        <div class="hero-copy">
+
+            <!-- Eyebrow pill -->
+            <div class="hero-eyebrow">
+                <span class="hero-eyebrow__dot"></span>
+                <span>Built for Canadian Retail &amp; Hospitality</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="hero-headline">
+                <span class="hero-headline__line hero-headline__line--1">Inventory &amp; POS</span>
+                <span class="hero-headline__line hero-headline__line--2">
+                    that works as hard
+                </span>
+                <span class="hero-headline__line hero-headline__line--3">
+                    as <em class="hero-headline__accent">you do.</em>
+                </span>
+            </h1>
+
+            <!-- Sub -->
+            <p class="hero-sub">
+                One dedicated system to manage your stock, sales, warehouses,
+                and cash registers — built for multi-location retail, dry goods,
+                and restaurants across Canada.
+            </p>
+
+            <!-- CTAs -->
+            <div class="hero-ctas">
+                <a href="/demo" class="btn btn--primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Book a Free Demo
+                </a>
+                <a href="/login" class="btn btn--ghost">
+                    Sign In to DMD
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Trust strip -->
+            <div class="hero-trust">
+                <div class="hero-trust__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="#00BFA5" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>GST &amp; PST ready</span>
+                </div>
+                <div class="hero-trust__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="#00BFA5" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Multi-warehouse</span>
+                </div>
+                <div class="hero-trust__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="#00BFA5" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>EN / FR / AR</span>
+                </div>
+                <div class="hero-trust__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         stroke="#00BFA5" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Role-based access</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+             RIGHT — Visual dashboard mockup
+        ══════════════════════════════ -->
+        <div class="hero-visual">
+
+            <!-- Main card: POS terminal mockup -->
+            <div class="mockup-card mockup-card--main">
+                <div class="mockup-topbar">
+                    <div class="mockup-topbar__dot mockup-topbar__dot--r"></div>
+                    <div class="mockup-topbar__dot mockup-topbar__dot--y"></div>
+                    <div class="mockup-topbar__dot mockup-topbar__dot--g"></div>
+                    <span class="mockup-topbar__label">DMD POS Terminal</span>
+                </div>
+                <div class="mockup-body">
+                    <!-- Cart items -->
+                    <div class="mockup-cart">
+                        <div class="mockup-cart__row mockup-cart__row--header">
+                            <span>Item</span>
+                            <span>Qty</span>
+                            <span>Total</span>
+                        </div>
+                        <div class="mockup-cart__row">
+                            <span>Basmati Rice 5kg</span>
+                            <span>2</span>
+                            <span>$29.98</span>
+                        </div>
+                        <div class="mockup-cart__row">
+                            <span>Mixed Nuts 500g</span>
+                            <span>3</span>
+                            <span>$44.97</span>
+                        </div>
+                        <div class="mockup-cart__row">
+                            <span>Olive Oil 1L</span>
+                            <span>1</span>
+                            <span>$18.49</span>
+                        </div>
+                        <div class="mockup-cart__divider"></div>
+                        <div class="mockup-cart__row mockup-cart__row--tax">
+                            <span>GST (5%)</span>
+                            <span></span>
+                            <span>$4.67</span>
+                        </div>
+                        <div class="mockup-cart__row mockup-cart__row--total">
+                            <span>Total</span>
+                            <span></span>
+                            <span>$98.11</span>
+                        </div>
+                    </div>
+                    <!-- Payment buttons -->
+                    <div class="mockup-pay">
+                        <button class="mockup-pay__btn mockup-pay__btn--cash">Cash</button>
+                        <button class="mockup-pay__btn mockup-pay__btn--card">Card</button>
+                        <button class="mockup-pay__btn mockup-pay__btn--charge">Charge</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating stat: Revenue -->
+            <div class="float-card float-card--revenue">
+                <div class="float-card__icon float-card__icon--teal">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                </div>
+                <div class="float-card__body">
+                    <div class="float-card__value">$24,831</div>
+                    <div class="float-card__label">Today's Revenue</div>
+                </div>
+                <div class="float-card__badge float-card__badge--up">+12.4%</div>
+            </div>
+
+            <!-- Floating stat: Low stock alert -->
+            <div class="float-card float-card--stock">
+                <div class="float-card__icon float-card__icon--orange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div class="float-card__body">
+                    <div class="float-card__value">3 items</div>
+                    <div class="float-card__label">Low stock alert</div>
+                </div>
+            </div>
+
+            <!-- Floating stat: Transactions -->
+            <div class="float-card float-card--txn">
+                <div class="float-card__icon float-card__icon--navy">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                </div>
+                <div class="float-card__body">
+                    <div class="float-card__value">187</div>
+                    <div class="float-card__label">Transactions today</div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /hero-visual -->
+
+    </div>
+    <!-- /hero-inner -->
+
+    <!-- Bottom wave divider -->
+    <div class="hero-wave">
+        <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#ffffff"/>
+        </svg>
+    </div>
+
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     STYLES
+═══════════════════════════════════════════════════════════════ -->
+<style>
+    /* ── Google Fonts ─────────────────────────────────────────────── */
+    @@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+    /* ── CSS Variables ───────────────────────────────────────────── */
+    :root {
+        --dmd-teal:        #00BFA5;
+        --dmd-teal-light:  #4DD0C4;
+        --dmd-teal-dim:    rgba(0,191,165,0.15);
+        --dmd-navy:        #1A237E;
+        --dmd-navy-dark:   #0D1457;
+        --dmd-navy-mid:    #283593;
+        --dmd-orange:      #FF6F00;
+        --dmd-white:       #FFFFFF;
+        --dmd-white-60:    rgba(255,255,255,0.60);
+        --dmd-white-20:    rgba(255,255,255,0.10);
+    }
+
+    /* ── Section shell ───────────────────────────────────────────── */
+    .hero-section {
+        position: relative;
+        min-height: 100vh;
+        background: var(--dmd-navy-dark);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── Mesh background ─────────────────────────────────────────── */
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .hero-bg__blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+    }
+
+    .hero-bg__blob--1 {
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, var(--dmd-teal) 0%, transparent 70%);
+        top: -200px; right: -100px;
+        animation: blobFloat1 12s ease-in-out infinite alternate;
+    }
+
+    .hero-bg__blob--2 {
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, var(--dmd-navy-mid) 0%, transparent 70%);
+        bottom: -150px; left: -100px;
+        animation: blobFloat2 15s ease-in-out infinite alternate;
+    }
+
+    .hero-bg__blob--3 {
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, var(--dmd-orange) 0%, transparent 70%);
+        top: 40%; left: 30%;
+        opacity: 0.12;
+        animation: blobFloat1 18s ease-in-out infinite alternate-reverse;
+    }
+
+    .hero-bg__grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 48px 48px;
+    }
+
+    @@keyframes blobFloat1 {
+        from { transform: translate(0, 0) scale(1); }
+        to   { transform: translate(40px, -30px) scale(1.08); }
+    }
+    @@keyframes blobFloat2 {
+        from { transform: translate(0, 0) scale(1); }
+        to   { transform: translate(-30px, 40px) scale(1.05); }
+    }
+
+    /* ── Inner layout ─────────────────────────────────────────────── */
+    .hero-inner {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: center;
+        max-width: 1280px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 100px 48px 80px;
+        flex: 1;
+    }
+
+    /* ── Eyebrow pill ────────────────────────────────────────────── */
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--dmd-teal-dim);
+        border: 1px solid rgba(0,191,165,0.30);
+        border-radius: 100px;
+        padding: 6px 16px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--dmd-teal-light);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+        animation: fadeSlideUp 0.6s ease both;
+    }
+
+    .hero-eyebrow__dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--dmd-teal);
+        box-shadow: 0 0 8px var(--dmd-teal);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ── Headline ─────────────────────────────────────────────────── */
+    .hero-headline {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: clamp(2.4rem, 4.5vw, 4rem);
+        line-height: 1.08;
+        color: var(--dmd-white);
+        margin: 0 0 28px;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-headline__line--1 { animation: fadeSlideUp 0.6s 0.1s ease both; }
+    .hero-headline__line--2 { animation: fadeSlideUp 0.6s 0.2s ease both; }
+    .hero-headline__line--3 { animation: fadeSlideUp 0.6s 0.3s ease both; }
+
+    .hero-headline__accent {
+        font-style: normal;
+        background: linear-gradient(90deg, var(--dmd-teal) 0%, var(--dmd-teal-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+    }
+
+    .hero-headline__accent::after {
+        content: '';
+        position: absolute;
+        bottom: -4px; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--dmd-teal), transparent);
+        border-radius: 2px;
+    }
+
+    /* ── Sub ──────────────────────────────────────────────────────── */
+    .hero-sub {
+        font-size: 1.0625rem;
+        line-height: 1.75;
+        color: var(--dmd-white-60);
+        max-width: 500px;
+        margin: 0 0 36px;
+        animation: fadeSlideUp 0.6s 0.4s ease both;
+    }
+
+    /* ── CTAs ─────────────────────────────────────────────────────── */
+    .hero-ctas {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 36px;
+        animation: fadeSlideUp 0.6s 0.5s ease both;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn--primary {
+        background: var(--dmd-teal);
+        color: var(--dmd-navy-dark);
+        box-shadow: 0 4px 24px rgba(0,191,165,0.40);
+    }
+
+    .btn--primary:hover {
+        background: var(--dmd-teal-light);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0,191,165,0.55);
+        color: var(--dmd-navy-dark);
+        text-decoration: none;
+    }
+
+    .btn--ghost {
+        background: var(--dmd-white-20);
+        color: var(--dmd-white);
+        border: 1px solid rgba(255,255,255,0.20);
+        backdrop-filter: blur(8px);
+    }
+
+    .btn--ghost:hover {
+        background: rgba(255,255,255,0.15);
+        transform: translateY(-2px);
+        color: var(--dmd-white);
+        text-decoration: none;
+    }
+
+    /* ── Trust strip ─────────────────────────────────────────────── */
+    .hero-trust {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        animation: fadeSlideUp 0.6s 0.6s ease both;
+    }
+
+    .hero-trust__item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.825rem;
+        font-weight: 500;
+        color: var(--dmd-white-60);
+    }
+
+    /* ── Visual area ─────────────────────────────────────────────── */
+    .hero-visual {
+        position: relative;
+        height: 480px;
+        animation: fadeSlideLeft 0.7s 0.3s ease both;
+    }
+
+    /* ── Main mockup card ────────────────────────────────────────── */
+    .mockup-card {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .mockup-card--main {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        max-width: 420px;
+        margin: 0 auto;
+        background: #1C2340;
+    }
+
+    .mockup-topbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #141830;
+        padding: 10px 16px;
+    }
+
+    .mockup-topbar__dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+    }
+    .mockup-topbar__dot--r { background: #FF5F56; }
+    .mockup-topbar__dot--y { background: #FFBD2E; }
+    .mockup-topbar__dot--g { background: #27C93F; }
+
+    .mockup-topbar__label {
+        margin-left: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.40);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .mockup-body {
+        padding: 16px;
+    }
+
+    .mockup-cart {
+        margin-bottom: 14px;
+    }
+
+    .mockup-cart__row {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 12px;
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.75);
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .mockup-cart__row--header {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.35);
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+        padding-bottom: 8px;
+    }
+
+    .mockup-cart__row--tax {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.74rem;
+    }
+
+    .mockup-cart__row--total {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--dmd-teal-light);
+        border-bottom: none;
+        padding-top: 8px;
+    }
+
+    .mockup-cart__divider {
+        height: 1px;
+        background: rgba(255,255,255,0.10);
+        margin: 8px 0;
+    }
+
+    .mockup-pay {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+    }
+
+    .mockup-pay__btn {
+        padding: 9px 0;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: filter 0.15s;
+    }
+    .mockup-pay__btn:hover { filter: brightness(1.15); }
+    .mockup-pay__btn--cash  { background: var(--dmd-teal); color: #0D1457; }
+    .mockup-pay__btn--card  { background: #283593; color: #fff; }
+    .mockup-pay__btn--charge { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); }
+
+    /* ── Floating stat cards ─────────────────────────────────────── */
+    .float-card {
+        position: absolute;
+        background: rgba(255,255,255,0.07);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 180px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .float-card--revenue {
+        bottom: 60px; right: -20px;
+        animation: floatA 5s ease-in-out infinite;
+    }
+
+    .float-card--stock {
+        top: 30px; right: -30px;
+        animation: floatB 6s ease-in-out infinite;
+    }
+
+    .float-card--txn {
+        bottom: 180px; left: -20px;
+        animation: floatA 7s 1s ease-in-out infinite;
+    }
+
+    @@keyframes floatA {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-10px); }
+    }
+    @@keyframes floatB {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(8px); }
+    }
+
+    .float-card__icon {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .float-card__icon--teal   { background: rgba(0,191,165,0.20); color: var(--dmd-teal-light); }
+    .float-card__icon--orange { background: rgba(255,111,0,0.20);  color: #FFB74D; }
+    .float-card__icon--navy   { background: rgba(40,53,147,0.50);  color: #9FA8DA; }
+
+    .float-card__value {
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dmd-white);
+        line-height: 1.2;
+    }
+
+    .float-card__label {
+        font-size: 0.7rem;
+        color: var(--dmd-white-60);
+        font-weight: 500;
+        margin-top: 1px;
+    }
+
+    .float-card__badge {
+        margin-left: auto;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 7px;
+        border-radius: 6px;
+    }
+    .float-card__badge--up {
+        background: rgba(0,200,83,0.18);
+        color: #69F0AE;
+    }
+
+    /* ── Wave divider ─────────────────────────────────────────────── */
+    .hero-wave {
+        position: relative;
+        z-index: 1;
+        line-height: 0;
+        margin-top: auto;
+    }
+    .hero-wave svg {
+        display: block;
+        width: 100%;
+        height: 60px;
+    }
+
+    /* ── Entry animations ─────────────────────────────────────────── */
+    @@keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes fadeSlideLeft {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @@media (max-width: 960px) {
+        .hero-inner {
+            grid-template-columns: 1fr;
+            padding: 80px 24px 40px;
+            gap: 48px;
+        }
+        .hero-visual {
+            height: 360px;
+        }
+        .mockup-card--main {
+            max-width: 100%;
+        }
+        .float-card--txn {
+            display: none;
+        }
+        .float-card--revenue {
+            right: 0;
+            bottom: 0;
+        }
+        .float-card--stock {
+            right: 0;
+            top: 0;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .hero-headline {
+            font-size: 2.2rem;
+        }
+        .hero-ctas {
+            flex-direction: column;
+        }
+        .hero-visual {
+            height: 300px;
+        }
+        .float-card--stock,
+        .float-card--revenue {
+            display: none;
+        }
+    }
+</style>
