@@ -19,5 +19,15 @@
     <Routes @rendermode="new InteractiveServerRenderMode()" />
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.registerResizeHandler = function (dotNetHelper) {
+            const handler = function () {
+                if (window.innerWidth >= 960) {
+                    dotNetHelper.invokeMethodAsync('CloseDrawerIfDesktop');
+                }
+            };
+            window.addEventListener('resize', handler);
+        };
+    </script>
 </body>
 </html>

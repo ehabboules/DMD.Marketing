@@ -1,85 +1,950 @@
 @page "/pricing"
-@using DMD.Marketing.Components
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
 
-<PageTitle>Pricing — DMD Inventory</PageTitle>
+<PageTitle>Pricing — DMD StockShopOnline</PageTitle>
 
-<!-- Header -->
-<div style="background:linear-gradient(135deg,var(--dmd-navy-dark),var(--dmd-navy));padding:8rem 0 4rem;margin-top:68px;text-align:center;">
-    <MudContainer MaxWidth="MaxWidth.Medium">
-        <p class="section-label">Pricing</p>
-        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;margin:0 0 1rem;">
-            Honest pricing, no surprises
-        </h1>
-        <p style="color:rgba(255,255,255,0.65);font-size:1.05rem;margin:0;">
-            Cancel anytime. No setup fees. No long-term contracts.
-        </p>
-    </MudContainer>
-</div>
+<div class="pricing-hero">
+    <div class="pricing-hero-inner">
 
-<!-- Plans -->
-<section class="section section-gray">
-    <MudContainer MaxWidth="MaxWidth.Large">
-        <PricingSection ShowAllFeatures="true" />
-    </MudContainer>
-</section>
-
-<!-- FAQ -->
-<section class="section">
-    <MudContainer MaxWidth="MaxWidth.Medium">
-        <div style="text-align:center;margin-bottom:3rem;">
-            <p class="section-label">FAQ</p>
-            <h2 class="section-title">Common questions</h2>
+        <div class="hero-left">
+            <div class="hero-eyebrow">
+                <span class="eyebrow-dot"></span>
+                Transparent pricing
+            </div>
+            <h1 class="hero-title">Simple plans.<br /><span class="hero-accent">No surprises.</span></h1>
+            <p class="hero-sub">Start free for 14 days. No credit card required. Cancel anytime.</p>
+            <div class="trust-row">
+                <span class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2 7 5.5 10.5 12 4" /></svg>
+                    14-day free trial
+                </span>
+                <span class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2 7 5.5 10.5 12 4" /></svg>
+                    No credit card
+                </span>
+                <span class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="2 7 5.5 10.5 12 4" /></svg>
+                    Cancel anytime
+                </span>
+            </div>
         </div>
 
-        <MudExpansionPanels Elevation="0">
-            @foreach (var faq in _faqs)
-            {
-                <MudExpansionPanel Style="border:1px solid var(--dmd-gray-mid);border-radius:10px!important;margin-bottom:0.75rem;">
-                    <TitleContent>
-                        <MudText Style="font-weight:600;color:var(--dmd-navy);">@faq.Q</MudText>
-                    </TitleContent>
-                    <ChildContent>
-                        <MudText Style="color:var(--dmd-text-muted);line-height:1.7;">@faq.A</MudText>
-                    </ChildContent>
-                </MudExpansionPanel>
-            }
-        </MudExpansionPanels>
-    </MudContainer>
-</section>
+        <div class="hero-right">
+            <div class="toggle-card">
+                <div class="toggle-card-label">Billing period</div>
+                <div class="toggle-row">
+                    <span class="toggle-text @(!IsAnnual ? "toggle-text-active" : "")">Monthly</span>
+                    <button class="toggle-pill @(IsAnnual ? "on" : "")"
+                            @onclick="() => IsAnnual = !IsAnnual"
+                            aria-label="Toggle billing period">
+                        <span class="toggle-knob"></span>
+                    </button>
+                    <span class="toggle-text @(IsAnnual ? "toggle-text-active" : "")">Annual</span>
+                    <span class="save-badge">Save 20%</span>
+                </div>
+            </div>
 
-<!-- CTA -->
-<section style="background:var(--dmd-navy);padding:4rem 0;text-align:center;">
-    <MudContainer MaxWidth="MaxWidth.Small">
-        <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:#fff;margin:0 0 1rem;">
-            Not sure which plan fits?
-        </h2>
-        <p style="color:rgba(255,255,255,0.6);margin:0 0 2rem;line-height:1.7;">
-            Book a free demo and we'll help you pick the right plan for your business size and needs.
-        </p>
-        <a href="/contact" style="background:var(--dmd-teal);color:var(--dmd-navy);font-weight:700;font-size:1rem;padding:0.9rem 2.5rem;border-radius:10px;text-decoration:none;display:inline-block;">
-            Talk to Us →
-        </a>
-    </MudContainer>
-</section>
+            <div class="plan-preview-list">
+                @foreach (var plan in Plans)
+                {
+                    <div class="plan-preview-row @(plan.Featured ? "plan-preview-featured" : "")">
+                        <div class="plan-preview-info">
+                            <span class="plan-preview-name">@plan.Name</span>
+                            <span class="plan-preview-tagline">@plan.PreviewTagline</span>
+                        </div>
+                        <div class="plan-preview-right">
+                            @if (plan.Featured)
+                            {
+                                <span class="plan-popular-dot"></span>
+                            }
+                            @if (plan.CustomPrice)
+                            {
+                                <span class="plan-preview-price" style="font-size: 0.8rem;">Custom</span>
+                            }
+                            else
+                            {
+                                <span class="plan-preview-price">$@(IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                                <span class="plan-preview-period">/mo</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="pricing-page">
+
+    <div class="plans-grid">
+        @foreach (var plan in Plans)
+        {
+            <div class="plan-card @(plan.Featured ? "featured" : "")">
+                @if (plan.Featured)
+                {
+                    <div class="popular-banner">Most popular</div>
+                }
+
+                <div class="plan-header">
+                    <h2 class="plan-name">@plan.Name</h2>
+                    <p class="plan-desc">@plan.Description</p>
+                </div>
+
+                <div class="plan-price">
+                    @if (plan.CustomPrice)
+                    {
+                        <span class="price-custom">Custom pricing</span>
+                    }
+                    else
+                    {
+                        <div class="price-row">
+                            <span class="currency">$</span>
+                            <span class="price-num">@(IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                            <span class="price-period">/mo</span>
+                        </div>
+                        <p class="price-note">
+                            @if (IsAnnual)
+                            {
+                                <span>Billed annually &middot; $@plan.MonthlyPrice/mo if monthly</span>
+                            }
+                            else
+                            {
+                                <span>Billed monthly</span>
+                            }
+                        </p>
+                    }
+                </div>
+
+                <button class="plan-cta @(plan.Featured ? "cta-primary" : "cta-default")"
+                        @onclick="() => HandleCta(plan)">
+                    @plan.CtaLabel
+                </button>
+
+                <div class="plan-divider"></div>
+
+                <ul class="feature-list">
+                    @foreach (var feat in plan.Features)
+                    {
+                        <li class="@(feat.Included ? "" : "excluded")">
+                            @if (feat.Included)
+                            {
+                                <span class="check-icon">
+                                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                        <circle cx="6.5" cy="6.5" r="6.5" fill="#00BFA5" fill-opacity="0.15" />
+                                        <path d="M3.5 6.5L5.5 8.5L9.5 4.5" stroke="#00897B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="dash-icon">—</span>
+                            }
+                            <span>@feat.Text</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <div class="addons-section">
+        <h2 class="addons-title">Add-ons</h2>
+        <p class="addons-sub">Available on any plan. Billed alongside your subscription.</p>
+        <div class="addons-grid">
+            <div class="addon-card">
+                <div class="addon-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="addon-name">Additional warehouse</div>
+                    <div class="addon-price">@(IsAnnual ? "$12/mo" : "$15/mo") per warehouse</div>
+                </div>
+            </div>
+            <div class="addon-card">
+                <div class="addon-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <path d="M8 21h8M12 17v4" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="addon-name">Additional register</div>
+                    <div class="addon-price">@(IsAnnual ? "$8/mo" : "$10/mo") per register</div>
+                </div>
+            </div>
+            <div class="addon-card">
+                <div class="addon-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <line x1="2" y1="10" x2="22" y2="10" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="addon-name">Stripe Terminal reader</div>
+                    <div class="addon-price">$399 one-time (hardware)</div>
+                </div>
+            </div>
+            <div class="addon-card">
+                <div class="addon-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6" />
+                        <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="addon-name">Custom integrations</div>
+                    <div class="addon-price">Quote on request</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="faq-title">Common questions</h2>
+        <div class="faq-grid">
+            @foreach (var faq in Faqs)
+            {
+                <div class="faq-item">
+                    <h3>@faq.Question</h3>
+                    <p>@faq.Answer</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="bottom-cta">
+        <h2>Not sure which plan fits?</h2>
+        <p>Talk to us — we'll help you figure it out in 15 minutes.</p>
+        <a href="/contact" class="btn-primary">Get in touch</a>
+    </div>
+
+</div>
 
 @code {
-    private record FaqItem(string Q, string A);
+    private bool IsAnnual { get; set; } = true;
 
-    private List<FaqItem> _faqs = new()
+    private void HandleCta(PricingPlan plan)
     {
-        new("Can I cancel anytime?",
-            "Yes — DMD Inventory is month-to-month. You can cancel at any time from your account settings with no cancellation fees."),
-        new("Is there a free trial?",
-            "We offer a free 30-minute live demo instead of a self-serve trial, so we can set up your catalog and walk you through everything personalized to your business."),
+        if (plan.Name == "Enterprise")
+            Navigation.NavigateTo("/contact");
+        else
+            Navigation.NavigateTo("/contact?plan=" + plan.Name.ToLower());
+    }
+
+    private record PricingFeature(string Text, bool Included);
+
+    private record PricingPlan(
+        string Name,
+        string Description,
+        string PreviewTagline,
+        int MonthlyPrice,
+        int AnnualPrice,
+        bool CustomPrice,
+        bool Featured,
+        string CtaLabel,
+        List<PricingFeature> Features
+    );
+
+    private List<PricingPlan> Plans => new()
+    {
+        new PricingPlan(
+            Name: "Starter",
+            Description: "One location, getting off the ground.",
+            PreviewTagline: "1 location · 1 user",
+            MonthlyPrice: 49,
+            AnnualPrice: 39,
+            CustomPrice: false,
+            Featured: false,
+            CtaLabel: "Start free trial",
+            Features: new()
+            {
+                new("POS terminal (1 register)", true),
+                new("Cash session management", true),
+                new("1 warehouse · up to 500 products", true),
+                new("Purchase orders & receiving", true),
+                new("Customers & sales orders", true),
+                new("Sales & inventory reports", true),
+                new("1 user", true),
+                new("Returns & refunds", false),
+                new("Specials & promotions", false),
+                new("Financial dashboard", false),
+                new("Stripe Terminal", false),
+                new("Role-based access control", false),
+            }
+        ),
+        new PricingPlan(
+            Name: "Growth",
+            Description: "Scaling retail with full POS and reporting.",
+            PreviewTagline: "Up to 5 users · 3 warehouses",
+            MonthlyPrice: 99,
+            AnnualPrice: 79,
+            CustomPrice: false,
+            Featured: true,
+            CtaLabel: "Start free trial",
+            Features: new()
+            {
+                new("POS terminal (2 registers)", true),
+                new("Cash session management", true),
+                new("Up to 3 warehouses · unlimited products", true),
+                new("Purchase orders & receiving", true),
+                new("Returns & refunds", true),
+                new("Specials & promotions wizard", true),
+                new("Full reports + financial dashboard", true),
+                new("Expenses & categories", true),
+                new("Stripe Terminal support", true),
+                new("Up to 5 users", true),
+                new("Role-based access control", true),
+                new("Multi-language (FR / AR)", false),
+            }
+        ),
+        new PricingPlan(
+            Name: "Pro",
+            Description: "Multi-location with full control and localization.",
+            PreviewTagline: "Unlimited · multi-language",
+            MonthlyPrice: 179,
+            AnnualPrice: 143,
+            CustomPrice: false,
+            Featured: false,
+            CtaLabel: "Start free trial",
+            Features: new()
+            {
+                new("Unlimited registers", true),
+                new("Cash session management", true),
+                new("Unlimited warehouses & products", true),
+                new("Purchase orders & receiving", true),
+                new("Returns & refunds", true),
+                new("Specials & promotions wizard", true),
+                new("Full reports + financial dashboard", true),
+                new("Expenses & categories", true),
+                new("Stripe Terminal support", true),
+                new("Unlimited users", true),
+                new("Role-based access control", true),
+                new("Multi-language (EN / FR / AR)", true),
+            }
+        ),
+        new PricingPlan(
+            Name: "Enterprise",
+            Description: "Custom deployments, SLAs, and dedicated support.",
+            PreviewTagline: "Custom deployment",
+            MonthlyPrice: 0,
+            AnnualPrice: 0,
+            CustomPrice: true,
+            Featured: false,
+            CtaLabel: "Contact us →",
+            Features: new()
+            {
+                new("Everything in Pro", true),
+                new("Dedicated tenant infrastructure", true),
+                new("Custom onboarding & data migration", true),
+                new("SLA & priority support", true),
+                new("Custom integrations (Moneris, ERP, etc.)", true),
+                new("Custom reporting", true),
+            }
+        ),
+    };
+
+    private record FaqItem(string Question, string Answer);
+
+    private List<FaqItem> Faqs => new()
+    {
+        new("Is there really no credit card required for the trial?",
+            "Correct. Sign up, connect your store, and use the platform free for 14 days. We only ask for payment details when you're ready to continue."),
         new("Can I change plans later?",
-            "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle."),
-        new("Do you support multiple locations?",
-            "Yes — the Business and Enterprise plans support multiple warehouses/locations. Each location gets its own stock tracking and transfer management."),
-        new("What payment methods do you accept?",
-            "We accept all major credit cards. Canadian businesses can also pay via bank transfer — contact us for details."),
-        new("Is my data secure?",
-            "Every customer gets a completely separate private database — your data is never mixed with other customers. Backups are taken daily."),
-        new("Do you support French and Arabic?",
-            "Yes — DMD Inventory has full UI support for English (Canadian), French (Canadian), and Arabic with RTL layout, included in Business and Enterprise plans."),
+            "Yes — you can upgrade or downgrade at any time. Upgrades take effect immediately; downgrades apply at the start of your next billing period."),
+        new("What happens to my data if I cancel?",
+            "Your data is retained for 30 days after cancellation, giving you time to export everything. After 30 days, your tenant database is permanently deleted."),
+        new("Do prices include HST / GST?",
+            "All listed prices are in CAD and exclude applicable taxes. Applicable Canadian taxes will be added at checkout based on your province."),
+        new("Can I add more warehouses or registers to my plan?",
+            "Yes — warehouses and registers are available as add-ons on any plan. They're billed monthly alongside your subscription."),
+        new("Is there a discount for multiple locations?",
+            "Yes. Volume discounts are available for businesses with 3 or more locations. Contact us for a custom quote."),
     };
 }
+
+<style>
+    :root {
+        --teal: #00BFA5;
+        --teal-dark: #00897B;
+        --teal-light: #E0F7F4;
+        --navy: #1A237E;
+        --navy-light: #E8EAF6;
+        --text: #1C1C1E;
+        --text-muted: #6B7280;
+        --border: #E5E7EB;
+        --surface: #F9FAFB;
+        --white: #FFFFFF;
+    }
+
+    /* ── Hero ── */
+    .pricing-hero {
+        background: #FFFFFF;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-hero::after {
+        content: '';
+        position: absolute;
+        right: -80px;
+        top: -80px;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0,191,165,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .pricing-hero-inner {
+        position: relative;
+        max-width: 960px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .hero-left { display: flex; flex-direction: column; }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--teal-light);
+        border: 1px solid rgba(0,191,165,0.25);
+        color: var(--teal-dark);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin-bottom: 1.25rem;
+        width: fit-content;
+    }
+
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--teal);
+        display: inline-block;
+    }
+
+    .hero-title {
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1.12;
+        margin: 0 0 1rem;
+    }
+
+    .hero-accent { color: var(--teal-dark); }
+
+    .hero-sub {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.65;
+        margin: 0 0 1.75rem;
+    }
+
+    .trust-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+    }
+
+    .trust-item svg { color: var(--teal); flex-shrink: 0; }
+
+    .hero-right {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    /* ── Toggle card ── */
+    .toggle-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .toggle-card-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #9CA3AF;
+        margin-bottom: 0.8rem;
+    }
+
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toggle-text {
+        font-size: 0.875rem;
+        color: #9CA3AF;
+        transition: color 0.2s;
+    }
+
+    .toggle-text-active {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .toggle-pill {
+        position: relative;
+        width: 48px;
+        height: 26px;
+        background: #E5E7EB;
+        border: 1px solid #D1D5DB;
+        border-radius: 13px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        flex-shrink: 0;
+        padding: 0;
+    }
+
+    .toggle-pill.on {
+        background: var(--teal);
+        border-color: var(--teal);
+    }
+
+    .toggle-knob {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #FFFFFF;
+        transition: left 0.2s;
+        display: block;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .toggle-pill.on .toggle-knob { left: 25px; }
+
+    .save-badge {
+        background: var(--teal-light);
+        border: 1px solid rgba(0,191,165,0.3);
+        color: var(--teal-dark);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 20px;
+    }
+
+    /* ── Plan preview list ── */
+    .plan-preview-list {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .plan-preview-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        transition: background 0.15s;
+    }
+
+    .plan-preview-row:last-child { border-bottom: none; }
+    .plan-preview-row:hover { background: var(--surface); }
+    .plan-preview-featured { background: #F0FBF8; }
+
+    .plan-preview-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .plan-preview-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .plan-preview-tagline {
+        font-size: 0.72rem;
+        color: #9CA3AF;
+    }
+
+    .plan-preview-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .plan-popular-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--teal);
+        display: inline-block;
+    }
+
+    .plan-preview-price {
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .plan-preview-period {
+        font-size: 0.72rem;
+        color: #9CA3AF;
+    }
+
+    /* ── Page layout ── */
+    .pricing-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 4rem;
+    }
+
+    /* ── Plans grid ── */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1rem;
+        margin-bottom: 4rem;
+        align-items: start;
+    }
+
+    .plan-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        position: relative;
+    }
+
+    .plan-card.featured {
+        border: 2px solid var(--teal);
+        box-shadow: 0 4px 24px rgba(0,191,165,0.1);
+    }
+
+    .popular-banner {
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--teal);
+        color: #FFFFFF;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.25rem 1rem;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .plan-header { padding-top: 0.5rem; }
+
+    .plan-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.3rem;
+    }
+
+    .plan-desc {
+        font-size: 0.825rem;
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .plan-price { min-height: 52px; }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+    }
+
+    .currency {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-top: 4px;
+    }
+
+    .price-num {
+        font-family: 'Syne', sans-serif;
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+    }
+
+    .price-period {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-left: 2px;
+    }
+
+    .price-note {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0;
+    }
+
+    .price-custom {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .plan-cta {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: none;
+    }
+
+    .cta-default {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .cta-default:hover {
+        background: var(--teal-light);
+        border-color: var(--teal);
+        color: var(--teal-dark);
+    }
+
+    .cta-primary {
+        background: var(--teal);
+        color: #FFFFFF;
+    }
+
+    .cta-primary:hover { background: var(--teal-dark); }
+
+    .plan-divider {
+        height: 1px;
+        background: var(--border);
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .feature-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.825rem;
+        color: var(--text);
+        line-height: 1.45;
+    }
+
+    .feature-list li.excluded {
+        color: var(--text-muted);
+        opacity: 0.45;
+    }
+
+    .check-icon, .dash-icon {
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .dash-icon {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        width: 13px;
+        display: inline-block;
+        text-align: center;
+    }
+
+    /* ── Add-ons ── */
+    .addons-section { margin-bottom: 4rem; }
+
+    .addons-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.3rem;
+    }
+
+    .addons-sub {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin: 0 0 1.5rem;
+    }
+
+    .addons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .addon-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: border-color 0.15s;
+    }
+
+    .addon-card:hover { border-color: var(--teal); }
+
+    .addon-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--teal-light);
+        color: var(--teal-dark);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .addon-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 2px;
+    }
+
+    .addon-price {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* ── FAQ ── */
+    .faq-section { margin-bottom: 4rem; }
+
+    .faq-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 1.5rem;
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .faq-item {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        transition: border-color 0.15s;
+    }
+
+    .faq-item:hover { border-color: #D1D5DB; }
+
+    .faq-item h3 {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.5rem;
+    }
+
+    .faq-item p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.65;
+        margin: 0;
+    }
+
+    /* ── Bottom CTA ── */
+    .bottom-cta {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+
+    .bottom-cta h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.6rem;
+    }
+
+    .bottom-cta p {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0 0 1.75rem;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        background: var(--teal);
+        color: #FFFFFF;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.75rem 1.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    @@media (max-width: 700px) {
+        .pricing-hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    @@media (max-width: 640px) {
+        .plans-grid { grid-template-columns: 1fr; }
+        .faq-grid { grid-template-columns: 1fr; }
+        .addons-grid { grid-template-columns: 1fr; }
+    }
+</style>

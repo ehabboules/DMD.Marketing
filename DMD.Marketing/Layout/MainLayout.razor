@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @using DMD.Marketing.Layout
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 @implements IDisposable
 
 <MudRTLProvider RightToLeft="false">
@@ -14,7 +15,8 @@
         <!-- ═══════════════════════════════════════════════════════════
          APP BAR — mobile only (hidden on md+ via CSS)
     ════════════════════════════════════════════════════════════════ -->
-        <MudAppBar Elevation="2" Dense="false" Class="dmd-mobile-appbar">
+        <MudAppBar Elevation="1" Dense="false" Class="dmd-mobile-appbar"
+                   Style="background:#ffffff;color:#1A237E;">
             <MudIconButton Icon="@Icons.Material.Filled.Menu"
                            Color="Color.Inherit"
                            Edge="Edge.Start"
@@ -22,14 +24,17 @@
             <img src="images/DMD_POS_scalable.svg"
                  alt="DMD POS"
                  style="width:36px;height:36px;margin-left:8px;margin-right:4px;" />
-            <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;">
-                DMD Inventory
+            <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;color:#1A237E;">
+                DMD <span style="color:#00BFA5;">Inventory</span>
             </MudText>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.RocketLaunch"
-                           Color="Color.Inherit"
-                           Href="/demo"
-                           Title="Book a Demo" />
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       Href="/demo"
+                       Style="font-weight:700;border-radius:8px;font-size:0.8rem;padding:6px 14px;">
+                Demo
+            </MudButton>
         </MudAppBar>
 
         <!-- ═══════════════════════════════════════════════════════════
@@ -110,12 +115,29 @@
                 <MudDivider Class="my-2" />
 
                 <!-- ═══ SOLUTIONS ═══ -->
+           
                 <MudNavGroup Title="Solutions"
                              Icon="@Icons.Material.Filled.Lightbulb"
                              @bind-Expanded="@ExpandSolutions"
-                             IconColor="Color.Secondary">
+                             IconColor="Color.Primary">
 
-                    <MudNavLink Href="/solutions/retail"
+                    <!-- Features (replaces the old /product deep-dive) -->
+                    <MudNavLink Href="/features"
+                                Icon="@Icons.Material.Filled.Inventory2"
+                                IconColor="Color.Primary"
+                                Match="NavLinkMatch.All">
+                        <div class="nav-link-content">
+                            <span>Features</span>
+                            <MudText Typo="Typo.caption" Class="nav-desc">Everything DMD can do</MudText>
+                        </div>
+                    </MudNavLink>
+
+                    <!-- Divider label -->
+                    <div class="nav-section-divider">
+                        <span>By industry</span>
+                    </div>
+
+                    <MudNavLink Href="/retail"
                                 Icon="@Icons.Material.Filled.Store"
                                 IconColor="Color.Secondary"
                                 Match="NavLinkMatch.All">
@@ -125,7 +147,7 @@
                         </div>
                     </MudNavLink>
 
-                    <MudNavLink Href="/solutions/dry-goods"
+                    <MudNavLink Href="/dry-goods"
                                 Icon="@Icons.Material.Filled.SetMeal"
                                 IconColor="Color.Secondary"
                                 Match="NavLinkMatch.All">
@@ -135,13 +157,13 @@
                         </div>
                     </MudNavLink>
 
-                    <MudNavLink Href="/solutions/restaurants"
+                    <MudNavLink Href="/restaurants"
                                 Icon="@Icons.Material.Filled.Restaurant"
                                 IconColor="Color.Secondary"
                                 Match="NavLinkMatch.All">
                         <div class="nav-link-content">
                             <span>Restaurants</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Table management &amp; kitchen flow</MudText>
+                            <MudText Typo="Typo.caption" Class="nav-desc">Counter service &amp; retail ops</MudText>
                         </div>
                     </MudNavLink>
 
@@ -338,6 +360,7 @@
 
     // ── State ──────────────────────────────────────────────────────
     private bool _drawerOpen = false;   // closed by default on public site
+    private DotNetObjectReference<MainLayout>? _dotNetRef;
 
     // ── Accordion backing fields ───────────────────────────────────
     private bool _expandProduct;
@@ -373,10 +396,30 @@
     // ── Toggle drawer ──────────────────────────────────────────────
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 
+    // ── Close drawer when viewport returns to desktop size ─────────
+    [JSInvokable]
+    public void CloseDrawerIfDesktop()
+    {
+        if (_drawerOpen)
+        {
+            _drawerOpen = false;
+            StateHasChanged();
+        }
+    }
+
     // ── Auto-close drawer on navigation (mobile UX polish) ─────────
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+        }
     }
 
     private void OnLocationChanged(object? sender,
@@ -392,6 +435,7 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
+        _dotNetRef?.Dispose();
     }
 
     // ── Theme ──────────────────────────────────────────────────────
@@ -416,8 +460,8 @@
             Background = "#FFFFFF",
             BackgroundGray = "#F5F7FA",
             Surface = "#FFFFFF",
-            AppbarBackground = "#1A237E",
-            AppbarText = "rgba(255,255,255,0.95)",
+            AppbarBackground = "#FFFFFF",
+            AppbarText = "#1A237E",
             DrawerBackground = "#FFFFFF",
             DrawerText = "rgba(26,35,126,0.87)",
             DrawerIcon = "rgba(26,35,126,0.55)",
