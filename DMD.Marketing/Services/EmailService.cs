@@ -63,6 +63,48 @@ public class EmailService
         }
     }
 
+    public async Task<bool> SendPasswordResetAsync(string toEmail, string firstName, string resetUrl)
+    {
+        try
+        {
+            var apiKey    = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"];
+            var fromName  = _config["SendGrid:FromName"];
+
+            if (string.IsNullOrEmpty(apiKey)) { _logger.LogWarning("SendGrid API key missing."); return false; }
+
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage
+            {
+                From             = new EmailAddress(fromEmail, fromName),
+                Subject          = "Reset your DMD Inventory password",
+                PlainTextContent = $"Hi {firstName},\n\nClick the link below to reset your password (expires in 1 hour):\n{resetUrl}\n\nIf you didn't request this, ignore this email.\n\n— DMD Tech",
+                HtmlContent      = $"""
+                    <div style="font-family:sans-serif;max-width:560px;margin:auto;">
+                      <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
+                        <h2 style="color:#fff;margin:0;font-size:1.2rem;">Reset your password</h2>
+                      </div>
+                      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
+                        <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
+                        <p style="color:#374151;margin:0 0 24px;">Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+                        <a href="{resetUrl}" style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:0.95rem;">Reset my password</a>
+                        <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">If you didn't request a password reset, you can safely ignore this email.</p>
+                      </div>
+                    </div>
+                    """
+            };
+            msg.AddTo(new EmailAddress(toEmail));
+
+            var response = await client.SendEmailAsync(msg);
+            return (int)response.StatusCode is >= 200 and < 300;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send password reset email to {Email}", toEmail);
+            return false;
+        }
+    }
+
     private static string BuildPlainText(ContactFormModel model) =>
         $"""
         New Demo Request — DMD Inventory

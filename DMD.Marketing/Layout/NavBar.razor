@@ -1,4 +1,5 @@
 @namespace DMD.Marketing.Layout
+@using System.Security.Claims
 @inject NavigationManager Nav
 
 <nav class="dmd-navbar">
@@ -21,31 +22,19 @@
             <div class="dmd-dropdown @(_open == "product" ? "dmd-dropdown--open" : "")">
                 <a href="/features" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Features</strong>
-                        <span>Everything DMD Inventory can do</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Features</strong><span>Everything DMD Inventory can do</span></span>
                 </a>
                 <a href="/pos-system" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 2H7C5.9 2 5 2.9 5 4v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V6h8v2z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Point of Sale</strong>
-                        <span>Fast, modern checkout experience</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Point of Sale</strong><span>Fast, modern checkout experience</span></span>
                 </a>
                 <a href="/inventory-management" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Inventory</strong>
-                        <span>Multi-warehouse stock control</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Inventory</strong><span>Multi-warehouse stock control</span></span>
                 </a>
                 <a href="/reports-analytics" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Reports &amp; Analytics</strong>
-                        <span>Profit, sales &amp; valuation reports</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Reports &amp; Analytics</strong><span>Profit, sales &amp; valuation reports</span></span>
                 </a>
             </div>
         </li>
@@ -57,26 +46,17 @@
                 <svg class="dmd-chevron @(_open == "solutions" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="dmd-dropdown @(_open == "solutions" ? "dmd-dropdown--open" : "")">
-                <a href="/solutions/retail" class="dmd-drop-link" @onclick="Close">
+                <a href="/retail" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4v2l8 5 8-5V4zm0 4l-8 5-8-5v10h16V8z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Retail Stores</strong>
-                        <span>General &amp; specialty retail</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Retail Stores</strong><span>General &amp; specialty retail</span></span>
                 </a>
-                <a href="/solutions/dry-goods" class="dmd-drop-link" @onclick="Close">
+                <a href="/dry-goods" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8.17-15.03-8.17-15.03 0h15.03zM1.02 17h15v2h-15z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Nuts &amp; Dry Goods</strong>
-                        <span>Bulk &amp; weight-based inventory</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Nuts &amp; Dry Goods</strong><span>Bulk &amp; weight-based inventory</span></span>
                 </a>
-                <a href="/solutions/restaurants" class="dmd-drop-link" @onclick="Close">
+                <a href="/restaurants" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Restaurants</strong>
-                        <span>Table management &amp; kitchen flow</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Restaurants</strong><span>Table management &amp; kitchen flow</span></span>
                 </a>
             </div>
         </li>
@@ -90,24 +70,15 @@
             <div class="dmd-dropdown @(_open == "company" ? "dmd-dropdown--open" : "")">
                 <a href="/about" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>About DMD Tech</strong>
-                        <span>Dynamic – Modern – Dedicated</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>About DMD Tech</strong><span>Dynamic – Modern – Dedicated</span></span>
                 </a>
                 <a href="/blog" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Blog</strong>
-                        <span>Tips, news &amp; product updates</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Blog</strong><span>Tips, news &amp; product updates</span></span>
                 </a>
                 <a href="/contact" class="dmd-drop-link" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
-                    <span class="dmd-drop-text">
-                        <strong>Contact Us</strong>
-                        <span>Get in touch with our team</span>
-                    </span>
+                    <span class="dmd-drop-text"><strong>Contact Us</strong><span>Get in touch with our team</span></span>
                 </a>
             </div>
         </li>
@@ -119,12 +90,48 @@
 
     </ul>
 
-    <!-- Right CTAs -->
+    <!-- Right CTAs — auth-aware -->
     <div class="dmd-nav-actions">
-        <a href="https://app.dmd-inventory.com" class="dmd-btn-login" target="_blank">Sign In</a>
-        <a href="/demo" class="dmd-btn-demo">
-            Book a Demo
-        </a>
+        <AuthorizeView>
+
+            <Authorized Context="auth">
+                <!-- User menu -->
+                <div class="dmd-has-dropdown"
+                     @onmouseenter="@(() => _open = "user")"
+                     @onmouseleave="@(() => _open = "")">
+                    <button class="dmd-user-btn @(_open == "user" ? "dmd-nav-btn--active" : "")">
+                        <span class="dmd-user-avatar">
+                            @((auth.User.FindFirst(ClaimTypes.GivenName)?.Value ?? "?").Substring(0,1).ToUpper())
+                        </span>
+                        <span class="dmd-user-name">
+                            @(auth.User.FindFirst(ClaimTypes.GivenName)?.Value ?? auth.User.FindFirst(ClaimTypes.Name)?.Value ?? "Account")
+                        </span>
+                        <svg class="dmd-chevron @(_open == "user" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="dmd-dropdown dmd-dropdown--right @(_open == "user" ? "dmd-dropdown--open" : "")">
+                        <a href="/profile" class="dmd-drop-link" @onclick="Close">
+                            <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></span>
+                            <span class="dmd-drop-text"><strong>My Profile</strong><span>Plan &amp; account settings</span></span>
+                        </a>
+                        <a href="/changepassword" class="dmd-drop-link" @onclick='() => Nav.NavigateTo("/changepassword", forceLoad: true)' @onclick:preventDefault>
+                            <span class="dmd-drop-icon" style="color:#607D8B;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg></span>
+                            <span class="dmd-drop-text"><strong>Change Password</strong><span>Update your credentials</span></span>
+                        </a>
+                        <div style="height:1px;background:#F3F4F6;margin:4px 8px;"></div>
+                        <a href="/logout" class="dmd-drop-link" style="color:#E53935;" @onclick='() => Nav.NavigateTo("/logout", forceLoad: true)' @onclick:preventDefault>
+                            <span class="dmd-drop-icon" style="color:#E53935;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg></span>
+                            <span class="dmd-drop-text"><strong>Sign Out</strong></span>
+                        </a>
+                    </div>
+                </div>
+            </Authorized>
+
+            <NotAuthorized>
+                <a href="/login" class="dmd-btn-login" @onclick='() => Nav.NavigateTo("/login", forceLoad: true)' @onclick:preventDefault>Sign In</a>
+                <a href="/demo"     class="dmd-btn-demo">Book a Demo</a>
+            </NotAuthorized>
+
+        </AuthorizeView>
     </div>
 
 </nav>
@@ -137,7 +144,6 @@
         z-index: 1100;
         display: flex;
         align-items: center;
-        gap: 0;
         padding: 0 32px;
         height: 68px;
         background: #ffffff;
@@ -146,205 +152,85 @@
     }
 
     /* ── Logo ────────────────────────────────────────────────────── */
-    .dmd-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        margin-right: 36px;
-        flex-shrink: 0;
-    }
-
-    .dmd-logo-text {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.1rem;
-        color: #1A237E;
-        letter-spacing: -0.01em;
-    }
-
-    .dmd-logo-text strong {
-        color: #00BFA5;
-    }
+    .dmd-logo { display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:36px;flex-shrink:0; }
+    .dmd-logo-text { font-family:'Syne',sans-serif;font-size:1.1rem;color:#1A237E;letter-spacing:-0.01em; }
+    .dmd-logo-text strong { color:#00BFA5; }
 
     /* ── Nav link list ───────────────────────────────────────────── */
-    .dmd-nav-links {
-        display: flex;
-        align-items: center;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        gap: 2px;
-        flex: 1;
-    }
+    .dmd-nav-links { display:flex;align-items:center;list-style:none;margin:0;padding:0;gap:2px;flex:1; }
+    .dmd-has-dropdown { position:relative; }
 
-    /* ── Dropdown parent ─────────────────────────────────────────── */
-    .dmd-has-dropdown {
-        position: relative;
-    }
-
-    /* ── Nav button (dropdown trigger) ──────────────────────────── */
+    /* ── Nav button ──────────────────────────────────────────────── */
     .dmd-nav-btn {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 8px 14px;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #37474F;
-        border-radius: 8px;
-        transition: background 0.15s, color 0.15s;
-        white-space: nowrap;
+        display:flex;align-items:center;gap:4px;padding:8px 14px;border:none;background:transparent;
+        cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;color:#37474F;
+        border-radius:8px;transition:background 0.15s,color 0.15s;white-space:nowrap;
     }
+    .dmd-nav-btn:hover, .dmd-nav-btn--active { background:rgba(0,191,165,0.08);color:#00BFA5; }
 
-    .dmd-nav-btn:hover,
-    .dmd-nav-btn--active {
-        background: rgba(0,191,165,0.08);
-        color: #00BFA5;
-    }
+    .dmd-chevron { transition:transform 0.2s ease;flex-shrink:0; }
+    .dmd-chevron--up { transform:rotate(180deg); }
 
-    /* ── Chevron ─────────────────────────────────────────────────── */
-    .dmd-chevron {
-        transition: transform 0.2s ease;
-        flex-shrink: 0;
-    }
-
-    .dmd-chevron--up {
-        transform: rotate(180deg);
-    }
-
-    /* ── Plain nav link (Pricing) ────────────────────────────────── */
     .dmd-nav-link-plain {
-        display: block;
-        padding: 8px 14px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #37474F;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: background 0.15s, color 0.15s;
-        white-space: nowrap;
+        display:block;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;
+        color:#37474F;text-decoration:none;border-radius:8px;transition:background 0.15s,color 0.15s;white-space:nowrap;
     }
+    .dmd-nav-link-plain:hover { background:rgba(0,191,165,0.08);color:#00BFA5; }
 
-    .dmd-nav-link-plain:hover {
-        background: rgba(0,191,165,0.08);
-        color: #00BFA5;
-    }
-
-    /* ── Dropdown panel ──────────────────────────────────────────── */
+    /* ── Dropdown ────────────────────────────────────────────────── */
     .dmd-dropdown {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        min-width: 280px;
-        background: #ffffff;
-        border: 1px solid rgba(0,0,0,0.08);
-        border-radius: 14px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        padding: 8px;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-6px);
-        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
-        z-index: 1200;
+        position:absolute;top:calc(100% + 8px);left:0;min-width:280px;
+        background:#ffffff;border:1px solid rgba(0,0,0,0.08);border-radius:14px;
+        box-shadow:0 8px 32px rgba(0,0,0,0.12);padding:8px;
+        opacity:0;visibility:hidden;transform:translateY(-6px);
+        transition:opacity 0.18s ease,transform 0.18s ease,visibility 0.18s;z-index:1200;
     }
+    .dmd-dropdown--right { left:auto;right:0; }
+    .dmd-dropdown--open  { opacity:1;visibility:visible;transform:translateY(0); }
 
-    .dmd-dropdown--open {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    /* ── Dropdown item ───────────────────────────────────────────── */
     .dmd-drop-link {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        text-decoration: none;
-        transition: background 0.15s;
+        display:flex;align-items:flex-start;gap:12px;padding:10px 12px;
+        border-radius:10px;text-decoration:none;transition:background 0.15s;
     }
+    .dmd-drop-link:hover { background:rgba(0,191,165,0.07); }
+    .dmd-drop-icon  { flex-shrink:0;margin-top:2px;display:flex; }
+    .dmd-drop-text  { display:flex;flex-direction:column;gap:2px; }
+    .dmd-drop-text strong { font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:600;color:#1A237E;line-height:1.3; }
+    .dmd-drop-text span   { font-family:'DM Sans',sans-serif;font-size:0.75rem;color:#90A4AE;line-height:1.4; }
 
-    .dmd-drop-link:hover {
-        background: rgba(0,191,165,0.07);
+    /* ── User menu button ────────────────────────────────────────── */
+    .dmd-user-btn {
+        display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;
+        border:1.5px solid #E5E7EB;background:#fff;cursor:pointer;
+        font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:500;color:#1A237E;
+        border-radius:24px;transition:border-color 0.15s,background 0.15s;white-space:nowrap;
     }
+    .dmd-user-btn:hover, .dmd-user-btn.dmd-nav-btn--active { border-color:#00BFA5;background:rgba(0,191,165,0.05); }
 
-    .dmd-drop-icon {
-        flex-shrink: 0;
-        margin-top: 2px;
-        display: flex;
+    .dmd-user-avatar {
+        width:28px;height:28px;border-radius:50%;
+        background:linear-gradient(135deg,#00BFA5,#1A237E);
+        color:#fff;font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
-
-    .dmd-drop-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .dmd-drop-text strong {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #1A237E;
-        line-height: 1.3;
-    }
-
-    .dmd-drop-text span {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.75rem;
-        color: #90A4AE;
-        line-height: 1.4;
-    }
+    .dmd-user-name { max-width:120px;overflow:hidden;text-overflow:ellipsis; }
 
     /* ── CTA buttons ─────────────────────────────────────────────── */
-    .dmd-nav-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-left: auto;
-        flex-shrink: 0;
-    }
+    .dmd-nav-actions { display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0; }
 
     .dmd-btn-login {
-        padding: 8px 16px;
-        border: 1.5px solid rgba(26,35,126,0.25);
-        border-radius: 8px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #1A237E;
-        text-decoration: none;
-        transition: border-color 0.15s, background 0.15s;
-        white-space: nowrap;
+        padding:8px 16px;border:1.5px solid rgba(26,35,126,0.25);border-radius:8px;
+        font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:600;color:#1A237E;
+        text-decoration:none;transition:border-color 0.15s,background 0.15s;white-space:nowrap;
     }
-
-    .dmd-btn-login:hover {
-        border-color: #1A237E;
-        background: rgba(26,35,126,0.05);
-    }
+    .dmd-btn-login:hover { border-color:#1A237E;background:rgba(26,35,126,0.05); }
 
     .dmd-btn-demo {
-        padding: 8px 20px;
-        background: #00BFA5;
-        border-radius: 8px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-decoration: none;
-        transition: background 0.15s, box-shadow 0.15s;
-        white-space: nowrap;
+        padding:8px 20px;background:#00BFA5;border-radius:8px;
+        font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:700;color:#ffffff;
+        text-decoration:none;transition:background 0.15s,box-shadow 0.15s;white-space:nowrap;
     }
-
-    .dmd-btn-demo:hover {
-        background: #00897B;
-        box-shadow: 0 4px 16px rgba(0,191,165,0.35);
-    }
+    .dmd-btn-demo:hover { background:#00897B;box-shadow:0 4px 16px rgba(0,191,165,0.35); }
 </style>
 
 @code {

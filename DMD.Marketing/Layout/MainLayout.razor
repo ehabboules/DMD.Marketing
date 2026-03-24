@@ -1,8 +1,5 @@
 @inherits LayoutComponentBase
 @using DMD.Marketing.Layout
-@inject NavigationManager Navigation
-@inject IJSRuntime JS
-@implements IDisposable
 
 <MudRTLProvider RightToLeft="false">
     <MudThemeProvider Theme="@_theme" />
@@ -12,251 +9,16 @@
 
     <MudLayout>
 
-        <!-- ═══════════════════════════════════════════════════════════
-         APP BAR — mobile only (hidden on md+ via CSS)
-    ════════════════════════════════════════════════════════════════ -->
-        <MudAppBar Elevation="1" Dense="false" Class="dmd-mobile-appbar"
-                   Style="background:#ffffff;color:#1A237E;">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                           Color="Color.Inherit"
-                           Edge="Edge.Start"
-                           OnClick="@ToggleDrawer" />
-            <img src="images/DMD_POS_scalable.svg"
-                 alt="DMD POS"
-                 style="width:36px;height:36px;margin-left:8px;margin-right:4px;" />
-            <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;color:#1A237E;">
-                DMD <span style="color:#00BFA5;">Inventory</span>
-            </MudText>
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Size="Size.Small"
-                       Href="/demo"
-                       Style="font-weight:700;border-radius:8px;font-size:0.8rem;padding:6px 14px;">
-                Demo
-            </MudButton>
-        </MudAppBar>
+        <MobileNav @rendermode="new InteractiveServerRenderMode()" />
 
         <!-- ═══════════════════════════════════════════════════════════
-         DRAWER — mobile slide-in nav
-    ════════════════════════════════════════════════════════════════ -->
-        <MudDrawer @bind-Open="_drawerOpen"
-                   Elevation="4"
-                   ClipMode="DrawerClipMode.Always"
-                   Class="dmd-mobile-drawer">
-
-            <MudDrawerHeader Class="pa-4 dmd-drawer-header">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                    <img src="images/DMD_POS_scalable.svg" alt="DMD POS"
-                         style="width:32px;height:32px;" />
-                    <div>
-                        <MudText Typo="Typo.h6"
-                                 Style="font-weight:800;color:var(--mud-palette-primary);line-height:1.1;">
-                            DMD Inventory
-                        </MudText>
-                        <MudText Typo="Typo.caption"
-                                 Style="color:var(--mud-palette-text-secondary);letter-spacing:0.06em;text-transform:uppercase;">
-                            Dynamic · Modern · Dedicated
-                        </MudText>
-                    </div>
-                </MudStack>
-            </MudDrawerHeader>
-
-            <MudNavMenu>
-
-                <!-- ═══ PRODUCT ═══ -->
-                <MudNavGroup Title="Product"
-                             Icon="@Icons.Material.Filled.Inventory2"
-                             @bind-Expanded="@ExpandProduct"
-                             IconColor="Color.Primary">
-
-                    <MudNavLink Href="/features"
-                                Icon="@Icons.Material.Filled.AutoAwesome"
-                                IconColor="Color.Primary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Features</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Everything DMD Inventory can do</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/pos-system"
-                                Icon="@Icons.Material.Filled.PointOfSale"
-                                IconColor="Color.Primary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Point of Sale</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Fast, modern checkout experience</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/inventory-management"
-                                Icon="@Icons.Material.Filled.Warehouse"
-                                IconColor="Color.Primary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Inventory</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Multi-warehouse stock control</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/reports-analytics"
-                                Icon="@Icons.Material.Filled.BarChart"
-                                IconColor="Color.Primary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Reports &amp; Analytics</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Profit, sales &amp; valuation reports</MudText>
-                        </div>
-                    </MudNavLink>
-
-                </MudNavGroup>
-
-                <MudDivider Class="my-2" />
-
-                <!-- ═══ SOLUTIONS ═══ -->
-           
-                <MudNavGroup Title="Solutions"
-                             Icon="@Icons.Material.Filled.Lightbulb"
-                             @bind-Expanded="@ExpandSolutions"
-                             IconColor="Color.Primary">
-
-                    <!-- Features (replaces the old /product deep-dive) -->
-                    <MudNavLink Href="/features"
-                                Icon="@Icons.Material.Filled.Inventory2"
-                                IconColor="Color.Primary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Features</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Everything DMD can do</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <!-- Divider label -->
-                    <div class="nav-section-divider">
-                        <span>By industry</span>
-                    </div>
-
-                    <MudNavLink Href="/retail"
-                                Icon="@Icons.Material.Filled.Store"
-                                IconColor="Color.Secondary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Retail Stores</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">General &amp; specialty retail</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/dry-goods"
-                                Icon="@Icons.Material.Filled.SetMeal"
-                                IconColor="Color.Secondary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Nuts &amp; Dry Goods</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Bulk &amp; weight-based inventory</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/restaurants"
-                                Icon="@Icons.Material.Filled.Restaurant"
-                                IconColor="Color.Secondary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Restaurants</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Counter service &amp; retail ops</MudText>
-                        </div>
-                    </MudNavLink>
-
-                </MudNavGroup>
-
-                <MudDivider Class="my-2" />
-
-                <!-- ═══ COMPANY ═══ -->
-                <MudNavGroup Title="Company"
-                             Icon="@Icons.Material.Filled.Business"
-                             @bind-Expanded="@ExpandCompany"
-                             IconColor="Color.Tertiary">
-
-                    <MudNavLink Href="/about"
-                                Icon="@Icons.Material.Filled.Info"
-                                IconColor="Color.Tertiary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>About DMD Tech</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Dynamic – Modern – Dedicated</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/blog"
-                                Icon="@Icons.Material.Filled.Article"
-                                IconColor="Color.Tertiary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Blog</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Tips, news &amp; product updates</MudText>
-                        </div>
-                    </MudNavLink>
-
-                    <MudNavLink Href="/contact"
-                                Icon="@Icons.Material.Filled.ContactMail"
-                                IconColor="Color.Tertiary"
-                                Match="NavLinkMatch.All">
-                        <div class="nav-link-content">
-                            <span>Contact Us</span>
-                            <MudText Typo="Typo.caption" Class="nav-desc">Get in touch with our team</MudText>
-                        </div>
-                    </MudNavLink>
-
-                </MudNavGroup>
-
-                <MudDivider Class="my-2" />
-
-                <!-- ═══ PRICING — standalone ═══ -->
-                <MudNavLink Href="/pricing"
-                            Icon="@Icons.Material.Filled.Sell"
-                            IconColor="Color.Success"
-                            Match="NavLinkMatch.All">
-                    <div class="nav-link-content">
-                        <span>Pricing</span>
-                        <MudText Typo="Typo.caption" Class="nav-desc">Transparent, flat-rate plans</MudText>
-                    </div>
-                </MudNavLink>
-
-                <MudDivider Class="my-2" />
-
-                <!-- ─── DRAWER CTAs ─── -->
-                <div class="pa-3">
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               FullWidth="true"
-                               StartIcon="@Icons.Material.Filled.RocketLaunch"
-                               Href="/demo"
-                               Class="mb-2"
-                               Style="font-weight:700;border-radius:10px;">
-                        Book a Free Demo
-                    </MudButton>
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Secondary"
-                               FullWidth="true"
-                               Href="/login"
-                               Style="border-radius:10px;">
-                        Sign In
-                    </MudButton>
-                </div>
-
-            </MudNavMenu>
-        </MudDrawer>
-
-        <!-- ═══════════════════════════════════════════════════════════
-         MAIN CONTENT
-         Desktop: sticky NavBar component handles top navigation
-         Mobile:  MudAppBar above + drawer handles navigation
-    ════════════════════════════════════════════════════════════════ -->
+             MAIN CONTENT
+        ════════════════════════════════════════════════════════════════ -->
         <MudMainContent Class="dmd-main-content">
 
             <!-- Desktop NavBar — hidden on mobile via CSS -->
             <div class="dmd-desktop-navbar">
-                <NavBar />
+                <NavBar @rendermode="new InteractiveServerRenderMode()" />
             </div>
 
             <main>
@@ -278,337 +40,188 @@
             Style="box-shadow:0 4px 24px rgba(0,191,165,0.45);" />
 </MudScrollToTop>
 
-<!-- ══════════════════════════════════════════════════════════════
-     STYLES
-═══════════════════════════════════════════════════════════════ -->
 <style>
-
     /* ── Responsive: mobile AppBar visible below 960px only ─────── */
-    .dmd-mobile-appbar {
-        display: flex !important;
-    }
+    .dmd-mobile-appbar { display: flex !important; }
 
     /* ── Responsive: desktop NavBar hidden on mobile ────────────── */
-    .dmd-desktop-navbar {
-        display: none;
-    }
+    .dmd-desktop-navbar { display: none; }
 
     @@media (min-width: 960px) {
-        /* Hide mobile AppBar on desktop */
-        .dmd-mobile-appbar {
-            display: none !important;
-        }
-        /* Show desktop NavBar component */
-        .dmd-desktop-navbar {
-            display: block;
-        }
-        /* Remove the top-padding MudMainContent adds for the AppBar */
-        .dmd-main-content {
-            padding-top: 0 !important;
-        }
-    }
-
-    /* ── Drawer header ───────────────────────────────────────────── */
-    .dmd-drawer-header {
-        border-bottom: 1px solid rgba(0,191,165,0.15);
-        background: linear-gradient(135deg, rgba(0,191,165,0.06) 0%, rgba(26,35,126,0.04) 100%);
-    }
-
-    /* ── Nav group child link indent ────────────────────────────── */
-    .mud-nav-group .mud-nav-link {
-        padding-left: 24px !important;
-        font-size: 0.88rem;
-    }
-
-    /* ── Active link highlight — teal brand ─────────────────────── */
-    .mud-nav-link.mud-nav-link-active {
-        background: linear-gradient(90deg, rgba(0,191,165,0.13) 0%, transparent 100%) !important;
-        border-left: 3px solid #00BFA5;
-        font-weight: 600;
-    }
-
-    /* ── Hover ───────────────────────────────────────────────────── */
-    .mud-nav-link:hover {
-        background-color: rgba(0,191,165,0.07) !important;
-        transition: background-color 0.15s ease;
-    }
-
-    /* ── Nav link content: label + description stacked ──────────── */
-    .nav-link-content {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-
-    .nav-desc {
-        font-size: 0.7rem !important;
-        color: #9e9e9e;
-        margin-top: 1px;
-        line-height: 1.3;
-    }
-
-    /* ── Smooth drawer transition ────────────────────────────────── */
-    .mud-drawer {
-        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        .dmd-mobile-appbar  { display: none !important; }
+        .dmd-desktop-navbar { display: block; }
+        .dmd-main-content   { padding-top: 0 !important; }
     }
 </style>
 
-<!-- ══════════════════════════════════════════════════════════════
-     CODE
-═══════════════════════════════════════════════════════════════ -->
 @code {
 
-    // ── State ──────────────────────────────────────────────────────
-    private bool _drawerOpen = false;   // closed by default on public site
-    private DotNetObjectReference<MainLayout>? _dotNetRef;
-
-    // ── Accordion backing fields ───────────────────────────────────
-    private bool _expandProduct;
-    private bool _expandSolutions;
-    private bool _expandCompany;
-
-    // ── Accordion: one group open at a time (mirrors POS pattern) ──
-    private void CloseAllGroups()
-    {
-        _expandProduct = false;
-        _expandSolutions = false;
-        _expandCompany = false;
-    }
-
-    private bool ExpandProduct
-    {
-        get => _expandProduct;
-        set { if (value) CloseAllGroups(); _expandProduct = value; }
-    }
-
-    private bool ExpandSolutions
-    {
-        get => _expandSolutions;
-        set { if (value) CloseAllGroups(); _expandSolutions = value; }
-    }
-
-    private bool ExpandCompany
-    {
-        get => _expandCompany;
-        set { if (value) CloseAllGroups(); _expandCompany = value; }
-    }
-
-    // ── Toggle drawer ──────────────────────────────────────────────
-    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
-
-    // ── Close drawer when viewport returns to desktop size ─────────
-    [JSInvokable]
-    public void CloseDrawerIfDesktop()
-    {
-        if (_drawerOpen)
-        {
-            _drawerOpen = false;
-            StateHasChanged();
-        }
-    }
-
-    // ── Auto-close drawer on navigation (mobile UX polish) ─────────
-    protected override void OnInitialized()
-    {
-        Navigation.LocationChanged += OnLocationChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
-        }
-    }
-
-    private void OnLocationChanged(object? sender,
-        Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        if (_drawerOpen)
-        {
-            _drawerOpen = false;
-            InvokeAsync(StateHasChanged);
-        }
-    }
-
-    public void Dispose()
-    {
-        Navigation.LocationChanged -= OnLocationChanged;
-        _dotNetRef?.Dispose();
-    }
-
-    // ── Theme ──────────────────────────────────────────────────────
     private MudTheme _theme = new MudTheme
     {
-        // ── Light palette ──
         PaletteLight = new PaletteLight
         {
-            Primary = "#00BFA5",
-            PrimaryDarken = "#00897B",
-            PrimaryLighten = "#E0F7F4",
-            Secondary = "#1A237E",
-            SecondaryDarken = "#0D1457",
+            Primary          = "#00BFA5",
+            PrimaryDarken    = "#00897B",
+            PrimaryLighten   = "#E0F7F4",
+            Secondary        = "#1A237E",
+            SecondaryDarken  = "#0D1457",
             SecondaryLighten = "#E8EAF6",
-            Tertiary = "#FF6F00",
-            TertiaryDarken = "#E65100",
-            TertiaryLighten = "#FFF3E0",
-            Success = "#00C853",
-            Info = "#0288D1",
-            Warning = "#FF8F00",
-            Error = "#E53935",
-            Background = "#FFFFFF",
-            BackgroundGray = "#F5F7FA",
-            Surface = "#FFFFFF",
+            Tertiary         = "#FF6F00",
+            TertiaryDarken   = "#E65100",
+            TertiaryLighten  = "#FFF3E0",
+            Success          = "#00C853",
+            Info             = "#0288D1",
+            Warning          = "#FF8F00",
+            Error            = "#E53935",
+            Background       = "#FFFFFF",
+            BackgroundGray   = "#F5F7FA",
+            Surface          = "#FFFFFF",
             AppbarBackground = "#FFFFFF",
-            AppbarText = "#1A237E",
+            AppbarText       = "#1A237E",
             DrawerBackground = "#FFFFFF",
-            DrawerText = "rgba(26,35,126,0.87)",
-            DrawerIcon = "rgba(26,35,126,0.55)",
-            TextPrimary = "#1A237E",
-            TextSecondary = "#607D8B",
-            TextDisabled = "rgba(0,0,0,0.38)",
-            ActionDefault = "#1A237E",
-            Divider = "rgba(0,0,0,0.08)",
+            DrawerText       = "rgba(26,35,126,0.87)",
+            DrawerIcon       = "rgba(26,35,126,0.55)",
+            TextPrimary      = "#1A237E",
+            TextSecondary    = "#607D8B",
+            TextDisabled     = "rgba(0,0,0,0.38)",
+            ActionDefault    = "#1A237E",
+            Divider          = "rgba(0,0,0,0.08)",
         },
 
-        // ── Dark palette ──
         PaletteDark = new PaletteDark
         {
-            Primary = "#4DB6AC",
-            PrimaryDarken = "#00897B",
-            PrimaryLighten = "#80CBC4",
-            Secondary = "#7986CB",
-            SecondaryDarken = "#5C6BC0",
+            Primary          = "#4DB6AC",
+            PrimaryDarken    = "#00897B",
+            PrimaryLighten   = "#80CBC4",
+            Secondary        = "#7986CB",
+            SecondaryDarken  = "#5C6BC0",
             SecondaryLighten = "#9FA8DA",
-            Tertiary = "#FFB74D",
-            Success = "#69F0AE",
-            Info = "#29B6F6",
-            Warning = "#FFD54F",
-            Error = "#EF9A9A",
-            Background = "#0F1117",
-            BackgroundGray = "#1A1D27",
-            Surface = "#1E2130",
+            Tertiary         = "#FFB74D",
+            Success          = "#69F0AE",
+            Info             = "#29B6F6",
+            Warning          = "#FFD54F",
+            Error            = "#EF9A9A",
+            Background       = "#0F1117",
+            BackgroundGray   = "#1A1D27",
+            Surface          = "#1E2130",
             AppbarBackground = "#12162A",
-            AppbarText = "rgba(255,255,255,0.95)",
+            AppbarText       = "rgba(255,255,255,0.95)",
             DrawerBackground = "#1A1D27",
-            DrawerText = "rgba(255,255,255,0.87)",
-            DrawerIcon = "rgba(255,255,255,0.55)",
-            TextPrimary = "rgba(255,255,255,0.87)",
-            TextSecondary = "rgba(255,255,255,0.60)",
-            Divider = "rgba(255,255,255,0.08)",
+            DrawerText       = "rgba(255,255,255,0.87)",
+            DrawerIcon       = "rgba(255,255,255,0.55)",
+            TextPrimary      = "rgba(255,255,255,0.87)",
+            TextSecondary    = "rgba(255,255,255,0.60)",
+            Divider          = "rgba(255,255,255,0.08)",
         },
 
-        // ── Typography ──
         Typography = new Typography
         {
             Default = new Default
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.9375rem",
+                FontSize   = "0.9375rem",
                 FontWeight = 400,
                 LineHeight = 1.65,
             },
             H1 = new H1
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "3.5rem",
+                FontSize   = "3.5rem",
                 FontWeight = 800,
                 LineHeight = 1.12,
             },
             H2 = new H2
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "2.75rem",
+                FontSize   = "2.75rem",
                 FontWeight = 800,
                 LineHeight = 1.18,
             },
             H3 = new H3
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "2.125rem",
+                FontSize   = "2.125rem",
                 FontWeight = 700,
                 LineHeight = 1.25,
             },
             H4 = new H4
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "1.5rem",
+                FontSize   = "1.5rem",
                 FontWeight = 700,
                 LineHeight = 1.3,
             },
             H5 = new H5
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "1.25rem",
+                FontSize   = "1.25rem",
                 FontWeight = 600,
                 LineHeight = 1.4,
             },
             H6 = new H6
             {
                 FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize = "1.0625rem",
+                FontSize   = "1.0625rem",
                 FontWeight = 600,
                 LineHeight = 1.4,
             },
             Subtitle1 = new Subtitle1
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "1rem",
+                FontSize   = "1rem",
                 FontWeight = 500,
                 LineHeight = 1.6,
             },
             Subtitle2 = new Subtitle2
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.875rem",
+                FontSize   = "0.875rem",
                 FontWeight = 500,
                 LineHeight = 1.6,
             },
             Body1 = new Body1
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "1rem",
+                FontSize   = "1rem",
                 FontWeight = 400,
                 LineHeight = 1.75,
             },
             Body2 = new Body2
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.875rem",
+                FontSize   = "0.875rem",
                 FontWeight = 400,
                 LineHeight = 1.65,
             },
             Button = new Button
             {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.9375rem",
-                FontWeight = 600,
+                FontFamily    = new[] { "DM Sans", "sans-serif" },
+                FontSize      = "0.9375rem",
+                FontWeight    = 600,
                 TextTransform = "none",
                 LetterSpacing = "0.01em",
             },
             Caption = new Caption
             {
                 FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.75rem",
+                FontSize   = "0.75rem",
                 FontWeight = 400,
                 LineHeight = 1.5,
             },
             Overline = new Overline
             {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize = "0.6875rem",
-                FontWeight = 700,
+                FontFamily    = new[] { "DM Sans", "sans-serif" },
+                FontSize      = "0.6875rem",
+                FontWeight    = 700,
                 LetterSpacing = "0.1em",
                 TextTransform = "uppercase",
-                LineHeight = 2.0,
+                LineHeight    = 2.0,
             },
         },
 
-        // ── Layout ──
         LayoutProperties = new LayoutProperties
         {
-            AppbarHeight = "68px",
+            AppbarHeight    = "68px",
             DrawerWidthLeft = "300px",
         }
     };

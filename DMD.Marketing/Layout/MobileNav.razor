@@ -1,0 +1,305 @@
+@namespace DMD.Marketing.Layout
+@using System.Security.Claims
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IDisposable
+
+<!-- ═══════════════════════════════════════════════════════════
+     APP BAR — mobile only (hidden on md+ via CSS)
+════════════════════════════════════════════════════════════════ -->
+<MudAppBar Elevation="1" Dense="false" Class="dmd-mobile-appbar"
+           Style="background:#ffffff;color:#1A237E;">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                   Color="Color.Inherit"
+                   Edge="Edge.Start"
+                   OnClick="@ToggleDrawer" />
+    <img src="images/DMD_POS_scalable.svg"
+         alt="DMD POS"
+         style="width:36px;height:36px;margin-left:8px;margin-right:4px;" />
+    <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;color:#1A237E;">
+        DMD <span style="color:#00BFA5;">Inventory</span>
+    </MudText>
+    <MudSpacer />
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Small"
+               Href="/demo"
+               Style="font-weight:700;border-radius:8px;font-size:0.8rem;padding:6px 14px;">
+        Demo
+    </MudButton>
+</MudAppBar>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DRAWER — mobile slide-in nav
+════════════════════════════════════════════════════════════════ -->
+<MudDrawer @bind-Open="_drawerOpen"
+           Elevation="4"
+           ClipMode="DrawerClipMode.Always"
+           Class="dmd-mobile-drawer">
+
+    <MudDrawerHeader Class="pa-4 dmd-drawer-header">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <img src="images/DMD_POS_scalable.svg" alt="DMD POS"
+                 style="width:32px;height:32px;" />
+            <div>
+                <MudText Typo="Typo.h6"
+                         Style="font-weight:800;color:var(--mud-palette-primary);line-height:1.1;">
+                    DMD Inventory
+                </MudText>
+                <MudText Typo="Typo.caption"
+                         Style="color:var(--mud-palette-text-secondary);letter-spacing:0.06em;text-transform:uppercase;">
+                    Dynamic · Modern · Dedicated
+                </MudText>
+            </div>
+        </MudStack>
+    </MudDrawerHeader>
+
+    <MudNavMenu>
+
+        <!-- ═══ SOLUTIONS ═══ -->
+        <MudNavGroup Title="Solutions"
+                     Icon="@Icons.Material.Filled.Lightbulb"
+                     @bind-Expanded="@ExpandSolutions"
+                     IconColor="Color.Primary">
+
+            <MudNavLink Href="/features"
+                        Icon="@Icons.Material.Filled.AutoAwesome"
+                        IconColor="Color.Primary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Features</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Everything DMD Inventory can do</MudText>
+                </div>
+            </MudNavLink>
+
+            <div class="nav-section-divider"><span>By industry</span></div>
+
+            <MudNavLink Href="/solutions/retail"
+                        Icon="@Icons.Material.Filled.Store"
+                        IconColor="Color.Secondary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Retail Stores</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">General &amp; specialty retail</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/solutions/dry-goods"
+                        Icon="@Icons.Material.Filled.SetMeal"
+                        IconColor="Color.Secondary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Nuts &amp; Dry Goods</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Bulk &amp; weight-based inventory</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/solutions/restaurants"
+                        Icon="@Icons.Material.Filled.Restaurant"
+                        IconColor="Color.Secondary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Restaurants</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Counter service &amp; retail ops</MudText>
+                </div>
+            </MudNavLink>
+
+        </MudNavGroup>
+
+        <MudDivider Class="my-2" />
+
+        <!-- ═══ COMPANY ═══ -->
+        <MudNavGroup Title="Company"
+                     Icon="@Icons.Material.Filled.Business"
+                     @bind-Expanded="@ExpandCompany"
+                     IconColor="Color.Tertiary">
+
+            <MudNavLink Href="/about"
+                        Icon="@Icons.Material.Filled.Info"
+                        IconColor="Color.Tertiary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>About DMD Tech</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Dynamic – Modern – Dedicated</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/blog"
+                        Icon="@Icons.Material.Filled.Article"
+                        IconColor="Color.Tertiary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Blog</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Tips, news &amp; product updates</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/contact"
+                        Icon="@Icons.Material.Filled.ContactMail"
+                        IconColor="Color.Tertiary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Contact Us</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Get in touch with our team</MudText>
+                </div>
+            </MudNavLink>
+
+        </MudNavGroup>
+
+        <MudDivider Class="my-2" />
+
+        <!-- ═══ PRICING — standalone ═══ -->
+        <MudNavLink Href="/pricing"
+                    Icon="@Icons.Material.Filled.Sell"
+                    IconColor="Color.Success"
+                    Match="NavLinkMatch.All">
+            <div class="nav-link-content">
+                <span>Pricing</span>
+                <MudText Typo="Typo.caption" Class="nav-desc">Transparent, flat-rate plans</MudText>
+            </div>
+        </MudNavLink>
+
+        <MudDivider Class="my-2" />
+
+        <!-- ─── DRAWER CTAs ─── -->
+        <div class="pa-3">
+            <AuthorizeView>
+                <Authorized>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Person"
+                               Href="/profile"
+                               Class="mb-2"
+                               Style="font-weight:700;border-radius:10px;">
+                        My Profile
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               FullWidth="true"
+                               OnClick='() => Navigation.NavigateTo("/logout", forceLoad: true)'
+                               Style="border-radius:10px;">
+                        Sign Out
+                    </MudButton>
+                </Authorized>
+                <NotAuthorized>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.RocketLaunch"
+                               Href="/demo"
+                               Class="mb-2"
+                               Style="font-weight:700;border-radius:10px;">
+                        Book a Free Demo
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               FullWidth="true"
+                               OnClick='() => Navigation.NavigateTo("/login", forceLoad: true)'
+                               Style="border-radius:10px;">
+                        Sign In
+                    </MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+    </MudNavMenu>
+</MudDrawer>
+
+<style>
+    .dmd-drawer-header {
+        border-bottom: 1px solid rgba(0,191,165,0.15);
+        background: linear-gradient(135deg, rgba(0,191,165,0.06) 0%, rgba(26,35,126,0.04) 100%);
+    }
+
+    .mud-nav-group .mud-nav-link { padding-left: 24px !important; font-size: 0.88rem; }
+
+    .mud-nav-link.mud-nav-link-active {
+        background: linear-gradient(90deg, rgba(0,191,165,0.13) 0%, transparent 100%) !important;
+        border-left: 3px solid #00BFA5;
+        font-weight: 600;
+    }
+
+    .mud-nav-link:hover {
+        background-color: rgba(0,191,165,0.07) !important;
+        transition: background-color 0.15s ease;
+    }
+
+    .nav-link-content { display: flex; flex-direction: column; min-width: 0; }
+
+    .nav-desc { font-size: 0.7rem !important; color: #9e9e9e; margin-top: 1px; line-height: 1.3; }
+
+    .nav-section-divider {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 16px 4px 28px; margin-top: 2px;
+    }
+
+    .nav-section-divider::before {
+        content: ''; display: block; width: 16px; height: 1px;
+        background: var(--mud-palette-divider); flex-shrink: 0;
+    }
+
+    .nav-section-divider span {
+        font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--mud-palette-text-disabled); white-space: nowrap;
+    }
+
+    .mud-drawer { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+</style>
+
+@code {
+
+    private bool _drawerOpen = false;
+    private DotNetObjectReference<MobileNav>? _dotNetRef;
+
+    private bool _expandSolutions;
+    private bool _expandCompany;
+
+    private void CloseAllGroups() { _expandSolutions = false; _expandCompany = false; }
+
+    private bool ExpandSolutions
+    {
+        get => _expandSolutions;
+        set { if (value) CloseAllGroups(); _expandSolutions = value; }
+    }
+
+    private bool ExpandCompany
+    {
+        get => _expandCompany;
+        set { if (value) CloseAllGroups(); _expandCompany = value; }
+    }
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+
+    [JSInvokable]
+    public void CloseDrawerIfDesktop()
+    {
+        if (_drawerOpen) { _drawerOpen = false; StateHasChanged(); }
+    }
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+        }
+    }
+
+    private void OnLocationChanged(object? sender,
+        Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        if (_drawerOpen) { _drawerOpen = false; InvokeAsync(StateHasChanged); }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        _dotNetRef?.Dispose();
+    }
+}

@@ -1,0 +1,257 @@
+@inherits LayoutComponentBase
+
+<div class="al-bg">
+    <div class="al-shell">
+
+        <a href="/" class="al-logo">
+            <img src="/images/DMD_POS_scalable.svg" alt="DMD" width="34" height="34" />
+            <span class="al-logo-text">DMD <strong>Inventory</strong></span>
+        </a>
+
+        <div class="al-card">
+            @Body
+        </div>
+
+        <p class="al-footer">© @DateTime.Now.Year DMD Tech · All rights reserved</p>
+
+    </div>
+</div>
+
+<style>
+    html, body {
+        background: #F5F7FA !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .al-bg {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: #F5F7FA;
+    }
+
+    .al-shell {
+        width: 100%;
+        max-width: 440px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    /* ── Logo ── */
+    .al-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .al-logo-text {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.15rem;
+        color: #1A237E;
+        letter-spacing: -0.01em;
+    }
+
+    .al-logo-text strong { color: #00BFA5; }
+
+    /* ── Card ── */
+    .al-card {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #E5E7EB;
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 2px 16px rgba(26,35,126,0.06);
+    }
+
+    /* ── Typography ── */
+    .al-title {
+        font-family: 'Syne', sans-serif !important;
+        font-size: 1.6rem !important;
+        font-weight: 800 !important;
+        color: #1A237E !important;
+        margin: 0 0 0.35rem !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.01em;
+    }
+
+    .al-sub {
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 0.9rem !important;
+        font-weight: 400 !important;
+        color: #607D8B !important;
+        line-height: 1.6 !important;
+        margin: 0 0 1.75rem !important;
+    }
+
+    /* ── Fields ── */
+    .al-field { margin-bottom: 1rem; }
+
+    .al-field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .al-label {
+        display: block;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #607D8B;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 6px;
+    }
+
+    /* MudBlazor TextField override to match brand */
+    .al-field .mud-input-root,
+    .al-field-row .mud-input-root {
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 0.9375rem !important;
+        border-radius: 9px !important;
+        background: #F9FAFB !important;
+    }
+
+    .al-field .mud-input-outlined-border,
+    .al-field-row .mud-input-outlined-border {
+        border-radius: 9px !important;
+    }
+
+    /* ── Alerts ── */
+    .al-alert-error {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        color: #B91C1C;
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .al-alert-success {
+        background: #F0FBF8;
+        border: 1px solid rgba(0,191,165,0.35);
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        color: #00897B;
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+    }
+
+    /* ── Buttons ── */
+    .al-btn-primary {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        background: #00BFA5;
+        border: none;
+        border-radius: 9px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.15s, box-shadow 0.15s;
+        margin-top: 0.75rem;
+    }
+
+    .al-btn-primary:hover {
+        background: #00897B;
+        box-shadow: 0 4px 18px rgba(0,191,165,0.3);
+    }
+
+    .al-btn-primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .al-btn-outline {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: transparent;
+        border: 1.5px solid #E5E7EB;
+        border-radius: 9px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1A237E;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: border-color 0.15s, background 0.15s;
+        margin-top: 0.5rem;
+    }
+
+    .al-btn-outline:hover {
+        border-color: #1A237E;
+        background: rgba(26,35,126,0.04);
+    }
+
+    /* ── Utility ── */
+    .al-forgot-row {
+        display: flex;
+        justify-content: flex-end;
+        margin: -0.25rem 0 0.9rem;
+    }
+
+    .al-link-sm {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        color: #607D8B;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .al-link-sm:hover { color: #00897B; }
+
+    .al-links {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        color: #90A4AE;
+    }
+
+    .al-links a {
+        color: #00897B;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .al-links a:hover { text-decoration: underline; }
+
+    .al-field-error {
+        display: block;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.72rem;
+        color: #E53935;
+        margin-top: 4px;
+    }
+
+    .al-footer {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        color: #B0BEC5;
+        text-align: center;
+        margin: 0;
+    }
+
+    @@media (max-width: 480px) {
+        .al-field-row { grid-template-columns: 1fr; }
+        .al-card { padding: 2rem 1.25rem; }
+    }
+</style>

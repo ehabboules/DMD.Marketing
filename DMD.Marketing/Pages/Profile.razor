@@ -1,0 +1,610 @@
+@page "/profile"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>My Profile — DMD Inventory</PageTitle>
+
+<div class="profile-page">
+
+    @if (_loading)
+    {
+        <div class="profile-loading">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </div>
+    }
+    else if (_user is null)
+    {
+        <MudAlert Severity="Severity.Error">Could not load your profile. Please try again.</MudAlert>
+    }
+    else
+    {
+        <!-- ── Header ── -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                @(string.IsNullOrWhiteSpace(_user.FirstName) ? "?" : _user.FirstName[0].ToString().ToUpper())
+            </div>
+            <div>
+                <h1 class="profile-name">@((_user.FirstName + " " + _user.LastName).Trim() is { Length: > 0 } n ? n : _user.Email)</h1>
+                <p class="profile-email">@_user.Email</p>
+            </div>
+        </div>
+
+        <!-- ── Profile fields ── -->
+        <div class="profile-section">
+            <h2 class="section-title">Account details</h2>
+            <div class="fields-grid">
+                <div class="field-group">
+                    <label class="field-label">First name</label>
+                    <input class="field-input" @bind="_firstName" placeholder="First name" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Last name</label>
+                    <input class="field-input" @bind="_lastName" placeholder="Last name" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Email</label>
+                    <input class="field-input" value="@_user.Email" disabled />
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Plan selection ── -->
+        <div class="profile-section">
+            <div class="section-header-row">
+                <h2 class="section-title">Your plan</h2>
+                <div class="billing-toggle">
+                    <span class="@(!_annual ? "toggle-label-active" : "toggle-label")">Monthly</span>
+                    <button class="toggle-pill @(_annual ? "on" : "")"
+                            @onclick="() => _annual = !_annual"
+                            aria-label="Toggle billing">
+                        <span class="toggle-knob"></span>
+                    </button>
+                    <span class="@(_annual ? "toggle-label-active" : "toggle-label")">Annual</span>
+                    <span class="save-tag">Save 20%</span>
+                </div>
+            </div>
+
+            <div class="plans-grid">
+                @foreach (var plan in _plans)
+                {
+                    var isSelected = _selectedPlan == plan.Slug;
+                    <div class="plan-card @(isSelected ? "plan-card--selected" : "") @(plan.Featured ? "plan-card--featured" : "")"
+                         @onclick="() => SelectPlan(plan.Slug)">
+
+                        @if (plan.Featured)
+                        {
+                            <div class="popular-tag">Most popular</div>
+                        }
+
+                        <div class="plan-check @(isSelected ? "plan-check--on" : "")">
+                            @if (isSelected)
+                            {
+                                <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            }
+                        </div>
+
+                        <div class="plan-name">@plan.Name</div>
+                        <div class="plan-desc">@plan.Description</div>
+
+                        <div class="plan-price">
+                            @if (plan.CustomPrice)
+                            {
+                                <span class="price-custom">Custom</span>
+                            }
+                            else
+                            {
+                                <span class="price-amount">$@(_annual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                                <span class="price-period">/mo</span>
+                            }
+                        </div>
+
+                        <ul class="plan-features">
+                            @foreach (var feat in plan.Highlights)
+                            {
+                                <li>
+                                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" width="12" height="12"><polyline points="2 7 5.5 10.5 12 4"/></svg>
+                                    @feat
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+
+            @if (_selectedPlan != PlanSlug.None)
+            {
+                <p class="plan-hint">
+                    Selected: <strong>@_selectedPlan @(_annual ? "(Annual)" : "(Monthly)")</strong>
+                </p>
+            }
+        </div>
+
+        <!-- ── Save button ── -->
+        <div class="save-row">
+            @if (_saveSuccess)
+            {
+                <div class="save-success-msg">
+                    <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Profile saved!
+                </div>
+            }
+            @if (_saveError is { Length: > 0 })
+            {
+                <div class="save-error-msg">@_saveError</div>
+            }
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       OnClick="SaveProfile"
+                       Disabled="_saving"
+                       Style="font-weight:700;border-radius:10px;padding:12px 36px;">
+                @(_saving ? "Saving…" : "Save profile")
+            </MudButton>
+        </div>
+    }
+
+</div>
+
+@code {
+    // ── State ────────────────────────────────────────────────────────
+    private User?   _user;
+    private bool    _loading     = true;
+    private bool    _saving      = false;
+    private bool    _saveSuccess = false;
+    private string? _saveError;
+
+    private string? _firstName;
+    private string? _lastName;
+    private bool     _annual       = false;
+    private PlanSlug _selectedPlan = PlanSlug.None;
+
+    // ── Plan definitions ─────────────────────────────────────────────
+    private record PlanDef(
+        PlanSlug Slug, string Name, string Description,
+        int MonthlyPrice, int AnnualPrice, bool CustomPrice, bool Featured,
+        List<string> Highlights);
+
+    private readonly List<PlanDef> _plans = new()
+    {
+        new(PlanSlug.Starter, "Starter", "One location, getting off the ground.",
+            49, 39, false, false,
+            new() { "1 register", "1 warehouse · 500 products", "1 user", "Sales & inventory reports" }),
+
+        new(PlanSlug.Growth, "Growth", "Scaling retail with full POS and reporting.",
+            99, 79, false, true,
+            new() { "2 registers", "3 warehouses · unlimited products", "5 users", "Financial dashboard", "Stripe Terminal" }),
+
+        new(PlanSlug.Pro, "Pro", "Multi-location with full control and localization.",
+            179, 143, false, false,
+            new() { "Unlimited registers & warehouses", "Unlimited users", "Multi-language (EN/FR/AR)", "Everything in Growth" }),
+
+        new(PlanSlug.Enterprise, "Enterprise", "Custom deployments and dedicated support.",
+            0, 0, true, false,
+            new() { "Everything in Pro", "Dedicated infrastructure", "Custom integrations", "SLA & priority support" }),
+    };
+
+    // ── Lifecycle ────────────────────────────────────────────────────
+    protected override async Task OnInitializedAsync()
+    {
+        var auth   = await AuthStateProvider.GetAuthenticationStateAsync();
+        var idStr  = auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (int.TryParse(idStr, out var userId))
+        {
+            _user = await Db.Users.FindAsync(userId);
+            if (_user is not null)
+            {
+                _firstName    = _user.FirstName;
+                _lastName     = _user.LastName;
+                _selectedPlan = _user.SelectedPlan;
+                _annual       = _user.BillingCycle == BillingCycle.Annual;
+            }
+        }
+
+        _loading = false;
+    }
+
+    // ── Actions ──────────────────────────────────────────────────────
+    private void SelectPlan(PlanSlug slug) => _selectedPlan = slug;
+
+    private async Task SaveProfile()
+    {
+        if (_user is null) return;
+        _saving      = true;
+        _saveSuccess = false;
+        _saveError   = null;
+
+        try
+        {
+            _user.FirstName      = _firstName?.Trim();
+            _user.LastName       = _lastName?.Trim();
+            _user.SelectedPlan   = _selectedPlan;
+            _user.BillingCycle   = _annual ? BillingCycle.Annual : BillingCycle.Monthly;
+            _user.PlanSelectedAt = _selectedPlan != PlanSlug.None ? DateTime.UtcNow : _user.PlanSelectedAt;
+            _user.ModifiedAt     = DateTime.UtcNow;
+
+            await Db.SaveChangesAsync();
+            _saveSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            _saveError = ex.Message;
+        }
+
+        _saving = false;
+    }
+}
+
+<style>
+    .profile-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+    }
+
+    .profile-loading {
+        display: flex;
+        justify-content: center;
+        padding: 4rem;
+    }
+
+    /* ── Header ── */
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00BFA5, #1A237E);
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .profile-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1A237E;
+        margin: 0 0 2px;
+    }
+
+    .profile-email {
+        font-size: 0.875rem;
+        color: #607D8B;
+        margin: 0;
+    }
+
+    .profile-company {
+        font-size: 0.8rem;
+        color: #00BFA5;
+        font-weight: 600;
+        margin: 2px 0 0;
+    }
+
+    /* ── Section ── */
+    .profile-section {
+        background: #ffffff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1A237E;
+        margin: 0 0 1.25rem;
+    }
+
+    .section-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-header-row .section-title { margin: 0; }
+
+    /* ── Fields ── */
+    .fields-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .field-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #607D8B;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .field-input {
+        padding: 10px 14px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        color: #1C1C1E;
+        background: #F9FAFB;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        outline: none;
+    }
+
+    .field-input:focus {
+        border-color: #00BFA5;
+        box-shadow: 0 0 0 3px rgba(0,191,165,0.12);
+        background: #fff;
+    }
+
+    .field-input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ── Billing toggle ── */
+    .billing-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .toggle-label {
+        font-size: 0.85rem;
+        color: #9CA3AF;
+    }
+
+    .toggle-label-active {
+        font-size: 0.85rem;
+        color: #1C1C1E;
+        font-weight: 600;
+    }
+
+    .toggle-pill {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        background: #E5E7EB;
+        border: 1px solid #D1D5DB;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        padding: 0;
+        flex-shrink: 0;
+    }
+
+    .toggle-pill.on { background: #00BFA5; border-color: #00BFA5; }
+
+    .toggle-knob {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        transition: left 0.2s;
+        display: block;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .toggle-pill.on .toggle-knob { left: 23px; }
+
+    .save-tag {
+        background: #E0F7F4;
+        border: 1px solid rgba(0,191,165,0.3);
+        color: #00897B;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 20px;
+    }
+
+    /* ── Plans grid ── */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .plan-card {
+        position: relative;
+        border: 1.5px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 1.1rem;
+        cursor: pointer;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        background: #F9FAFB;
+        user-select: none;
+    }
+
+    .plan-card:hover {
+        border-color: #00BFA5;
+        background: #fff;
+    }
+
+    .plan-card--selected {
+        border-color: #00BFA5 !important;
+        background: #F0FBF8 !important;
+        box-shadow: 0 0 0 3px rgba(0,191,165,0.15);
+    }
+
+    .plan-card--featured {
+        border-color: #00BFA5;
+    }
+
+    /* ── Plan check circle ── */
+    .plan-check {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1.5px solid #D1D5DB;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, border-color 0.15s;
+        color: #fff;
+    }
+
+    .plan-check--on {
+        background: #00BFA5;
+        border-color: #00BFA5;
+    }
+
+    /* ── Popular tag ── */
+    .popular-tag {
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #00BFA5;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 0 0 8px 8px;
+        white-space: nowrap;
+    }
+
+    .plan-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1A237E;
+        margin-top: 0.6rem;
+        margin-bottom: 3px;
+    }
+
+    .plan-desc {
+        font-size: 0.75rem;
+        color: #607D8B;
+        line-height: 1.45;
+        margin-bottom: 0.75rem;
+    }
+
+    .plan-price {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+        margin-bottom: 0.75rem;
+    }
+
+    .price-amount {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1C1C1E;
+    }
+
+    .price-period {
+        font-size: 0.8rem;
+        color: #9CA3AF;
+    }
+
+    .price-custom {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1C1C1E;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .plan-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        font-size: 0.75rem;
+        color: #374151;
+        line-height: 1.4;
+    }
+
+    .plan-features li svg {
+        flex-shrink: 0;
+        color: #00BFA5;
+        margin-top: 2px;
+    }
+
+    /* ── Plan hint ── */
+    .plan-hint {
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: #607D8B;
+    }
+
+    .plan-hint strong {
+        color: #00897B;
+    }
+
+    /* ── Save row ── */
+    .save-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .save-success-msg {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #00897B;
+    }
+
+    .save-error-msg {
+        font-size: 0.875rem;
+        color: #E53935;
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 640px) {
+        .fields-grid { grid-template-columns: 1fr; }
+        .plans-grid  { grid-template-columns: 1fr 1fr; }
+        .profile-header { flex-direction: column; text-align: center; }
+    }
+
+    @@media (max-width: 400px) {
+        .plans-grid { grid-template-columns: 1fr; }
+    }
+</style>

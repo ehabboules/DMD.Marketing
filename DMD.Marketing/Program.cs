@@ -1,5 +1,6 @@
 using DMD.Marketing.Data;
 using DMD.Marketing.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -9,25 +10,35 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<UserService>();
 
-// DbContext
+// ── DbContext ──────────────────────────────────────────────────────
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-    options.UseOpenIddict(); // must be called on the same options
+    options.UseOpenIddict();
 });
 
-// Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+// ── Password hasher ────────────────────────────────────────────────
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-// OpenIddict
+// ── Cookie authentication ──────────────────────────────────────────
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath         = "/login";
+        options.AccessDeniedPath  = "/login";
+        options.ExpireTimeSpan    = TimeSpan.FromDays(14);
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization();
+
+// ── OpenIddict ─────────────────────────────────────────────────────
 builder.Services.AddOpenIddict()
     .AddCore(options =>
     {
@@ -47,7 +58,6 @@ builder.Services.AddOpenIddict()
 
         options.RegisterScopes("openid", "profile", "email", "offline_access");
 
-        // Dev: use ephemeral keys (no cert needed); swap for AddEncryptionCertificate in prod
         options.AddEphemeralEncryptionKey()
                .AddEphemeralSigningKey();
 
