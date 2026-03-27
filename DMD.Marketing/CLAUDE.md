@@ -169,7 +169,7 @@ All solution pages share: pain points grid (red-tinted), feature cards with hove
 | Plan | Monthly | Annual | Key limits |
 |---|---|---|---|
 | Starter | $49 | $39 | 1 register, 1 warehouse, 500 products, 1 user |
-| Growth | $99 | $79 | 2 registers, 3 warehouses, unlimited products, 5 users |
+| Growth | $99 | $79 | 3 registers, 3 warehouses, unlimited products, 5 users |
 | Pro | $179 | $143 | Unlimited everything, multi-language |
 | Enterprise | Custom | Custom | Dedicated infra, SLA, custom integrations |
 

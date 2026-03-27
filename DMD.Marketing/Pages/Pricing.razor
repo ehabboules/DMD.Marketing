@@ -256,7 +256,7 @@
         new PricingPlan(
             Name: "Starter",
             Description: "One location, getting off the ground.",
-            PreviewTagline: "1 location · 1 user",
+            PreviewTagline: "1 register · 1 warehouse",
             MonthlyPrice: 49,
             AnnualPrice: 39,
             CustomPrice: false,
@@ -271,11 +271,11 @@
                 new("Customers & sales orders", true),
                 new("Sales & inventory reports", true),
                 new("1 user", true),
-                new("Returns & refunds", false),
-                new("Specials & promotions", false),
-                new("Financial dashboard", false),
-                new("Stripe Terminal", false),
-                new("Role-based access control", false),
+                new("Returns & refunds", true),
+                new("Specials & promotions", true),
+                new("Financial dashboard", true),
+                new("Stripe Terminal", true),
+                new("Role-based access control", true),
             }
         ),
         new PricingPlan(
@@ -289,7 +289,7 @@
             CtaLabel: "Start free trial",
             Features: new()
             {
-                new("POS terminal (2 registers)", true),
+                new("POS terminal (3 registers)", true),
                 new("Cash session management", true),
                 new("Up to 3 warehouses · unlimited products", true),
                 new("Purchase orders & receiving", true),
