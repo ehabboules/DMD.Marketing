@@ -55,174 +55,214 @@
 </style>
 
 @code {
-
-    private MudTheme _theme = new MudTheme
+      // ── theme ──
+    private MudTheme _theme = new MudTheme()
     {
-        PaletteLight = new PaletteLight
+        PaletteLight = new PaletteLight()
         {
-            Primary          = "#00BFA5",
-            PrimaryDarken    = "#00897B",
-            PrimaryLighten   = "#E0F7F4",
-            Secondary        = "#1A237E",
-            SecondaryDarken  = "#0D1457",
-            SecondaryLighten = "#E8EAF6",
-            Tertiary         = "#FF6F00",
-            TertiaryDarken   = "#E65100",
-            TertiaryLighten  = "#FFF3E0",
-            Success          = "#00C853",
-            Info             = "#0288D1",
-            Warning          = "#FF8F00",
-            Error            = "#E53935",
-            Background       = "#FFFFFF",
-            BackgroundGray   = "#F5F7FA",
-            Surface          = "#FFFFFF",
-            AppbarBackground = "#FFFFFF",
-            AppbarText       = "#1A237E",
-            DrawerBackground = "#FFFFFF",
-            DrawerText       = "rgba(26,35,126,0.87)",
-            DrawerIcon       = "rgba(26,35,126,0.55)",
-            TextPrimary      = "#1A237E",
-            TextSecondary    = "#607D8B",
-            TextDisabled     = "rgba(0,0,0,0.38)",
-            ActionDefault    = "#1A237E",
-            Divider          = "rgba(0,0,0,0.08)",
+            Primary = "#1976d2",
+            Secondary = "#00c853",
+            Background = "#f5f5f5",
+            AppbarBackground = "#1565c0",
+            DrawerBackground = "#ffffff",
+            DrawerText = "rgba(0,0,0,0.87)",
+            Success = "#00c853",
+            Info = "#2196f3",
+            Warning = "#ff9800",
+            Error = "#f44336",
+            Tertiary = "#9c27b0"
         },
-
-        PaletteDark = new PaletteDark
+        PaletteDark = new PaletteDark()
         {
-            Primary          = "#4DB6AC",
-            PrimaryDarken    = "#00897B",
-            PrimaryLighten   = "#80CBC4",
-            Secondary        = "#7986CB",
-            SecondaryDarken  = "#5C6BC0",
-            SecondaryLighten = "#9FA8DA",
-            Tertiary         = "#FFB74D",
-            Success          = "#69F0AE",
-            Info             = "#29B6F6",
-            Warning          = "#FFD54F",
-            Error            = "#EF9A9A",
-            Background       = "#0F1117",
-            BackgroundGray   = "#1A1D27",
-            Surface          = "#1E2130",
-            AppbarBackground = "#12162A",
-            AppbarText       = "rgba(255,255,255,0.95)",
-            DrawerBackground = "#1A1D27",
-            DrawerText       = "rgba(255,255,255,0.87)",
-            DrawerIcon       = "rgba(255,255,255,0.55)",
-            TextPrimary      = "rgba(255,255,255,0.87)",
-            TextSecondary    = "rgba(255,255,255,0.60)",
-            Divider          = "rgba(255,255,255,0.08)",
+            Primary = "#90caf9",
+            Secondary = "#69f0ae",
+            Background = "#1a1a1a",
+            AppbarBackground = "#1e1e1e",
+            DrawerBackground = "#2d2d2d",
+            DrawerText = "rgba(255,255,255,0.87)",
+            Surface = "#2d2d2d"
         },
-
-        Typography = new Typography
+        Typography = new Typography()
         {
-            Default = new Default
+            Default = new Default()
             {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "0.9375rem",
-                FontWeight = 400,
-                LineHeight = 1.65,
-            },
-            H1 = new H1
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "3.5rem",
-                FontWeight = 800,
-                LineHeight = 1.12,
-            },
-            H2 = new H2
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "2.75rem",
-                FontWeight = 800,
-                LineHeight = 1.18,
-            },
-            H3 = new H3
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "2.125rem",
-                FontWeight = 700,
-                LineHeight = 1.25,
-            },
-            H4 = new H4
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "1.5rem",
-                FontWeight = 700,
-                LineHeight = 1.3,
-            },
-            H5 = new H5
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "1.25rem",
-                FontWeight = 600,
-                LineHeight = 1.4,
-            },
-            H6 = new H6
-            {
-                FontFamily = new[] { "Syne", "sans-serif" },
-                FontSize   = "1.0625rem",
-                FontWeight = 600,
-                LineHeight = 1.4,
-            },
-            Subtitle1 = new Subtitle1
-            {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "1rem",
-                FontWeight = 500,
-                LineHeight = 1.6,
-            },
-            Subtitle2 = new Subtitle2
-            {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "0.875rem",
-                FontWeight = 500,
-                LineHeight = 1.6,
-            },
-            Body1 = new Body1
-            {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "1rem",
-                FontWeight = 400,
-                LineHeight = 1.75,
-            },
-            Body2 = new Body2
-            {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "0.875rem",
-                FontWeight = 400,
-                LineHeight = 1.65,
-            },
-            Button = new Button
-            {
-                FontFamily    = new[] { "DM Sans", "sans-serif" },
-                FontSize      = "0.9375rem",
-                FontWeight    = 600,
-                TextTransform = "none",
-                LetterSpacing = "0.01em",
-            },
-            Caption = new Caption
-            {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
-                FontSize   = "0.75rem",
-                FontWeight = 400,
-                LineHeight = 1.5,
-            },
-            Overline = new Overline
-            {
-                FontFamily    = new[] { "DM Sans", "sans-serif" },
-                FontSize      = "0.6875rem",
-                FontWeight    = 700,
-                LetterSpacing = "0.1em",
-                TextTransform = "uppercase",
-                LineHeight    = 2.0,
-            },
+                FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif" }
+            }
         },
-
-        LayoutProperties = new LayoutProperties
+        LayoutProperties = new LayoutProperties()
         {
-            AppbarHeight    = "68px",
-            DrawerWidthLeft = "300px",
+            DrawerWidthLeft = "280px",
+            DrawerWidthRight = "300px"
         }
     };
+
+    // private MudTheme _theme = new MudTheme
+    // {
+    //     PaletteLight = new PaletteLight
+    //     {
+    //         Primary          = "#00BFA5",
+    //         PrimaryDarken    = "#00897B",
+    //         PrimaryLighten   = "#E0F7F4",
+    //         Secondary        = "#1A237E",
+    //         SecondaryDarken  = "#0D1457",
+    //         SecondaryLighten = "#E8EAF6",
+    //         Tertiary         = "#FF6F00",
+    //         TertiaryDarken   = "#E65100",
+    //         TertiaryLighten  = "#FFF3E0",
+    //         Success          = "#00C853",
+    //         Info             = "#0288D1",
+    //         Warning          = "#FF8F00",
+    //         Error            = "#E53935",
+    //         Background       = "#FFFFFF",
+    //         BackgroundGray   = "#F5F7FA",
+    //         Surface          = "#FFFFFF",
+    //         AppbarBackground = "#FFFFFF",
+    //         AppbarText       = "#1A237E",
+    //         DrawerBackground = "#FFFFFF",
+    //         DrawerText       = "rgba(26,35,126,0.87)",
+    //         DrawerIcon       = "rgba(26,35,126,0.55)",
+    //         TextPrimary      = "#1A237E",
+    //         TextSecondary    = "#607D8B",
+    //         TextDisabled     = "rgba(0,0,0,0.38)",
+    //         ActionDefault    = "#1A237E",
+    //         Divider          = "rgba(0,0,0,0.08)",
+    //     },
+
+    //     PaletteDark = new PaletteDark
+    //     {
+    //         Primary          = "#4DB6AC",
+    //         PrimaryDarken    = "#00897B",
+    //         PrimaryLighten   = "#80CBC4",
+    //         Secondary        = "#7986CB",
+    //         SecondaryDarken  = "#5C6BC0",
+    //         SecondaryLighten = "#9FA8DA",
+    //         Tertiary         = "#FFB74D",
+    //         Success          = "#69F0AE",
+    //         Info             = "#29B6F6",
+    //         Warning          = "#FFD54F",
+    //         Error            = "#EF9A9A",
+    //         Background       = "#0F1117",
+    //         BackgroundGray   = "#1A1D27",
+    //         Surface          = "#1E2130",
+    //         AppbarBackground = "#12162A",
+    //         AppbarText       = "rgba(255,255,255,0.95)",
+    //         DrawerBackground = "#1A1D27",
+    //         DrawerText       = "rgba(255,255,255,0.87)",
+    //         DrawerIcon       = "rgba(255,255,255,0.55)",
+    //         TextPrimary      = "rgba(255,255,255,0.87)",
+    //         TextSecondary    = "rgba(255,255,255,0.60)",
+    //         Divider          = "rgba(255,255,255,0.08)",
+    //     },
+
+    //     Typography = new Typography
+    //     {
+    //         Default = new Default
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "0.9375rem",
+    //             FontWeight = 400,
+    //             LineHeight = 1.65,
+    //         },
+    //         H1 = new H1
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "3.5rem",
+    //             FontWeight = 800,
+    //             LineHeight = 1.12,
+    //         },
+    //         H2 = new H2
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "2.75rem",
+    //             FontWeight = 800,
+    //             LineHeight = 1.18,
+    //         },
+    //         H3 = new H3
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "2.125rem",
+    //             FontWeight = 700,
+    //             LineHeight = 1.25,
+    //         },
+    //         H4 = new H4
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "1.5rem",
+    //             FontWeight = 700,
+    //             LineHeight = 1.3,
+    //         },
+    //         H5 = new H5
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "1.25rem",
+    //             FontWeight = 600,
+    //             LineHeight = 1.4,
+    //         },
+    //         H6 = new H6
+    //         {
+    //             FontFamily = new[] { "Syne", "sans-serif" },
+    //             FontSize   = "1.0625rem",
+    //             FontWeight = 600,
+    //             LineHeight = 1.4,
+    //         },
+    //         Subtitle1 = new Subtitle1
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "1rem",
+    //             FontWeight = 500,
+    //             LineHeight = 1.6,
+    //         },
+    //         Subtitle2 = new Subtitle2
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "0.875rem",
+    //             FontWeight = 500,
+    //             LineHeight = 1.6,
+    //         },
+    //         Body1 = new Body1
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "1rem",
+    //             FontWeight = 400,
+    //             LineHeight = 1.75,
+    //         },
+    //         Body2 = new Body2
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "0.875rem",
+    //             FontWeight = 400,
+    //             LineHeight = 1.65,
+    //         },
+    //         Button = new Button
+    //         {
+    //             FontFamily    = new[] { "DM Sans", "sans-serif" },
+    //             FontSize      = "0.9375rem",
+    //             FontWeight    = 600,
+    //             TextTransform = "none",
+    //             LetterSpacing = "0.01em",
+    //         },
+    //         Caption = new Caption
+    //         {
+    //             FontFamily = new[] { "DM Sans", "sans-serif" },
+    //             FontSize   = "0.75rem",
+    //             FontWeight = 400,
+    //             LineHeight = 1.5,
+    //         },
+    //         Overline = new Overline
+    //         {
+    //             FontFamily    = new[] { "DM Sans", "sans-serif" },
+    //             FontSize      = "0.6875rem",
+    //             FontWeight    = 700,
+    //             LetterSpacing = "0.1em",
+    //             TextTransform = "uppercase",
+    //             LineHeight    = 2.0,
+    //         },
+    //     },
+
+    //     LayoutProperties = new LayoutProperties
+    //     {
+    //         AppbarHeight    = "68px",
+    //         DrawerWidthLeft = "300px",
+    //     }
+    // };
 }

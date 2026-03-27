@@ -1,0 +1,249 @@
+/* ================================================================
+   DMD StockShopOnline — Application Stylesheet
+   ----------------------------------------------------------------
+   Sections
+     1.  Base / Reset
+     2.  Layout — Drawer & AppBar
+     3.  Navigation
+     4.  Cards
+     5.  Dialogs
+     6.  Buttons
+     7.  Tables
+     8.  Forms & Inputs
+     9.  Loading Indicators & Misc
+    10.  Custom Scrollbar
+    11.  Typography
+    12.  Elevation Helpers
+    13.  Spacing Utilities
+    14.  Responsive — Mobile (≤ 959 px)
+    15.  Responsive — Small  (≤ 600 px)
+    16.  Dark Mode
+   ================================================================ */
+
+
+/* ── 1. Base / Reset ─────────────────────────────────────────── */
+
+body {
+    margin: 0;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.mud-layout {
+    min-height: 100vh;
+}
+
+
+/* ── 2. Layout — Drawer & AppBar ─────────────────────────────── */
+
+.mud-drawer {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mud-appbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Chip inside the AppBar */
+.mud-appbar .mud-chip {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Drawer — mini mode (icon-only) */
+.mud-drawer-mini .mud-nav-link-text {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.mud-drawer-mini:hover .mud-nav-link-text {
+    opacity: 1;
+}
+
+
+/* ── 3. Navigation ───────────────────────────────────────────── */
+
+.mud-nav-link {
+    border-radius: 8px;
+    margin: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+    .mud-nav-link:hover {
+        background-color: rgba(25, 118, 210, 0.08);
+        transform: translateX(4px);
+    }
+
+    .mud-nav-link.active {
+        background-color: rgba(25, 118, 210, 0.12);
+        border-left: 4px solid #1976d2;
+    }
+
+/* Indent nested nav-group links */
+.mud-nav-group .mud-nav-link {
+    padding-left: 32px;
+}
+
+
+/* ── 4. Cards ────────────────────────────────────────────────── */
+
+.mud-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+}
+
+    .mud-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+
+/* ── 5. Dialogs ──────────────────────────────────────────────── */
+
+.mud-dialog {
+    border-radius: 12px;
+}
+
+.mud-dialog-title {
+    font-weight: 500;
+    font-size: 1.25rem;
+}
+
+
+/* ── 6. Buttons ──────────────────────────────────────────────── */
+
+.mud-button-root {
+    border-radius: 8px;
+    text-transform: none;
+    font-weight: 500;
+}
+
+
+/* ── 7. Tables ───────────────────────────────────────────────── */
+
+.mud-table {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+
+/* ── 8. Forms & Inputs ───────────────────────────────────────── */
+
+.mud-input {
+    margin-bottom: 16px;
+}
+
+
+/* ── 9. Loading Indicators & Misc ────────────────────────────── */
+
+.mud-menu {
+    border-radius: 8px;
+}
+
+.mud-menu-item {
+    border-radius: 4px;
+    margin: 2px 4px;
+}
+
+
+/* ── 10. Custom Scrollbar (Drawer) ───────────────────────────── */
+
+.mud-drawer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mud-drawer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mud-drawer::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+    .mud-drawer::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+
+/* ── 11. Typography ──────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+}
+
+
+/* ── 12. Elevation Helpers ───────────────────────────────────── */
+
+.elevation-1 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
+}
+
+.elevation-2 {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.elevation-3 {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+
+/* ── 13. Spacing Utilities ───────────────────────────────────── */
+
+.text-center { text-align: center; }
+
+/* Margin Top */
+.mt-1 { margin-top:     4px; }
+.mt-2 { margin-top:     8px; }
+.mt-3 { margin-top:    16px; }
+.mt-4 { margin-top:    24px; }
+
+/* Margin Bottom */
+.mb-1 { margin-bottom:  4px; }
+.mb-2 { margin-bottom:  8px; }
+.mb-3 { margin-bottom: 16px; }
+.mb-4 { margin-bottom: 24px; }
+
+/* Padding All */
+.pa-1 { padding:  4px; }
+.pa-2 { padding:  8px; }
+.pa-3 { padding: 16px; }
+.pa-4 { padding: 24px; }
+
+
+/* ── 14. Responsive — Mobile (≤ 959 px) ──────────────────────── */
+
+@media (max-width: 959px) {
+    .mud-main-content {
+        padding: 0 !important;
+    }
+
+    .mud-container {
+        padding: 12px !important;
+    }
+}
+
+
+/* ── 15. Responsive — Small (≤ 600 px) ──────────────────────── */
+
+@media (max-width: 600px) {
+    .mud-table {
+        font-size: 0.875rem;
+    }
+
+    .mud-snackbar {
+        margin: 8px !important;
+    }
+
+    .mud-grid-item {
+        padding: 8px !important;
+    }
+}
+
+
+/* ── 16. Dark Mode ───────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+    .mud-card {
+        background-color: #2d2d2d;
+    }
+}
