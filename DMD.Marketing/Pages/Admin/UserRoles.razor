@@ -1,0 +1,268 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@inject UserService UserSvc
+@inject ISnackbar Snackbar
+
+<PageTitle>User Role Management — DMD</PageTitle>
+
+<div class="ur-page">
+    <div class="ur-header">
+        <div>
+            <div class="ur-eyebrow">Admin</div>
+            <h1 class="ur-title">User Role Management</h1>
+            <p class="ur-sub">Assign or remove Admin and User roles for each account.</p>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="ur-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Medium" />
+        </div>
+    }
+    else
+    {
+        <div class="ur-card">
+            <MudTable Items="_users" Dense="true" Hover="true" Striped="false"
+                      Filter="FilterFunc" @bind-SelectedItem="_selected"
+                      Class="ur-table">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="_search"
+                                  Placeholder="Search by name or email…"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  AdornmentColor="Color.Primary"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="ur-search" />
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>User</MudTh>
+                    <MudTh>Email</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Admin</MudTh>
+                    <MudTh>User</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <div class="ur-name">
+                            <div class="ur-avatar">@Initials(context)</div>
+                            <span>@context.FirstName @context.LastName</span>
+                        </div>
+                    </MudTd>
+                    <MudTd>
+                        <span class="ur-email">@context.Email</span>
+                    </MudTd>
+                    <MudTd>
+                        @if (context.IsActive)
+                        {
+                            <span class="ur-badge ur-badge--active">Active</span>
+                        }
+                        else
+                        {
+                            <span class="ur-badge ur-badge--inactive">Inactive</span>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        <MudSwitch T="bool"
+                                   Value="HasRole(context, "Admin")"
+                                   ValueChanged="v => ToggleRole(context, "Admin", v)"
+                                   Color="Color.Primary"
+                                   Disabled="_busy" />
+                    </MudTd>
+                    <MudTd>
+                        <MudSwitch T="bool"
+                                   Value="HasRole(context, "User")"
+                                   ValueChanged="v => ToggleRole(context, "User", v)"
+                                   Color="Color.Secondary"
+                                   Disabled="_busy" />
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[]{10, 25, 50}" />
+                </PagerContent>
+            </MudTable>
+        </div>
+    }
+</div>
+
+@code {
+    private List<User>  _users    = new();
+    private List<Role>  _roles    = new();
+    private User?       _selected;
+    private string      _search   = "";
+    private bool        _loading  = true;
+    private bool        _busy     = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _roles = await UserSvc.GetAllRolesAsync();
+        _users = await UserSvc.GetAllUsersWithRolesAsync();
+        _loading = false;
+    }
+
+    private bool HasRole(User user, string roleName) =>
+        user.UserRoles.Any(ur => ur.Role.Name == roleName);
+
+    private async Task ToggleRole(User user, string roleName, bool assign)
+    {
+        var role = _roles.FirstOrDefault(r => r.Name == roleName);
+        if (role is null) return;
+
+        _busy = true;
+        try
+        {
+            if (assign)
+                await UserSvc.AssignRoleAsync(user.Id, role.Id);
+            else
+                await UserSvc.RemoveRoleAsync(user.Id, role.Id);
+
+            // Refresh user's roles in memory
+            var updated = await UserSvc.GetUserRolesAsync(user.Id);
+            user.UserRoles = updated;
+
+            Snackbar.Add(
+                assign
+                    ? $"{roleName} role assigned to {user.Email}"
+                    : $"{roleName} role removed from {user.Email}",
+                Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Failed to update role. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private bool FilterFunc(User user)
+    {
+        if (string.IsNullOrWhiteSpace(_search)) return true;
+        var q = _search.Trim().ToLower();
+        return (user.Email?.ToLower().Contains(q) ?? false)
+            || (user.FirstName?.ToLower().Contains(q) ?? false)
+            || (user.LastName?.ToLower().Contains(q)  ?? false);
+    }
+
+    private string Initials(User user)
+    {
+        var f = user.FirstName?.FirstOrDefault();
+        var l = user.LastName?.FirstOrDefault();
+        if (f.HasValue && l.HasValue) return $"{f}{l}".ToUpper();
+        return user.Email?.Substring(0, 1).ToUpper() ?? "?";
+    }
+}
+
+<style>
+    .ur-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+    }
+
+    .ur-header {
+        margin-bottom: 2rem;
+    }
+
+    .ur-eyebrow {
+        display: inline-block;
+        background: var(--teal-light, #E0F7F4);
+        color: var(--teal-dark, #00897B);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        margin-bottom: 0.75rem;
+    }
+
+    .ur-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1A237E;
+        margin: 0 0 0.4rem;
+    }
+
+    .ur-sub {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: #6B7280;
+        margin: 0;
+    }
+
+    .ur-loading {
+        display: flex;
+        justify-content: center;
+        padding: 4rem;
+    }
+
+    .ur-card {
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .ur-table {
+        width: 100%;
+    }
+
+    .ur-search {
+        min-width: 280px;
+        margin: 0.75rem 0;
+    }
+
+    .ur-name {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1C1C1E;
+    }
+
+    .ur-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--teal-light, #E0F7F4);
+        color: var(--teal-dark, #00897B);
+        font-family: 'Syne', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ur-email {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        color: #6B7280;
+    }
+
+    .ur-badge {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+    }
+
+    .ur-badge--active {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .ur-badge--inactive {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+</style>

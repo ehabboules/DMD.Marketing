@@ -91,6 +91,7 @@
         if (user is null)   { _error = "Invalid email or password."; return; }
         if (!user.IsActive) { _error = "Account deactivated. Contact support."; return; }
 
+        var userRoles = await users.GetUserRolesAsync(user.Id);
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -98,6 +99,8 @@
             new(ClaimTypes.GivenName,      user.FirstName ?? ""),
             new(ClaimTypes.Surname,        user.LastName  ?? ""),
         };
+        foreach (var ur in userRoles)
+            claims.Add(new(ClaimTypes.Role, ur.Role.Name));
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,

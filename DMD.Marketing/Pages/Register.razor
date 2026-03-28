@@ -147,12 +147,19 @@
 
         if (user is null) { _error = error; return; }
 
+        // Auto-assign "User" role to new registrations
+        var db       = HttpContext.RequestServices.GetRequiredService<DMD.Marketing.Data.ApplicationDbContext>();
+        var userRole = db.Roles.FirstOrDefault(r => r.Name == "User");
+        if (userRole is not null)
+            await users.AssignRoleAsync(user.Id, userRole.Id);
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name,           user.Email),
             new(ClaimTypes.GivenName,      user.FirstName ?? ""),
             new(ClaimTypes.Surname,        user.LastName  ?? ""),
+            new(ClaimTypes.Role,           "User"),
         };
 
         await HttpContext.SignInAsync(

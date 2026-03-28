@@ -107,4 +107,39 @@ public class UserService
         await _db.SaveChangesAsync();
         return (true, null);
     }
+
+    // ── Role management ───────────────────────────────────────────────
+    public Task<List<Role>> GetAllRolesAsync() =>
+        _db.Roles.OrderBy(r => r.Name).ToListAsync();
+
+    public Task<List<User>> GetAllUsersWithRolesAsync() =>
+        _db.Users
+           .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+           .OrderBy(u => u.Email)
+           .ToListAsync();
+
+    public Task<List<UserRole>> GetUserRolesAsync(int userId) =>
+        _db.UserRoles.Include(ur => ur.Role)
+           .Where(ur => ur.UserId == userId)
+           .ToListAsync();
+
+    public async Task AssignRoleAsync(int userId, Guid roleId)
+    {
+        var exists = await _db.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        if (!exists)
+        {
+            _db.UserRoles.Add(new UserRole { UserId = userId, RoleId = roleId, CreatedAt = DateTime.UtcNow });
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    public async Task RemoveRoleAsync(int userId, Guid roleId)
+    {
+        var ur = await _db.UserRoles.FindAsync(userId, roleId);
+        if (ur is not null)
+        {
+            _db.UserRoles.Remove(ur);
+            await _db.SaveChangesAsync();
+        }
+    }
 }
