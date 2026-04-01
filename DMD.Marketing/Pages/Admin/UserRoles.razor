@@ -65,15 +65,15 @@
                     </MudTd>
                     <MudTd>
                         <MudSwitch T="bool"
-                                   Value="HasRole(context, "Admin")"
-                                   ValueChanged="v => ToggleRole(context, "Admin", v)"
+                                   Value="@HasRole(context, "Admin")"
+                                   ValueChanged="@(v => ToggleRole(context, "Admin", v))"
                                    Color="Color.Primary"
                                    Disabled="_busy" />
                     </MudTd>
                     <MudTd>
                         <MudSwitch T="bool"
-                                   Value="HasRole(context, "User")"
-                                   ValueChanged="v => ToggleRole(context, "User", v)"
+                                   Value="@HasRole(context, "User")"
+                                   ValueChanged="@(v => ToggleRole(context, "User", v))"
                                    Color="Color.Secondary"
                                    Disabled="_busy" />
                     </MudTd>

@@ -1,16 +1,19 @@
 @page "/logout"
-@attribute [ExcludeFromInteractiveRouting]
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@inject NavigationManager Nav
+@rendermode InteractiveServer
+@inject ITokenService TokenService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 @code {
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        Nav.NavigateTo("/", forceLoad: true);
+        if (!firstRender) return;
+
+        await TokenService.ClearTokensAsync();
+
+        if (AuthStateProvider is CustomAuthStateProvider provider)
+            provider.NotifyAuthenticationStateChanged();
+
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 }

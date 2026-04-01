@@ -1,6 +1,7 @@
 using DMD.Marketing.Data;
 using DMD.Marketing.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -10,11 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddControllers();
+builder.Services.AddHttpClient();
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMudServices();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // ── DbContext ──────────────────────────────────────────────────────
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -54,7 +60,10 @@ builder.Services.AddOpenIddict()
 
         options.AllowAuthorizationCodeFlow()
                .AllowClientCredentialsFlow()
+               .AllowPasswordFlow()
                .AllowRefreshTokenFlow();
+
+        options.AcceptAnonymousClients();
 
         options.RegisterScopes("openid", "profile", "email", "offline_access");
 
@@ -101,5 +110,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<DMD.Marketing.Components.App>()
     .AddInteractiveServerRenderMode();
+
+app.MapControllers();
 
 app.Run();
