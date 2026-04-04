@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.JSInterop;
 
 namespace DMD.Marketing.Services;
 
@@ -12,16 +12,16 @@ public interface ITokenService
 
 public class TokenService : ITokenService
 {
-    private readonly ProtectedLocalStorage _localStorage;
+    private readonly IJSRuntime _js;
     private readonly ILogger<TokenService> _logger;
 
-    // In-memory cache to avoid JS interop during prerender
+    // In-memory cache — avoids repeated JS interop within the same circuit.
     private TokenData? _cachedTokens;
-    private bool _isInitialized = false;
+    private bool _isInitialized;
 
-    public TokenService(ProtectedLocalStorage localStorage, ILogger<TokenService> logger)
+    public TokenService(IJSRuntime js, ILogger<TokenService> logger)
     {
-        _localStorage = localStorage;
+        _js = js;
         _logger = logger;
     }
 
@@ -29,19 +29,16 @@ public class TokenService : ITokenService
     {
         try
         {
-            await _localStorage.SetAsync("access_token", accessToken);
+            var expiry = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToUnixTimeSeconds();
+
+            await _js.InvokeVoidAsync("localStorage.setItem", "dmd_access_token",  accessToken);
+            await _js.InvokeVoidAsync("localStorage.setItem", "dmd_token_expiry",  expiry.ToString());
 
             if (refreshToken != null)
-                await _localStorage.SetAsync("refresh_token", refreshToken);
+                await _js.InvokeVoidAsync("localStorage.setItem", "dmd_refresh_token", refreshToken);
 
-            await _localStorage.SetAsync("token_expiry", DateTime.UtcNow.AddSeconds(expiresIn));
-
-            _cachedTokens = new TokenData
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
-            _isInitialized = true;
+            _cachedTokens   = new TokenData { AccessToken = accessToken, RefreshToken = refreshToken };
+            _isInitialized  = true;
 
             _logger.LogInformation("Tokens saved successfully");
         }
@@ -67,38 +64,38 @@ public class TokenService : ITokenService
                 return _cachedTokens;
             }
 
-            var accessTokenResult = await _localStorage.GetAsync<string>("access_token");
+            var accessToken = await _js.InvokeAsync<string?>("localStorage.getItem", "dmd_access_token");
 
-            if (!accessTokenResult.Success || string.IsNullOrEmpty(accessTokenResult.Value))
+            if (string.IsNullOrEmpty(accessToken))
             {
-                _logger.LogInformation("No access token found");
+                _logger.LogInformation("No access token found in localStorage");
                 return null;
             }
 
-            var refreshTokenResult = await _localStorage.GetAsync<string>("refresh_token");
-            var expiryResult = await _localStorage.GetAsync<DateTime>("token_expiry");
-
-            if (expiryResult.Success && expiryResult.Value < DateTime.UtcNow)
+            // Check expiry stored as Unix seconds
+            var expiryStr = await _js.InvokeAsync<string?>("localStorage.getItem", "dmd_token_expiry");
+            if (long.TryParse(expiryStr, out var expiryUnix))
             {
-                _logger.LogInformation("Token expired");
-                await ClearTokensAsync();
-                return null;
+                var expiry = DateTimeOffset.FromUnixTimeSeconds(expiryUnix);
+                if (expiry < DateTimeOffset.UtcNow)
+                {
+                    _logger.LogInformation("Token expired");
+                    await ClearTokensAsync();
+                    return null;
+                }
             }
 
-            _logger.LogInformation("Tokens retrieved successfully");
+            var refreshToken = await _js.InvokeAsync<string?>("localStorage.getItem", "dmd_refresh_token");
 
-            _cachedTokens = new TokenData
-            {
-                AccessToken = accessTokenResult.Value,
-                RefreshToken = refreshTokenResult.Success ? refreshTokenResult.Value : null
-            };
+            _cachedTokens  = new TokenData { AccessToken = accessToken, RefreshToken = refreshToken };
             _isInitialized = true;
 
+            _logger.LogInformation("Tokens retrieved successfully");
             return _cachedTokens;
         }
         catch (InvalidOperationException)
         {
-            _logger.LogDebug("Cannot access storage during prerendering");
+            _logger.LogDebug("Cannot access localStorage during prerendering");
             return null;
         }
         catch (Exception ex)
@@ -112,24 +109,22 @@ public class TokenService : ITokenService
     {
         try
         {
-            await _localStorage.DeleteAsync("access_token");
-            await _localStorage.DeleteAsync("refresh_token");
-            await _localStorage.DeleteAsync("token_expiry");
-
-            _cachedTokens = null;
-            _isInitialized = false;
-
-            _logger.LogInformation("Tokens cleared");
+            await _js.InvokeVoidAsync("localStorage.removeItem", "dmd_access_token");
+            await _js.InvokeVoidAsync("localStorage.removeItem", "dmd_refresh_token");
+            await _js.InvokeVoidAsync("localStorage.removeItem", "dmd_token_expiry");
         }
         catch (InvalidOperationException)
         {
-            _cachedTokens = null;
-            _isInitialized = false;
-            _logger.LogDebug("Cleared token cache during prerendering");
+            // prerender — nothing to clear in browser
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error clearing tokens");
+        }
+        finally
+        {
+            _cachedTokens  = null;
+            _isInitialized = false;
         }
     }
 
@@ -148,8 +143,8 @@ public class TokenData
 
 public class TokenResponse
 {
-    public string? access_token { get; set; }
-    public string? token_type { get; set; }
-    public int expires_in { get; set; }
+    public string? access_token  { get; set; }
+    public string? token_type    { get; set; }
+    public int     expires_in    { get; set; }
     public string? refresh_token { get; set; }
 }

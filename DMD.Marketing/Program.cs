@@ -68,7 +68,8 @@ builder.Services.AddOpenIddict()
         options.RegisterScopes("openid", "profile", "email", "offline_access");
 
         options.AddEphemeralEncryptionKey()
-               .AddEphemeralSigningKey();
+               .AddEphemeralSigningKey()
+               .DisableAccessTokenEncryption(); // tokens are JWS (signed-only), readable by JwtSecurityTokenHandler
 
         options.UseAspNetCore()
                .EnableTokenEndpointPassthrough()

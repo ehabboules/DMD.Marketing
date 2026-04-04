@@ -236,26 +236,27 @@
         background-color: #ffffff !important;
         padding: 0 4px !important;
     }
+
     /* 1. Ensure the notched outline has enough space for the label */
-.mud-input-outlined .mud-notched-outline {
-    border-radius: 9px !important;
-}
+    .mud-input-outlined .mud-notched-outline {
+        border-radius: 9px !important;
+    }
 
-/* 2. Style the label when it shrinks (floats) */
-.mud-input-label-outlined.mud-shrink {
-    background-color: #ffffff !important; /* Matches your card background */
-    padding: 0 8px !important;            /* Adds breathing room around the text */
-    margin-top: 2px !important;           /* Adjusts vertical alignment */
-    transform: translate(14px, -6px) scale(0.75) !important; /* Fine-tunes position */
-    z-index: 1;                           /* Ensures it sits on top of the border */
-}
+    /* 2. Style the label when it shrinks (floats) */
+    .mud-input-label-outlined.mud-shrink {
+        background-color: #ffffff !important;
+        padding: 0 8px !important;
+        margin-top: 2px !important;
+        transform: translate(14px, -6px) scale(0.75) !important;
+        z-index: 1;
+    }
 
-/* 3. Specifically target the 'legend' element which MudBlazor uses for the notch gap */
-.mud-input-outlined .mud-notched-outline legend {
-    width: auto !important;
-    padding: 0 !important;
-    margin-left: 10px !important;
-}
+    /* 3. Specifically target the 'legend' element which MudBlazor uses for the notch gap */
+    .mud-input-outlined .mud-notched-outline legend {
+        width: auto !important;
+        padding: 0 !important;
+        margin-left: 10px !important;
+    }
 
     @@media (max-width: 480px) {
         .al-shell { max-width: 100%; }
@@ -265,7 +266,7 @@
 
 
 @code {
-      // ── theme ──
+    // ── theme ──
     private MudTheme _theme = new MudTheme()
     {
         PaletteLight = new PaletteLight()

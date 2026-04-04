@@ -4,7 +4,11 @@
    ╚══════════════════════════════════════════════════════════════╝ *@
 
 @page "/"
+@rendermode InteractiveServer
 @using DMD.Marketing.Components
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ApplicationDbContext Db
 
 <PageTitle>DMD Inventory — Smart POS &amp; Inventory for Canadian Retail</PageTitle>
 
@@ -271,6 +275,59 @@
         </svg>
     </div>
 </section>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     § WELCOME CARD  (authenticated users only)
+     ────────────────────────────────────────────────────────────────
+     FIX: Replaced <AuthorizeView> with manual auth state check.
+     AuthorizeView evaluates during SSR pre-render when
+     ProtectedLocalStorage is NOT available, so the user appears
+     unauthenticated and the Authorized block never renders.
+     By checking _isAuthenticated (set in OnAfterRenderAsync after
+     ProtectedLocalStorage is accessible), we guarantee the welcome
+     card appears after interactive hydration completes.
+═══════════════════════════════════════════════════════════════════ -->
+@if (_isAuthenticated)
+{
+    <section class="home-welcome">
+        <div class="home-welcome__inner">
+
+            <!-- Left: avatar + identity -->
+            <div class="home-welcome__identity">
+                <div class="home-welcome__avatar">
+                    @_userInitial
+                </div>
+                <div>
+                    <div class="home-welcome__name">
+                        Welcome back,
+                        <strong>@_userDisplayName</strong>!
+                    </div>
+                    <div class="home-welcome__email">
+                        @_userEmail
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: plan badge + actions -->
+            <div class="home-welcome__actions">
+                @if (_homeUser is not null && _homeUser.SelectedPlan != PlanSlug.None)
+                {
+                    <span class="home-welcome__plan-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @_homeUser.SelectedPlan Plan
+                        @(_homeUser.BillingCycle == BillingCycle.Annual ? "· Annual" : "· Monthly")
+                    </span>
+                }
+                <a href="/profile" class="home-welcome__btn home-welcome__btn--primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                    My Profile
+                </a>
+                <a href="/changepassword" class="home-welcome__btn home-welcome__btn--ghost">Settings</a>
+            </div>
+
+        </div>
+    </section>
+}
 
 <!-- ══════════════════════════════════════════════════════════════════
      § 2  TRUST BAR
@@ -1076,9 +1133,182 @@
         .float-card { display: none; }
         .why-cards { grid-template-columns: 1fr; }
     }
+
+    /* ════════════════════════════════════
+       HOME WELCOME CARD
+    ════════════════════════════════════ */
+    .home-welcome {
+        background: linear-gradient(135deg, #f0fbf8 0%, #e8eaf6 100%);
+        border-bottom: 1px solid rgba(0,191,165,0.2);
+    }
+
+    .home-welcome__inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .home-welcome__identity {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .home-welcome__avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00BFA5, #1A237E);
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,191,165,0.35);
+    }
+
+    .home-welcome__name {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: #37474F;
+    }
+
+    .home-welcome__name strong {
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        color: #1A237E;
+    }
+
+    .home-welcome__email {
+        font-size: 0.8rem;
+        color: #90A4AE;
+        margin-top: 2px;
+    }
+
+    .home-welcome__actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .home-welcome__plan-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(0,191,165,0.12);
+        border: 1px solid rgba(0,191,165,0.35);
+        color: #00897B;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        padding: 4px 12px;
+        border-radius: 100px;
+        text-transform: capitalize;
+    }
+
+    .home-welcome__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.15s, box-shadow 0.15s;
+        white-space: nowrap;
+    }
+
+    .home-welcome__btn--primary {
+        background: #00BFA5;
+        color: #fff;
+    }
+
+    .home-welcome__btn--primary:hover {
+        background: #00897B;
+        box-shadow: 0 4px 14px rgba(0,191,165,0.35);
+    }
+
+    .home-welcome__btn--ghost {
+        background: transparent;
+        color: #1A237E;
+        border: 1.5px solid rgba(26,35,126,0.2);
+    }
+
+    .home-welcome__btn--ghost:hover {
+        border-color: #1A237E;
+        background: rgba(26,35,126,0.05);
+    }
+
+    @@media (max-width: 640px) {
+        .home-welcome__inner { padding: 16px 20px; flex-direction: column; align-items: flex-start; }
+    }
 </style>
 
 @code {
+    // ── Auth state (resolved after interactive hydration) ────────────
+    private bool _isAuthenticated;
+    private string _userInitial = "?";
+    private string _userDisplayName = "there";
+    private string _userEmail = "";
+
+    // ── User profile from DB (plan badge) ───────────────────────────
+    private User? _homeUser;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            // Get auth state — this triggers ProtectedLocalStorage read
+            // which is only available after interactive hydration
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                _isAuthenticated = true;
+
+                // Extract claims for display
+                var name  = user.FindFirst(ClaimTypes.Name)?.Value;
+                var email = user.FindFirst(ClaimTypes.Email)?.Value;
+
+                _userInitial     = (name ?? email ?? "?").Substring(0, 1).ToUpper();
+                _userDisplayName = name?.Split(' ')[0] ?? email ?? "there";
+                _userEmail       = email ?? "";
+
+                // Load user from DB for plan badge
+                var idStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(idStr, out var userId))
+                {
+                    _homeUser = await Db.Users.FindAsync(userId);
+                }
+            }
+        }
+        catch
+        {
+            // ProtectedLocalStorage may throw during pre-render or if
+            // the token is missing/expired — silently treat as guest
+            _isAuthenticated = false;
+        }
+
+        // Re-render now that auth state + user data are resolved
+        StateHasChanged();
+    }
+
+    // ── Static data ───────────────────────────────────────────────────
     private record FeatureItem(string Icon, string Title, string Description, string Color, string Href);
     private record WhyPoint(string Icon, string Title, string Desc);
     private record TrustItem(string Icon, string Text);
