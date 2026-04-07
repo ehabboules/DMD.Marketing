@@ -1,8 +1,11 @@
 @page "/profile"
-@attribute [Authorize]
-@rendermode InteractiveServer
+@* @rendermode new InteractiveServerRenderMode(prerender: false)
+ *@@* Correct syntax for component definition *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
 @inject ApplicationDbContext Db
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
 <PageTitle>My Profile — DMD Inventory</PageTitle>
 
@@ -31,7 +34,133 @@
             </div>
         </div>
 
-        <!-- ── Profile fields ── -->
+        @if (_user.ActivationStatus == ActivationStatus.Active)
+        {
+            <div class="activation-banner activation-banner--active">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                Your store is <strong>live</strong>! Check your email for login credentials.
+            </div>
+        }
+        else if (_user.ActivationStatus == ActivationStatus.Pending)
+        {
+            <div class="activation-banner activation-banner--pending">
+                <span class="activation-pending-dot"></span>
+                Your store provisioning is <strong>in progress</strong>. We'll email you within 24 hours.
+            </div>
+        }
+
+        <!-- ══════════════════════════════════════════════════
+             § SUBSCRIPTION SUMMARY
+        ═══════════════════════════════════════════════════ -->
+        <div class="profile-section">
+            <div class="section-header-row">
+                <h2 class="section-title">Subscription</h2>
+                @if (_user.ActivationStatus == ActivationStatus.Active)
+                {
+                    <span class="sub-status sub-status--active">
+                        <span class="sub-status-dot"></span>Active
+                    </span>
+                }
+                else if (_user.ActivationStatus == ActivationStatus.Pending)
+                {
+                    <span class="sub-status sub-status--pending">
+                        <span class="sub-status-dot sub-status-dot--amber"></span>Pending
+                    </span>
+                }
+                else if (_user.SelectedPlan != PlanSlug.None)
+                {
+                    <span class="sub-status sub-status--setup">
+                        Setup required
+                    </span>
+                }
+                else
+                {
+                    <span class="sub-status sub-status--none">No active plan</span>
+                }
+            </div>
+
+            @if (_user.SelectedPlan != PlanSlug.None)
+            {
+                var planDef   = _plans.FirstOrDefault(p => p.Slug == _user.SelectedPlan);
+                var isAnnual  = _user.BillingCycle == BillingCycle.Annual;
+                var nextDate  = GetNextPaymentDate();
+                var amount    = planDef is { CustomPrice: false }
+                                    ? (isAnnual ? planDef.AnnualPrice : planDef.MonthlyPrice)
+                                    : (int?)null;
+
+                <div class="sub-grid">
+                    <div class="sub-item">
+                        <span class="sub-item-label">Current plan</span>
+                        <span class="sub-item-value sub-plan-pill">
+                            @planDef?.Name
+                        </span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">Billing cycle</span>
+                        <span class="sub-item-value">@(isAnnual ? "Annual" : "Monthly")</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">Next payment</span>
+                        <span class="sub-item-value sub-item-value--accent">
+                            @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
+                        </span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">Amount due</span>
+                        <span class="sub-item-value">
+                            @(amount.HasValue ? $"${amount}/mo" : "Custom")
+                            @if (isAnnual && amount.HasValue)
+                            {
+                                <span class="sub-billed-note">&nbsp;· billed annually</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Cancel flow -->
+                @if (_cancelSuccess)
+                {
+                    <div class="sub-cancel-success">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Subscription cancelled. Access continues until @(nextDate?.ToString("MMM d, yyyy") ?? "end of period").
+                    </div>
+                }
+                else if (_showCancelConfirm)
+                {
+                    <div class="sub-cancel-box">
+                        <p class="sub-cancel-question">
+                            Are you sure? You'll keep full access to <strong>@planDef?.Name</strong> until
+                            <strong>@(nextDate?.ToString("MMM d, yyyy") ?? "end of period")</strong>, then your account will downgrade.
+                        </p>
+                        <div class="sub-cancel-actions">
+                            <button class="btn-cancel-confirm"
+                                    disabled="@_cancelling"
+                                    @onclick="CancelSubscription">
+                                @(_cancelling ? "Cancelling…" : "Yes, cancel subscription")
+                            </button>
+                            <button class="btn-cancel-dismiss"
+                                    @onclick="() => _showCancelConfirm = false">
+                                Keep my subscription
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <button class="btn-cancel-sub" @onclick="() => _showCancelConfirm = true">
+                        Cancel subscription
+                    </button>
+                }
+            }
+            else
+            {
+                <p class="sub-no-plan">
+                    You don't have an active subscription. Choose a plan below to get started.
+                </p>
+            }
+        </div>
+
+        <!-- ── Account details ── -->
         <div class="profile-section">
             <h2 class="section-title">Account details</h2>
             <div class="fields-grid">
@@ -53,7 +182,7 @@
         <!-- ── Plan selection ── -->
         <div class="profile-section">
             <div class="section-header-row">
-                <h2 class="section-title">Your plan</h2>
+                <h2 class="section-title">Change plan</h2>
                 <div class="billing-toggle">
                     <span class="@(!_annual ? "toggle-label-active" : "toggle-label")">Monthly</span>
                     <button class="toggle-pill @(_annual ? "on" : "")"
@@ -112,13 +241,6 @@
                     </div>
                 }
             </div>
-
-            @if (_selectedPlan != PlanSlug.None)
-            {
-                <p class="plan-hint">
-                    Selected: <strong>@_selectedPlan @(_annual ? "(Annual)" : "(Monthly)")</strong>
-                </p>
-            }
         </div>
 
         <!-- ── Save button ── -->
@@ -150,15 +272,20 @@
 @code {
     // ── State ────────────────────────────────────────────────────────
     private User?   _user;
-    private bool    _loading     = true;
-    private bool    _saving      = false;
-    private bool    _saveSuccess = false;
+    private bool    _loading       = true;
+    private bool    _saving        = false;
+    private bool    _saveSuccess   = false;
     private string? _saveError;
 
     private string? _firstName;
     private string? _lastName;
     private bool     _annual       = false;
     private PlanSlug _selectedPlan = PlanSlug.None;
+
+    // cancel flow
+    private bool _showCancelConfirm = false;
+    private bool _cancelling        = false;
+    private bool _cancelSuccess     = false;
 
     // ── Plan definitions ─────────────────────────────────────────────
     private record PlanDef(
@@ -188,8 +315,15 @@
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override async Task OnInitializedAsync()
     {
-        var auth   = await AuthStateProvider.GetAuthenticationStateAsync();
-        var idStr  = auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var auth  = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (auth.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/login?returnUrl=profile", forceLoad: false);
+            return;
+        }
+
+        var idStr = auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (int.TryParse(idStr, out var userId))
         {
@@ -206,8 +340,54 @@
         _loading = false;
     }
 
+    // ── Helpers ──────────────────────────────────────────────────────
+    private DateTime? GetNextPaymentDate()
+    {
+        if (_user?.PlanSelectedAt is not { } start || _user.SelectedPlan == PlanSlug.None)
+            return null;
+
+        var now  = DateTime.UtcNow;
+        var next = _user.BillingCycle == BillingCycle.Annual
+            ? start.AddYears(1)
+            : start.AddMonths(1);
+
+        // Roll forward until the date is in the future
+        while (next < now)
+            next = _user.BillingCycle == BillingCycle.Annual
+                ? next.AddYears(1)
+                : next.AddMonths(1);
+
+        return next;
+    }
+
     // ── Actions ──────────────────────────────────────────────────────
     private void SelectPlan(PlanSlug slug) => _selectedPlan = slug;
+
+    private async Task CancelSubscription()
+    {
+        if (_user is null) return;
+        _cancelling = true;
+
+        try
+        {
+            _user.SelectedPlan   = PlanSlug.None;
+            _user.PlanSelectedAt = null;
+            _user.ModifiedAt     = DateTime.UtcNow;
+            await Db.SaveChangesAsync();
+
+            _selectedPlan        = PlanSlug.None;
+            _showCancelConfirm   = false;
+            _cancelSuccess       = true;
+        }
+        catch
+        {
+            _showCancelConfirm = false;
+        }
+        finally
+        {
+            _cancelling = false;
+        }
+    }
 
     private async Task SaveProfile()
     {
@@ -218,15 +398,26 @@
 
         try
         {
+            var hadNoPlan      = _user.SelectedPlan == PlanSlug.None;
+            var isSelectingNew = _selectedPlan != PlanSlug.None;
+
             _user.FirstName      = _firstName?.Trim();
             _user.LastName       = _lastName?.Trim();
             _user.SelectedPlan   = _selectedPlan;
             _user.BillingCycle   = _annual ? BillingCycle.Annual : BillingCycle.Monthly;
-            _user.PlanSelectedAt = _selectedPlan != PlanSlug.None ? DateTime.UtcNow : _user.PlanSelectedAt;
+            _user.PlanSelectedAt = _selectedPlan != PlanSlug.None ? (_user.PlanSelectedAt ?? DateTime.UtcNow) : null;
             _user.ModifiedAt     = DateTime.UtcNow;
 
             await Db.SaveChangesAsync();
-            _saveSuccess = true;
+            _saveSuccess   = true;
+            _cancelSuccess = false; // clear any cancel message
+
+            // Redirect to onboarding when plan was just set and store is not yet provisioned
+            if (hadNoPlan && isSelectingNew && _user.ActivationStatus == ActivationStatus.None)
+            {
+                Nav.NavigateTo("/onboarding", forceLoad: false);
+                return;
+            }
         }
         catch (Exception ex)
         {
@@ -255,175 +446,272 @@
         display: flex;
         align-items: center;
         gap: 1.25rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
 
     .profile-avatar {
-        width: 64px;
-        height: 64px;
+        width: 64px; height: 64px;
         border-radius: 50%;
         background: linear-gradient(135deg, #00BFA5, #1A237E);
         color: #fff;
         font-family: 'Syne', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        font-size: 1.5rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
 
     .profile-name {
         font-family: 'Syne', sans-serif;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1A237E;
-        margin: 0 0 2px;
+        font-size: 1.4rem; font-weight: 700;
+        color: #1A237E; margin: 0 0 2px;
     }
 
-    .profile-email {
-        font-size: 0.875rem;
-        color: #607D8B;
-        margin: 0;
-    }
-
-    .profile-company {
-        font-size: 0.8rem;
-        color: #00BFA5;
-        font-weight: 600;
-        margin: 2px 0 0;
-    }
+    .profile-email { font-size: 0.875rem; color: #607D8B; margin: 0; }
 
     /* ── Section ── */
     .profile-section {
-        background: #ffffff;
+        background: #fff;
         border: 1px solid #E5E7EB;
         border-radius: 16px;
         padding: 1.75rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .section-title {
         font-family: 'Syne', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1A237E;
-        margin: 0 0 1.25rem;
+        font-size: 1rem; font-weight: 700;
+        color: #1A237E; margin: 0 0 1.25rem;
     }
 
     .section-header-row {
-        display: flex;
-        align-items: center;
+        display: flex; align-items: center;
         justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.75rem;
+        flex-wrap: wrap; gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+    .section-header-row .section-title { margin: 0; }
+
+    /* ── Subscription status badge ── */
+    .sub-status {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.78rem; font-weight: 600;
+        padding: 4px 12px; border-radius: 20px;
+    }
+    .sub-status--active {
+        background: #D1FAE5; color: #065F46;
+    }
+    .sub-status-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #10B981;
+        animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @@keyframes pulse-dot {
+        0%,100% { opacity:1; }
+        50%      { opacity:.4; }
+    }
+    .sub-status--none {
+        background: #F3F4F6; color: #6B7280;
+    }
+    .sub-status--pending {
+        background: #FEF3C7; color: #92400E;
+    }
+    .sub-status-dot--amber {
+        background: #F59E0B;
+    }
+    .sub-status--setup {
+        background: #EFF6FF; color: #1D4ED8;
+        font-size: 0.78rem; font-weight: 600;
+        padding: 4px 12px; border-radius: 20px;
+    }
+
+    /* ── Activation banners ── */
+    .activation-banner {
+        display: flex; align-items: center; gap: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; border-radius: 10px;
+        padding: 12px 16px; margin-bottom: 1.25rem;
+        border: 1px solid transparent;
+    }
+    .activation-banner--active {
+        background: #D1FAE5; border-color: #A7F3D0; color: #065F46;
+    }
+    .activation-banner--pending {
+        background: #FEF3C7; border-color: #FDE68A; color: #92400E;
+    }
+    .activation-pending-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #F59E0B; flex-shrink: 0;
+        animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    /* ── Subscription summary grid ── */
+    .sub-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        overflow: hidden;
         margin-bottom: 1.25rem;
     }
 
-    .section-header-row .section-title { margin: 0; }
+    .sub-item {
+        padding: 1rem 1.25rem;
+        border-right: 1px solid #E5E7EB;
+        display: flex; flex-direction: column; gap: 5px;
+    }
+    .sub-item:last-child { border-right: none; }
+
+    .sub-item-label {
+        font-size: 0.72rem; font-weight: 600;
+        color: #9CA3AF;
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    .sub-item-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.95rem; font-weight: 700;
+        color: #1C1C1E;
+    }
+
+    .sub-item-value--accent { color: #00897B; }
+
+    .sub-plan-pill {
+        display: inline-block;
+        background: #E0F7F4;
+        color: #00695C;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 700;
+        width: fit-content;
+    }
+
+    .sub-billed-note { font-size: 0.75rem; color: #9CA3AF; font-family: 'DM Sans', sans-serif; font-weight: 400; }
+
+    /* ── No plan ── */
+    .sub-no-plan {
+        font-size: 0.9rem; color: #6B7280;
+        margin: 0; padding: 0.5rem 0;
+    }
+
+    /* ── Cancel button ── */
+    .btn-cancel-sub {
+        background: none; border: none;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem; font-weight: 600;
+        color: #9CA3AF;
+        cursor: pointer; padding: 0;
+        text-decoration: underline;
+        transition: color 0.15s;
+    }
+    .btn-cancel-sub:hover { color: #E53935; }
+
+    /* ── Cancel confirmation box ── */
+    .sub-cancel-box {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .sub-cancel-question {
+        font-size: 0.875rem; color: #374151;
+        margin: 0 0 0.75rem; line-height: 1.55;
+    }
+
+    .sub-cancel-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    .btn-cancel-confirm {
+        padding: 8px 20px;
+        background: #E53935; color: #fff;
+        border: none; border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem; font-weight: 700;
+        cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cancel-confirm:hover:not(:disabled) { background: #C62828; }
+    .btn-cancel-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-cancel-dismiss {
+        padding: 8px 20px;
+        background: #fff; color: #374151;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem; font-weight: 600;
+        cursor: pointer; transition: border-color 0.15s;
+    }
+    .btn-cancel-dismiss:hover { border-color: #9CA3AF; }
+
+    /* ── Cancel success ── */
+    .sub-cancel-success {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 0.875rem; font-weight: 600;
+        color: #065F46;
+        background: #D1FAE5; border: 1px solid #A7F3D0;
+        border-radius: 8px; padding: 10px 14px;
+        margin-top: 0.25rem;
+    }
 
     /* ── Fields ── */
     .fields-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
     }
-
-    .field-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
 
     .field-label {
-        font-size: 0.78rem;
-        font-weight: 600;
+        font-size: 0.78rem; font-weight: 600;
         color: #607D8B;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
+        text-transform: uppercase; letter-spacing: 0.06em;
     }
 
     .field-input {
         padding: 10px 14px;
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
+        border: 1px solid #E5E7EB; border-radius: 8px;
         font-family: 'DM Sans', sans-serif;
-        font-size: 0.9rem;
-        color: #1C1C1E;
-        background: #F9FAFB;
+        font-size: 0.9rem; color: #1C1C1E;
+        background: #F9FAFB; outline: none;
         transition: border-color 0.15s, box-shadow 0.15s;
-        outline: none;
     }
-
     .field-input:focus {
         border-color: #00BFA5;
         box-shadow: 0 0 0 3px rgba(0,191,165,0.12);
         background: #fff;
     }
-
-    .field-input:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    .field-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── Billing toggle ── */
-    .billing-toggle {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .toggle-label {
-        font-size: 0.85rem;
-        color: #9CA3AF;
-    }
-
-    .toggle-label-active {
-        font-size: 0.85rem;
-        color: #1C1C1E;
-        font-weight: 600;
-    }
+    .billing-toggle { display: flex; align-items: center; gap: 8px; }
+    .toggle-label       { font-size: 0.85rem; color: #9CA3AF; }
+    .toggle-label-active { font-size: 0.85rem; color: #1C1C1E; font-weight: 600; }
 
     .toggle-pill {
         position: relative;
-        width: 44px;
-        height: 24px;
-        background: #E5E7EB;
-        border: 1px solid #D1D5DB;
-        border-radius: 12px;
-        cursor: pointer;
+        width: 44px; height: 24px;
+        background: #E5E7EB; border: 1px solid #D1D5DB;
+        border-radius: 12px; cursor: pointer;
         transition: background 0.2s, border-color 0.2s;
-        padding: 0;
-        flex-shrink: 0;
+        padding: 0; flex-shrink: 0;
     }
-
     .toggle-pill.on { background: #00BFA5; border-color: #00BFA5; }
 
     .toggle-knob {
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #fff;
-        transition: left 0.2s;
-        display: block;
+        position: absolute; top: 3px; left: 3px;
+        width: 16px; height: 16px;
+        border-radius: 50%; background: #fff;
+        transition: left 0.2s; display: block;
         box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-
     .toggle-pill.on .toggle-knob { left: 23px; }
 
     .save-tag {
-        background: #E0F7F4;
-        border: 1px solid rgba(0,191,165,0.3);
-        color: #00897B;
-        font-size: 0.68rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        padding: 3px 8px;
-        border-radius: 20px;
+        background: #E0F7F4; border: 1px solid rgba(0,191,165,0.3);
+        color: #00897B; font-size: 0.68rem; font-weight: 700;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        padding: 3px 8px; border-radius: 20px;
     }
 
     /* ── Plans grid ── */
@@ -435,173 +723,75 @@
 
     .plan-card {
         position: relative;
-        border: 1.5px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 1.1rem;
-        cursor: pointer;
+        border: 1.5px solid #E5E7EB; border-radius: 12px;
+        padding: 1.1rem; cursor: pointer;
         transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-        background: #F9FAFB;
-        user-select: none;
+        background: #F9FAFB; user-select: none;
     }
-
-    .plan-card:hover {
-        border-color: #00BFA5;
-        background: #fff;
-    }
-
+    .plan-card:hover { border-color: #00BFA5; background: #fff; }
     .plan-card--selected {
         border-color: #00BFA5 !important;
         background: #F0FBF8 !important;
         box-shadow: 0 0 0 3px rgba(0,191,165,0.15);
     }
+    .plan-card--featured { border-color: #00BFA5; }
 
-    .plan-card--featured {
-        border-color: #00BFA5;
-    }
-
-    /* ── Plan check circle ── */
     .plan-check {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        border: 1.5px solid #D1D5DB;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.15s, border-color 0.15s;
-        color: #fff;
+        position: absolute; top: 10px; right: 10px;
+        width: 20px; height: 20px; border-radius: 50%;
+        border: 1.5px solid #D1D5DB; background: #fff;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s, border-color 0.15s; color: #fff;
     }
+    .plan-check--on { background: #00BFA5; border-color: #00BFA5; }
 
-    .plan-check--on {
-        background: #00BFA5;
-        border-color: #00BFA5;
-    }
-
-    /* ── Popular tag ── */
     .popular-tag {
-        position: absolute;
-        top: -1px;
-        left: 50%;
+        position: absolute; top: -1px; left: 50%;
         transform: translateX(-50%);
-        background: #00BFA5;
-        color: #fff;
-        font-size: 0.65rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        padding: 3px 10px;
-        border-radius: 0 0 8px 8px;
+        background: #00BFA5; color: #fff;
+        font-size: 0.65rem; font-weight: 700;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        padding: 3px 10px; border-radius: 0 0 8px 8px;
         white-space: nowrap;
     }
 
     .plan-name {
         font-family: 'Syne', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1A237E;
-        margin-top: 0.6rem;
-        margin-bottom: 3px;
+        font-size: 0.95rem; font-weight: 700; color: #1A237E;
+        margin-top: 0.6rem; margin-bottom: 3px;
     }
+    .plan-desc { font-size: 0.75rem; color: #607D8B; line-height: 1.45; margin-bottom: 0.75rem; }
 
-    .plan-desc {
-        font-size: 0.75rem;
-        color: #607D8B;
-        line-height: 1.45;
-        margin-bottom: 0.75rem;
-    }
+    .plan-price { display: flex; align-items: baseline; gap: 2px; margin-bottom: 0.75rem; }
+    .price-amount { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; color: #1C1C1E; }
+    .price-period { font-size: 0.8rem; color: #9CA3AF; }
+    .price-custom { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 600; color: #1C1C1E; }
 
-    .plan-price {
-        display: flex;
-        align-items: baseline;
-        gap: 2px;
-        margin-bottom: 0.75rem;
-    }
-
-    .price-amount {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #1C1C1E;
-    }
-
-    .price-period {
-        font-size: 0.8rem;
-        color: #9CA3AF;
-    }
-
-    .price-custom {
-        font-family: 'Syne', sans-serif;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1C1C1E;
-    }
-
-    .plan-features {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .plan-features li {
-        display: flex;
-        align-items: flex-start;
-        gap: 6px;
-        font-size: 0.75rem;
-        color: #374151;
-        line-height: 1.4;
-    }
-
-    .plan-features li svg {
-        flex-shrink: 0;
-        color: #00BFA5;
-        margin-top: 2px;
-    }
-
-    /* ── Plan hint ── */
-    .plan-hint {
-        margin-top: 1rem;
-        font-size: 0.85rem;
-        color: #607D8B;
-    }
-
-    .plan-hint strong {
-        color: #00897B;
-    }
+    .plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 6px; font-size: 0.75rem; color: #374151; line-height: 1.4; }
+    .plan-features li svg { flex-shrink: 0; color: #00BFA5; margin-top: 2px; }
 
     /* ── Save row ── */
-    .save-row {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
+    .save-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 
     .save-success-msg {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #00897B;
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.875rem; font-weight: 600; color: #00897B;
     }
-
-    .save-error-msg {
-        font-size: 0.875rem;
-        color: #E53935;
-    }
+    .save-error-msg { font-size: 0.875rem; color: #E53935; }
 
     /* ── Responsive ── */
+    @@media (max-width: 700px) {
+        .sub-grid { grid-template-columns: 1fr 1fr; }
+        .sub-item { border-right: none; border-bottom: 1px solid #E5E7EB; }
+        .sub-item:last-child { border-bottom: none; }
+    }
+
     @@media (max-width: 640px) {
         .fields-grid { grid-template-columns: 1fr; }
         .plans-grid  { grid-template-columns: 1fr 1fr; }
         .profile-header { flex-direction: column; text-align: center; }
+        .sub-grid { grid-template-columns: 1fr; }
     }
 
     @@media (max-width: 400px) {

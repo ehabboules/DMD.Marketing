@@ -3,6 +3,11 @@
 @code {
     protected override void OnInitialized()
     {
+        // RendererInfo.IsInteractive is false during SSR prerender.
+        // Never redirect during prerender — localStorage auth isn't readable yet.
+        // The circuit will re-evaluate auth once it connects.
+        if (!RendererInfo.IsInteractive) return;
+
         var returnUrl = Uri.EscapeDataString(Nav.ToBaseRelativePath(Nav.Uri));
         Nav.NavigateTo($"/login?returnUrl={returnUrl}", forceLoad: true);
     }

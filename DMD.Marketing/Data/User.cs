@@ -41,6 +41,13 @@ public class User
     public BillingCycle BillingCycle   { get; set; } = BillingCycle.Monthly;
     public DateTime?    PlanSelectedAt { get; set; }
 
+    // ── Store setup ───────────────────────────────────────────────
+    public string?          StoreName        { get; set; }
+    public string?          StorePhone       { get; set; }
+    public string?          StoreTimezone    { get; set; }
+    public string?          BusinessType     { get; set; }  // "Retail" | "DryGoods" | "Restaurant" | "Other"
+    public ActivationStatus ActivationStatus { get; set; } = ActivationStatus.None;
+
     // ── Navigation ────────────────────────────────────────────────
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

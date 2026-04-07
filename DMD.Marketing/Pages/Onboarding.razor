@@ -1,0 +1,695 @@
+@page "/onboarding"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject ProvisioningService ProvisioningService
+
+<PageTitle>Set Up Your Store — DMD Inventory</PageTitle>
+
+<div class="ob-page">
+
+    @if (_loading)
+    {
+        <div class="ob-loading">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </div>
+    }
+    else if (_submitted)
+    {
+        <!-- ── Success screen ── -->
+        <div class="ob-success-card">
+            <div class="ob-success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="32" height="32">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h1 class="ob-success-title">Request submitted!</h1>
+            <p class="ob-success-sub">
+                We've received your store setup request. Our team will provision your DMD StockShopOnline
+                instance and send you login credentials within <strong>24 hours</strong>.
+            </p>
+            <div class="ob-success-steps">
+                <div class="ob-step ob-step--done"><span class="ob-step-num">1</span><span>Request received</span></div>
+                <div class="ob-step-arrow">→</div>
+                <div class="ob-step"><span class="ob-step-num">2</span><span>We provision your DB</span></div>
+                <div class="ob-step-arrow">→</div>
+                <div class="ob-step"><span class="ob-step-num">3</span><span>Email with credentials</span></div>
+                <div class="ob-step-arrow">→</div>
+                <div class="ob-step"><span class="ob-step-num">4</span><span>Start selling</span></div>
+            </div>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick='() => Nav.NavigateTo("/profile")'
+                       Style="margin-top:1.5rem;font-weight:700;border-radius:10px;padding:12px 32px;">
+                Back to Profile
+            </MudButton>
+        </div>
+    }
+    else
+    {
+        <!-- ── Wizard header ── -->
+        <div class="ob-header">
+            <div class="ob-eyebrow">Get started</div>
+            <h1 class="ob-title">Set up your store</h1>
+            <p class="ob-sub">Just a few details and you're ready to go.</p>
+        </div>
+
+        <!-- ── Step indicators ── -->
+        <div class="ob-steps-bar">
+            @for (int i = 1; i <= 3; i++)
+            {
+                var step = i;
+                <div class="ob-step-indicator @(step == _step ? "active" : step < _step ? "done" : "")">
+                    <div class="ob-step-circle">
+                        @if (step < _step)
+                        {
+                            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                                <polyline points="2 7 5.5 10.5 12 4"/>
+                            </svg>
+                        }
+                        else
+                        {
+                            @step
+                        }
+                    </div>
+                    <span class="ob-step-label">@_stepLabels[step - 1]</span>
+                </div>
+                @if (i < 3)
+                {
+                    <div class="ob-step-connector @(step < _step ? "done" : "")"></div>
+                }
+            }
+        </div>
+
+        <!-- ── Step content ── -->
+        <div class="ob-card">
+
+            @if (_step == 1)
+            {
+                <h2 class="ob-card-title">Store details</h2>
+
+                @if (_error is { Length: > 0 })
+                {
+                    <div class="ob-alert-error">@_error</div>
+                }
+
+                <div class="ob-fields">
+                    <div class="ob-field-group ob-field-group--full">
+                        <label class="ob-label">Store / Company name <span class="ob-required">*</span></label>
+                        <input class="ob-input @(_showValidation && string.IsNullOrWhiteSpace(_storeName) ? "ob-input--error" : "")"
+                               @bind="_storeName" placeholder="e.g. Maple Leaf Groceries" />
+                        @if (_showValidation && string.IsNullOrWhiteSpace(_storeName))
+                        {
+                            <span class="ob-field-error">Store name is required</span>
+                        }
+                    </div>
+
+                    <div class="ob-field-group">
+                        <label class="ob-label">Business type <span class="ob-required">*</span></label>
+                        <select class="ob-select @(_showValidation && string.IsNullOrWhiteSpace(_businessType) ? "ob-input--error" : "")"
+                                @bind="_businessType">
+                            <option value="">Select type…</option>
+                            <option value="Retail">Retail</option>
+                            <option value="DryGoods">Nuts &amp; Dry Goods</option>
+                            <option value="Restaurant">Restaurant</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        @if (_showValidation && string.IsNullOrWhiteSpace(_businessType))
+                        {
+                            <span class="ob-field-error">Business type is required</span>
+                        }
+                    </div>
+
+                    <div class="ob-field-group">
+                        <label class="ob-label">Phone <span class="ob-required">*</span></label>
+                        <input class="ob-input @(_showValidation && string.IsNullOrWhiteSpace(_storePhone) ? "ob-input--error" : "")"
+                               @bind="_storePhone" placeholder="+1 (416) 555-0100" />
+                        @if (_showValidation && string.IsNullOrWhiteSpace(_storePhone))
+                        {
+                            <span class="ob-field-error">Phone is required</span>
+                        }
+                    </div>
+
+                    <div class="ob-field-group">
+                        <label class="ob-label">Timezone</label>
+                        <select class="ob-select" @bind="_storeTimezone">
+                            <option value="">Select timezone…</option>
+                            <option value="America/St_Johns">Newfoundland (UTC-3:30)</option>
+                            <option value="America/Halifax">Atlantic (UTC-4)</option>
+                            <option value="America/Toronto">Eastern (UTC-5)</option>
+                            <option value="America/Winnipeg">Central (UTC-6)</option>
+                            <option value="America/Edmonton">Mountain (UTC-7)</option>
+                            <option value="America/Vancouver">Pacific (UTC-8)</option>
+                        </select>
+                    </div>
+
+                    <div class="ob-field-group">
+                        <label class="ob-label">Province</label>
+                        <select class="ob-select" @bind="_province">
+                            <option value="">Select province…</option>
+                            <option value="AB">Alberta</option>
+                            <option value="BC">British Columbia</option>
+                            <option value="MB">Manitoba</option>
+                            <option value="NB">New Brunswick</option>
+                            <option value="NL">Newfoundland &amp; Labrador</option>
+                            <option value="NS">Nova Scotia</option>
+                            <option value="NT">Northwest Territories</option>
+                            <option value="NU">Nunavut</option>
+                            <option value="ON">Ontario</option>
+                            <option value="PE">Prince Edward Island</option>
+                            <option value="QC">Quebec</option>
+                            <option value="SK">Saskatchewan</option>
+                            <option value="YT">Yukon</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ob-actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="NextStep"
+                               Style="font-weight:700;border-radius:10px;padding:12px 36px;">
+                        Continue
+                    </MudButton>
+                </div>
+            }
+
+            else if (_step == 2)
+            {
+                <h2 class="ob-card-title">Confirm your plan</h2>
+
+                <!-- Plan summary card -->
+                <div class="ob-plan-card">
+                    <div class="ob-plan-name">@_planDef?.Name</div>
+                    <div class="ob-plan-billing">
+                        @if (_planDef?.CustomPrice == true)
+                        {
+                            <span class="ob-plan-price">Custom pricing</span>
+                        }
+                        else
+                        {
+                            var price = _isAnnual ? _planDef?.AnnualPrice : _planDef?.MonthlyPrice;
+                            <span class="ob-plan-price">$@price<span class="ob-plan-per">/mo</span></span>
+                            @if (_isAnnual)
+                            {
+                                <span class="ob-plan-note">· billed annually</span>
+                            }
+                        }
+                    </div>
+                    <div class="ob-plan-cycle-badge @(_isAnnual ? "annual" : "monthly")">
+                        @(_isAnnual ? "Annual billing · save 20%" : "Monthly billing")
+                    </div>
+                </div>
+
+                <!-- What happens next -->
+                <div class="ob-next-steps">
+                    <h3 class="ob-next-title">What happens next</h3>
+                    <ol class="ob-next-list">
+                        <li>Your provisioning request is sent to our team</li>
+                        <li>We spin up a dedicated database instance for your store</li>
+                        <li>You receive an email with your login URL and credentials</li>
+                        <li>Log in and start selling — usually within 24 hours</li>
+                    </ol>
+                </div>
+
+                <div class="ob-actions">
+                    <button class="ob-btn-back" @onclick="() => { _step = 1; _showValidation = false; }">
+                        ← Back
+                    </button>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="NextStep"
+                               Style="font-weight:700;border-radius:10px;padding:12px 36px;">
+                        Looks good — activate
+                    </MudButton>
+                </div>
+            }
+
+            else if (_step == 3)
+            {
+                <h2 class="ob-card-title">Activate your store</h2>
+                <p class="ob-activate-sub">
+                    We'll send your provisioning request now. This submits your store details
+                    to the DMD team so they can provision your instance.
+                </p>
+
+                <div class="ob-summary">
+                    <div class="ob-summary-row"><span>Store name</span><strong>@_storeName</strong></div>
+                    <div class="ob-summary-row"><span>Business type</span><strong>@_businessType</strong></div>
+                    <div class="ob-summary-row"><span>Phone</span><strong>@_storePhone</strong></div>
+                    @if (!string.IsNullOrWhiteSpace(_storeTimezone))
+                    {
+                        <div class="ob-summary-row"><span>Timezone</span><strong>@_storeTimezone</strong></div>
+                    }
+                    <div class="ob-summary-row"><span>Plan</span><strong>@_planDef?.Name (@(_isAnnual ? "Annual" : "Monthly"))</strong></div>
+                </div>
+
+                @if (_activationError is { Length: > 0 })
+                {
+                    <div class="ob-alert-error">@_activationError</div>
+                }
+
+                <div class="ob-actions">
+                    <button class="ob-btn-back" @onclick="() => _step = 2" disabled="@_activating">
+                        ← Back
+                    </button>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="Activate"
+                               Disabled="_activating"
+                               Style="font-weight:700;border-radius:10px;padding:12px 36px;">
+                        @(_activating ? "Submitting…" : "Submit request")
+                    </MudButton>
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code {
+    private User?   _user;
+    private bool    _loading    = true;
+    private int     _step       = 1;
+    private bool    _submitted  = false;
+    private bool    _activating = false;
+    private bool    _showValidation = false;
+    private string? _error;
+    private string? _activationError;
+
+    // Step 1 fields
+    private string? _storeName;
+    private string? _businessType;
+    private string? _storePhone;
+    private string? _storeTimezone;
+    private string? _province;
+
+    private readonly string[] _stepLabels = { "Store details", "Confirm plan", "Activate" };
+
+    // Plan lookup
+    private record PlanDef(PlanSlug Slug, string Name, int MonthlyPrice, int AnnualPrice, bool CustomPrice);
+    private readonly List<PlanDef> _planDefs = new()
+    {
+        new(PlanSlug.Starter,    "Starter",    49,  39,  false),
+        new(PlanSlug.Growth,     "Growth",     99,  79,  false),
+        new(PlanSlug.Pro,        "Pro",        179, 143, false),
+        new(PlanSlug.Enterprise, "Enterprise", 0,   0,   true),
+    };
+
+    private PlanDef? _planDef;
+    private bool     _isAnnual;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+
+        if (auth.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/login?returnUrl=onboarding", forceLoad: false);
+            return;
+        }
+
+        var idStr = auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idStr, out var userId))
+            _user = await Db.Users.FindAsync(userId);
+
+        if (_user is null)
+        {
+            Nav.NavigateTo("/profile", forceLoad: false);
+            return;
+        }
+
+        // Already submitted → back to profile
+        if (_user.ActivationStatus != ActivationStatus.None)
+        {
+            Nav.NavigateTo("/profile", forceLoad: false);
+            return;
+        }
+
+        // No plan selected → back to profile to pick one
+        if (_user.SelectedPlan == PlanSlug.None)
+        {
+            Nav.NavigateTo("/profile", forceLoad: false);
+            return;
+        }
+
+        _planDef  = _planDefs.FirstOrDefault(p => p.Slug == _user.SelectedPlan);
+        _isAnnual = _user.BillingCycle == BillingCycle.Annual;
+
+        // Pre-fill from any previously saved data
+        _storeName     = _user.StoreName;
+        _storePhone    = _user.StorePhone;
+        _storeTimezone = _user.StoreTimezone;
+        _businessType  = _user.BusinessType;
+
+        _loading = false;
+    }
+
+    private void NextStep()
+    {
+        if (_step == 1)
+        {
+            _showValidation = true;
+            if (string.IsNullOrWhiteSpace(_storeName) || string.IsNullOrWhiteSpace(_businessType) || string.IsNullOrWhiteSpace(_storePhone))
+                return;
+            _showValidation = false;
+            _step = 2;
+        }
+        else if (_step == 2)
+        {
+            _step = 3;
+        }
+    }
+
+    private async Task Activate()
+    {
+        if (_user is null) return;
+        _activating      = true;
+        _activationError = null;
+
+        var success = await ProvisioningService.RequestActivationAsync(
+            email:          _user.Email,
+            firstName:      _user.FirstName ?? "",
+            lastName:       _user.LastName  ?? "",
+            planSlug:       _user.SelectedPlan.ToString(),
+            billingCycle:   _isAnnual ? "Annual" : "Monthly",
+            storeName:      _storeName!,
+            storePhone:     _storePhone,
+            storeTimezone:  _storeTimezone,
+            businessType:   _businessType,
+            marketingUserId: _user.Id);
+
+        if (success)
+        {
+            _user.StoreName        = _storeName?.Trim();
+            _user.StorePhone       = _storePhone?.Trim();
+            _user.StoreTimezone    = _storeTimezone;
+            _user.BusinessType     = _businessType;
+            _user.ActivationStatus = ActivationStatus.Pending;
+            _user.ModifiedAt       = DateTime.UtcNow;
+            await Db.SaveChangesAsync();
+            _submitted = true;
+        }
+        else
+        {
+            _activationError = "Could not submit your request. Please try again or contact support.";
+        }
+
+        _activating = false;
+    }
+}
+
+<style>
+    .ob-page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+    }
+
+    .ob-loading {
+        display: flex;
+        justify-content: center;
+        padding: 5rem;
+    }
+
+    /* ── Header ── */
+    .ob-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        background: #E0F7F4;
+        color: #00695C;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        padding: 4px 12px; border-radius: 20px;
+        margin-bottom: 0.75rem;
+    }
+
+    .ob-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem; font-weight: 800;
+        color: #1A237E; margin: 0 0 0.5rem;
+    }
+
+    .ob-sub {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem; color: #6B7280; margin: 0 0 2rem;
+    }
+
+    /* ── Steps bar ── */
+    .ob-steps-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 0;
+    }
+
+    .ob-step-indicator {
+        display: flex; align-items: center; gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .ob-step-circle {
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 2px solid #D1D5DB;
+        background: #fff; color: #9CA3AF;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .ob-step-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem; color: #9CA3AF; font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .ob-step-indicator.active .ob-step-circle {
+        border-color: #00BFA5; background: #00BFA5; color: #fff;
+    }
+    .ob-step-indicator.active .ob-step-label { color: #1C1C1E; font-weight: 700; }
+
+    .ob-step-indicator.done .ob-step-circle {
+        border-color: #00897B; background: #00897B; color: #fff;
+    }
+    .ob-step-indicator.done .ob-step-label { color: #6B7280; }
+
+    .ob-step-connector {
+        flex: 1; height: 2px;
+        background: #E5E7EB; margin: 0 10px;
+        min-width: 20px;
+        transition: background 0.2s;
+    }
+    .ob-step-connector.done { background: #00897B; }
+
+    /* ── Card ── */
+    .ob-card {
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 2rem;
+    }
+
+    .ob-card-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem; font-weight: 700;
+        color: #1A237E; margin: 0 0 1.5rem;
+    }
+
+    /* ── Fields ── */
+    .ob-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ob-field-group { display: flex; flex-direction: column; gap: 6px; }
+    .ob-field-group--full { grid-column: 1 / -1; }
+
+    .ob-label {
+        font-size: 0.78rem; font-weight: 600;
+        color: #607D8B;
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .ob-required { color: #E53935; }
+
+    .ob-input, .ob-select {
+        padding: 10px 14px;
+        border: 1px solid #E5E7EB; border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem; color: #1C1C1E;
+        background: #F9FAFB; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        width: 100%; box-sizing: border-box;
+    }
+    .ob-input:focus, .ob-select:focus {
+        border-color: #00BFA5;
+        box-shadow: 0 0 0 3px rgba(0,191,165,0.12);
+        background: #fff;
+    }
+    .ob-input--error { border-color: #E53935 !important; }
+    .ob-field-error { font-size: 0.75rem; color: #E53935; margin-top: 2px; }
+
+    /* ── Alert ── */
+    .ob-alert-error {
+        background: #FEF2F2; border: 1px solid #FECACA;
+        border-radius: 8px; padding: 10px 14px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; color: #B91C1C;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Actions ── */
+    .ob-actions {
+        display: flex; align-items: center;
+        gap: 0.75rem; flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .ob-btn-back {
+        background: none; border: 1px solid #E5E7EB;
+        border-radius: 10px; padding: 11px 20px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; font-weight: 600;
+        color: #6B7280; cursor: pointer;
+        transition: border-color 0.15s, color 0.15s;
+    }
+    .ob-btn-back:hover:not(:disabled) { border-color: #9CA3AF; color: #374151; }
+    .ob-btn-back:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Plan card (step 2) ── */
+    .ob-plan-card {
+        background: #F0FBF8;
+        border: 1.5px solid #00BFA5;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .ob-plan-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.1rem; font-weight: 700;
+        color: #1A237E; margin-bottom: 4px;
+    }
+    .ob-plan-billing { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+    .ob-plan-price {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.8rem; font-weight: 700; color: #1C1C1E;
+    }
+    .ob-plan-per { font-size: 0.85rem; color: #9CA3AF; }
+    .ob-plan-note { font-size: 0.82rem; color: #9CA3AF; }
+    .ob-plan-cycle-badge {
+        display: inline-flex;
+        font-size: 0.72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        padding: 3px 10px; border-radius: 20px;
+    }
+    .ob-plan-cycle-badge.annual { background: #E0F7F4; color: #00695C; }
+    .ob-plan-cycle-badge.monthly { background: #F3F4F6; color: #6B7280; }
+
+    /* ── What happens next ── */
+    .ob-next-steps {
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+    }
+    .ob-next-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.9rem; font-weight: 700;
+        color: #1A237E; margin: 0 0 0.75rem;
+    }
+    .ob-next-list {
+        margin: 0; padding-left: 1.25rem;
+        display: flex; flex-direction: column; gap: 6px;
+    }
+    .ob-next-list li {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; color: #374151; line-height: 1.55;
+    }
+
+    /* ── Summary (step 3) ── */
+    .ob-activate-sub {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem; color: #6B7280;
+        margin: 0 0 1.25rem; line-height: 1.6;
+    }
+
+    .ob-summary {
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+    .ob-summary-row {
+        display: flex; justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        border-bottom: 1px solid #E5E7EB;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+    }
+    .ob-summary-row:last-child { border-bottom: none; }
+    .ob-summary-row span { color: #6B7280; }
+    .ob-summary-row strong { color: #1C1C1E; font-weight: 600; }
+
+    /* ── Success screen ── */
+    .ob-success-card {
+        text-align: center;
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+
+    .ob-success-icon {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: #D1FAE5;
+        color: #059669;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .ob-success-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.5rem; font-weight: 800;
+        color: #1A237E; margin: 0 0 0.75rem;
+    }
+
+    .ob-success-sub {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem; color: #374151;
+        max-width: 480px; line-height: 1.6;
+        margin: 0 0 1.75rem;
+    }
+
+    .ob-success-steps {
+        display: flex; align-items: center; gap: 8px;
+        flex-wrap: wrap; justify-content: center;
+    }
+
+    .ob-step {
+        display: flex; align-items: center; gap: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.78rem; color: #6B7280;
+    }
+    .ob-step--done { color: #059669; }
+    .ob-step-num {
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #E5E7EB; color: #6B7280;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.7rem; font-weight: 700;
+    }
+    .ob-step--done .ob-step-num { background: #D1FAE5; color: #059669; }
+    .ob-step-arrow { color: #D1D5DB; font-size: 0.9rem; }
+
+    /* ── Responsive ── */
+    @@media (max-width: 560px) {
+        .ob-fields { grid-template-columns: 1fr; }
+        .ob-field-group--full { grid-column: 1; }
+        .ob-steps-bar .ob-step-label { display: none; }
+        .ob-success-steps { flex-direction: column; align-items: flex-start; gap: 6px; }
+        .ob-step-arrow { display: none; }
+    }
+</style>
