@@ -1,0 +1,125 @@
+@using MudBlazor
+@using DMD.Marketing.Services
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Primary" />
+            <div>
+                <MudText Typo="Typo.h6">@Client.StoreName</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Inherit">
+                    @Client.FirstName @Client.LastName · @Client.Email
+                </MudText>
+            </div>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+
+        <!-- ── License summary ──────────────────────────────── -->
+        <MudPaper Elevation="0" Class="pa-3 mb-4" Style="background:#F9FAFB;border-radius:10px;">
+            <MudGrid Spacing="2">
+                <MudItem xs="6" sm="3">
+                    <MudText Typo="Typo.caption" Color="Color.Inherit">Plan</MudText>
+                    <MudText Typo="Typo.body2" Class="font-weight-bold">@Client.PlanSlug · @Client.BillingCycle</MudText>
+                </MudItem>
+                <MudItem xs="6" sm="3">
+                    <MudText Typo="Typo.caption" Color="Color.Inherit">Status</MudText>
+                    <MudChip T="string" Size="Size.Small" Color="@StatusColor(Client.Status)" Variant="Variant.Filled">
+                        @Client.Status
+                    </MudChip>
+                </MudItem>
+                <MudItem xs="6" sm="3">
+                    <MudText Typo="Typo.caption" Color="Color.Inherit">Next Payment Due</MudText>
+                    @if (Client.ExpiresAt.HasValue)
+                    {
+                        var days = (int)Math.Ceiling((Client.ExpiresAt.Value - DateTime.UtcNow).TotalDays);
+                        <MudText Typo="Typo.body2" Color="@(days <= 0 ? Color.Error : days <= 7 ? Color.Warning : Color.Inherit)">
+                            @Client.ExpiresAt.Value.ToString("MMM d, yyyy")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                            @(days <= 0 ? "Overdue" : $"{days} day{(days == 1 ? "" : "s")}")
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Inherit">—</MudText>
+                    }
+                </MudItem>
+                <MudItem xs="6" sm="3">
+                    <MudText Typo="Typo.caption" Color="Color.Inherit">Total Paid</MudText>
+                    <MudText Typo="Typo.body2" Class="font-weight-bold" Color="Color.Success">
+                        @(Client.Currency ?? "CAD") @TotalPaid.ToString("N2")
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <!-- ── Payment history ──────────────────────────────── -->
+        @if (Client.Payments.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Inherit" Class="py-6">
+                No payments recorded yet.
+            </MudText>
+        }
+        else
+        {
+            <MudTable Items="@Client.Payments" Dense="true" Hover="true" Elevation="0"
+                      Style="border:1px solid #E5E7EB;border-radius:10px;overflow:hidden;">
+                <HeaderContent>
+                    <MudTh Style="font-weight:600;">Invoice</MudTh>
+                    <MudTh Style="font-weight:600;">Plan</MudTh>
+                    <MudTh Style="font-weight:600;">Amount</MudTh>
+                    <MudTh Style="font-weight:600;">Period</MudTh>
+                    <MudTh Style="font-weight:600;">Paid</MudTh>
+                    <MudTh Style="font-weight:600;">Method</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Invoice">
+                        <MudText Typo="Typo.body2" Class="font-weight-medium">
+                            @(context.InvoiceNumber ?? $"PMT-{context.Id:D4}")
+                        </MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Plan">
+                        <MudText Typo="Typo.body2">@context.PlanSlug</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Amount">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                            @context.Currency @context.Amount.ToString("N2")
+                        </MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Period">
+                        <MudText Typo="Typo.body2">@context.PeriodStart.ToString("MMM d, yyyy")</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">→ @context.PeriodEnd.ToString("MMM d, yyyy")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Paid">
+                        <MudText Typo="Typo.body2">@context.PaidAt.ToString("MMM d, yyyy")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Method">
+                        <MudText Typo="Typo.body2">@(context.PaymentMethod ?? "—")</MudText>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Close())" Variant="Variant.Filled" Color="Color.Primary">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public ClientInfo Client { get; set; } = null!;
+
+    private decimal TotalPaid => Client.Payments.Sum(p => p.Amount);
+
+    private static Color StatusColor(string s) => s switch
+    {
+        "Active"       => Color.Success,
+        "Provisioning" => Color.Info,
+        "Pending"      => Color.Warning,
+        "Rejected"     => Color.Error,
+        _              => Color.Inherit
+    };
+}

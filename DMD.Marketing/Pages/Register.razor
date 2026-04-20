@@ -176,27 +176,27 @@
                             <MudText Typo="Typo.caption" Color="@GetStrengthColor()">@GetStrengthText()</MudText>
                             <MudStack Spacing="1" Class="mt-3">
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                                         Color="@(_hasMinLength ? Color.Success : Color.Default)"
+                                         Color="@(_hasMinLength ? Color.Success : Color.Inherit)"
                                          Icon="@(_hasMinLength ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)">
                                     8+ characters
                                 </MudChip>
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                                         Color="@(_hasUpper ? Color.Success : Color.Default)"
+                                         Color="@(_hasUpper ? Color.Success : Color.Inherit)"
                                          Icon="@(_hasUpper ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)">
                                     Uppercase letter
                                 </MudChip>
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                                         Color="@(_hasLower ? Color.Success : Color.Default)"
+                                         Color="@(_hasLower ? Color.Success : Color.Inherit)"
                                          Icon="@(_hasLower ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)">
                                     Lowercase letter
                                 </MudChip>
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                                         Color="@(_hasNumber ? Color.Success : Color.Default)"
+                                         Color="@(_hasNumber ? Color.Success : Color.Inherit)"
                                          Icon="@(_hasNumber ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)">
                                     Number
                                 </MudChip>
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
-                                         Color="@(_hasSpecial ? Color.Success : Color.Default)"
+                                         Color="@(_hasSpecial ? Color.Success : Color.Inherit)"
                                          Icon="@(_hasSpecial ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)">
                                     Special character
                                 </MudChip>
@@ -236,7 +236,7 @@
             </MudText>
 
             <div class="back-to-landing">
-                <MudLink Href="/" Color="Color.Default" Style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <MudLink Href="/" Color="Color.Inherit" Style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Size="Size.Small" />
                     Back to Landing Page
                 </MudLink>
@@ -281,7 +281,7 @@
 
     private Color GetStrengthColor() => _passwordStrength switch
     {
-        <= 0  => Color.Default,
+        <= 0  => Color.Inherit,
         < 40  => Color.Error,
         < 60  => Color.Warning,
         < 80  => Color.Info,

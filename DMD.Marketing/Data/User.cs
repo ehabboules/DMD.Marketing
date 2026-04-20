@@ -45,8 +45,17 @@ public class User
     public string?          StoreName        { get; set; }
     public string?          StorePhone       { get; set; }
     public string?          StoreTimezone    { get; set; }
-    public string?          BusinessType     { get; set; }  // "Retail" | "DryGoods" | "Restaurant" | "Other"
+    public string?          BusinessType     { get; set; }  // "Retail" | "Grocery" | "Restaurant" | "Other"
     public ActivationStatus ActivationStatus { get; set; } = ActivationStatus.None;
+
+    // ── Store defaults ────────────────────────────────────────────
+    public string?   Currency           { get; set; } = "CAD";
+    public decimal   FederalTaxRate     { get; set; } = 5m;
+    public decimal   ProvincialTaxRate  { get; set; } = 0m;
+    public bool      TaxInclusive       { get; set; } = false;
+
+    // ── Subscription expiry ───────────────────────────────────────
+    public DateTime? SubscriptionExpiresAt { get; set; }
 
     // ── Navigation ────────────────────────────────────────────────
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

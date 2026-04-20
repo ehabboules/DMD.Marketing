@@ -100,18 +100,34 @@
                         <span class="sub-item-value">@(isAnnual ? "Annual" : "Monthly")</span>
                     </div>
                     <div class="sub-item">
-                        <span class="sub-item-label">Next payment</span>
+                        <span class="sub-item-label">
+                            @(_user.ActivationStatus == ActivationStatus.Pending ? "Trial ends" : "Next payment")
+                        </span>
                         <span class="sub-item-value sub-item-value--accent">
-                            @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
+                            @if (_user.SubscriptionExpiresAt.HasValue)
+                            {
+                                @_user.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
+                            }
+                            else
+                            {
+                                @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
+                            }
                         </span>
                     </div>
                     <div class="sub-item">
                         <span class="sub-item-label">Amount due</span>
                         <span class="sub-item-value">
-                            @(amount.HasValue ? $"${amount}/mo" : "Custom")
-                            @if (isAnnual && amount.HasValue)
+                            @if (_user.ActivationStatus == ActivationStatus.Pending)
                             {
-                                <span class="sub-billed-note">&nbsp;· billed annually</span>
+                                <span style="color:#00897B;font-size:0.85rem;">Free trial</span>
+                            }
+                            else
+                            {
+                                @(amount.HasValue ? $"${amount}/mo" : "Custom")
+                                @if (isAnnual && amount.HasValue)
+                                {
+                                    <span class="sub-billed-note">&nbsp;· billed annually</span>
+                                }
                             }
                         </span>
                     </div>

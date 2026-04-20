@@ -52,6 +52,15 @@ public class UserService
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
+
+        // Assign default "User" role
+        var userRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+        if (userRole is not null)
+        {
+            _db.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = userRole.Id, CreatedAt = DateTime.UtcNow });
+            await _db.SaveChangesAsync();
+        }
+
         return (user, null);
     }
 

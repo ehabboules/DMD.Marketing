@@ -1,0 +1,133 @@
+@using MudBlazor
+@using DMD.Marketing.Services
+@inject ISnackbar Snackbar
+@inject ProvisioningService ProvisioningService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Record Payment</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Inherit">@Request.StoreName · @Request.Email</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_planSlug" Label="Plan" Variant="Variant.Outlined" Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_billingCycle" Label="Billing Cycle" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("Monthly")">Monthly</MudSelectItem>
+                    <MudSelectItem Value="@("Annual")">Annual</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="_amount" Label="Amount" Variant="Variant.Outlined" Dense="true"
+                                 Format="F2" Min="0" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_currency" Label="Currency" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("CAD")">CAD</MudSelectItem>
+                    <MudSelectItem Value="@("USD")">USD</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_paidAt" Label="Paid Date" Variant="Variant.Outlined" Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_paymentMethod" Label="Payment Method" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("Credit Card")">Credit Card</MudSelectItem>
+                    <MudSelectItem Value="@("Bank Transfer")">Bank Transfer</MudSelectItem>
+                    <MudSelectItem Value="@("Cheque")">Cheque</MudSelectItem>
+                    <MudSelectItem Value="@("E-Transfer")">E-Transfer</MudSelectItem>
+                    <MudSelectItem Value="@("Cash")">Cash</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_periodStart" Label="Period Start" Variant="Variant.Outlined" Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_periodEnd" Label="Period End" Variant="Variant.Outlined" Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_invoiceNumber" Label="Invoice #" Variant="Variant.Outlined" Dense="true"
+                              Placeholder="INV-001" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_notes" Label="Notes" Variant="Variant.Outlined" Lines="2" Dense="true" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="SaveAsync" Variant="Variant.Filled" Color="Color.Success"
+                   Disabled="_saving" StartIcon="@Icons.Material.Filled.AddCard">
+            @(_saving ? "Saving…" : "Record Payment")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public ProvisioningRequestInfo Request { get; set; } = null!;
+
+    private string    _planSlug      = "";
+    private string    _billingCycle  = "Monthly";
+    private decimal   _amount        = 0m;
+    private string    _currency      = "CAD";
+    private DateTime? _paidAt        = DateTime.Today;
+    private DateTime? _periodStart   = DateTime.Today;
+    private DateTime? _periodEnd     = DateTime.Today.AddMonths(1);
+    private string?   _paymentMethod = "Credit Card";
+    private string?   _invoiceNumber;
+    private string?   _notes;
+    private bool      _saving;
+
+    protected override void OnParametersSet()
+    {
+        _planSlug     = Request.PlanSlug;
+        _billingCycle = Request.BillingCycle;
+        _currency     = Request.Currency ?? "CAD";
+        _periodEnd    = _billingCycle == "Annual"
+            ? DateTime.Today.AddYears(1)
+            : DateTime.Today.AddMonths(1);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_paidAt is null || _periodStart is null || _periodEnd is null)
+        {
+            Snackbar.Add("Please fill in all date fields.", Severity.Warning);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var ok = await ProvisioningService.RecordPaymentAsync(
+                email:         Request.Email,
+                planSlug:      _planSlug,
+                billingCycle:  _billingCycle,
+                amount:        _amount,
+                currency:      _currency,
+                paidAt:        _paidAt.Value,
+                periodStart:   _periodStart.Value,
+                periodEnd:     _periodEnd.Value,
+                paymentMethod: _paymentMethod,
+                invoiceNumber: _invoiceNumber,
+                notes:         _notes);
+
+            if (ok)
+            {
+                Snackbar.Add("Payment recorded successfully.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add("Failed to record payment — check API configuration.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

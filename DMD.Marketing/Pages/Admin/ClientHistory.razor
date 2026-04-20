@@ -1,0 +1,404 @@
+@page "/admin/clients"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using DMD.Marketing.Services
+@inject ProvisioningService ProvisioningService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 mb-8">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h4">Client History &amp; Billing</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Inherit">All clients, payment history and upcoming renewals</MudText>
+        </div>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Refresh" Variant="Variant.Outlined"
+                   Color="Color.Primary" OnClick="LoadAsync" Disabled="_loading">
+            Refresh
+        </MudButton>
+    </MudStack>
+
+    @if (_loading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-6" />
+    }
+    else
+    {
+        <!-- ── Stats ──────────────────────────────────────────── -->
+        <MudGrid Spacing="3" Class="mb-5">
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Total Clients</MudText>
+                            <MudText Typo="Typo.h4" Class="font-weight-bold">@_all.Count</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Active</MudText>
+                            <MudText Typo="Typo.h4" Color="Color.Success" Class="font-weight-bold">
+                                @_all.Count(c => c.Status == "Active")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Revenue This Month</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Class="font-weight-bold">
+                                $@RevenueThisMonth.ToString("N0")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-4"
+                          Style="@($"border-radius:14px;{(_upcomingCount > 0 ? "border:2px solid #FF9800;" : "")}")">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Renewals ≤30 Days</MudText>
+                            <MudText Typo="Typo.h4" Color="@(_upcomingCount > 0 ? Color.Warning : Color.Inherit)"
+                                     Class="font-weight-bold">
+                                @_upcomingCount
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.EventRepeat"
+                                 Color="@(_upcomingCount > 0 ? Color.Warning : Color.Inherit)"
+                                 Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <!-- ── Upcoming Renewals ──────────────────────────────── -->
+        @if (_upcoming.Count > 0)
+        {
+            <MudPaper Elevation="2" Class="pa-4 mb-5" Style="border-radius:14px;border-left:4px solid #FF9800;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.EventRepeat" Color="Color.Warning" />
+                    <MudText Typo="Typo.h6">Upcoming Renewals</MudText>
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">
+                        @_upcoming.Count client@(_upcoming.Count == 1 ? "" : "s")
+                    </MudChip>
+                </MudStack>
+                <MudGrid Spacing="2">
+                    @foreach (var c in _upcoming.OrderBy(c => c.ExpiresAt))
+                    {
+                        var days = (int)Math.Ceiling((c.ExpiresAt!.Value - DateTime.UtcNow).TotalDays);
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudPaper Elevation="0" Class="pa-3"
+                                      Style="@($"border-radius:10px;background:{(days <= 7 ? "#FFF3E0" : "#FAFAFA")};border:1px solid {(days <= 7 ? "#FFB74D" : "#E5E7EB")};")">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <div>
+                                        <MudText Typo="Typo.body2" Class="font-weight-bold">@c.StoreName</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Inherit">@c.Email</MudText>
+                                        <MudText Typo="Typo.caption">@c.PlanSlug · @c.BillingCycle</MudText>
+                                    </div>
+                                    <MudStack AlignItems="AlignItems.End">
+                                        <MudText Typo="Typo.body2" Color="@(days <= 7 ? Color.Error : Color.Warning)"
+                                                 Class="font-weight-bold">
+                                            @days day@(days == 1 ? "" : "s")
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                                            @c.ExpiresAt!.Value.ToString("MMM d")
+                                        </MudText>
+                                    </MudStack>
+                                </MudStack>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
+        }
+
+        <!-- ── Filters ────────────────────────────────────────── -->
+        <MudGrid Spacing="3" Class="mb-3">
+            <MudItem xs="12" sm="5">
+                <MudTextField @bind-Value="_search"
+                              Placeholder="Search by store, name or email…"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true"
+                              OnDebounceIntervalElapsed="Filter"
+                              DebounceInterval="300"
+                              Variant="Variant.Outlined"
+                              Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudSelect @bind-Value="_filterStatus" Label="Status" T="string"
+                           Clearable="true" Variant="Variant.Outlined" Dense="true"
+                           OnClearButtonClick="@(() => { _filterStatus = null; Filter(); })">
+                    <MudSelectItem Value="@("Pending")">Pending</MudSelectItem>
+                    <MudSelectItem Value="@("Provisioning")">Provisioning</MudSelectItem>
+                    <MudSelectItem Value="@("Active")">Active</MudSelectItem>
+                    <MudSelectItem Value="@("Rejected")">Rejected</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4" Style="display:flex;align-items:center;">
+                <MudSwitch @bind-Value="_onlyUpcoming" Color="Color.Warning"
+                           Label="Upcoming renewals only"
+                           UncheckedColor="Color.Inherit" />
+            </MudItem>
+        </MudGrid>
+
+        <!-- ── Summary totals ─────────────────────────────────── -->
+        <MudStack Row="true" Class="mb-2 px-1">
+            <MudText Typo="Typo.body2" Color="Color.Inherit">
+                @_filtered.Count client@(_filtered.Count == 1 ? "" : "s") ·
+                Total revenue: <strong>$@_filtered.SelectMany(c => c.Payments).Sum(p => p.Amount).ToString("N2")</strong>
+            </MudText>
+        </MudStack>
+
+        <!-- ── Client table ───────────────────────────────────── -->
+        <MudPaper Elevation="2" Style="border-radius:12px;overflow:hidden;">
+            <MudTable Items="@_filtered" Hover="true" Dense="false" Elevation="0" Breakpoint="Breakpoint.Md">
+                <HeaderContent>
+                    <MudTh Style="font-weight:600;">Store</MudTh>
+                    <MudTh Style="font-weight:600;">Plan</MudTh>
+                    <MudTh Style="font-weight:600;">Status</MudTh>
+                    <MudTh Style="font-weight:600;">Last Payment</MudTh>
+                    <MudTh Style="font-weight:600;">Next Due</MudTh>
+                    <MudTh Style="font-weight:600;">Total Paid</MudTh>
+                    <MudTh Style="font-weight:600;">#</MudTh>
+                    <MudTh Style="font-weight:600;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <!-- Store / Contact -->
+                    <MudTd DataLabel="Store">
+                        <MudText Typo="Typo.body2" Class="font-weight-medium">@context.StoreName</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                            @context.FirstName @context.LastName · @context.Email
+                        </MudText>
+                    </MudTd>
+                    <!-- Plan -->
+                    <MudTd DataLabel="Plan">
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                            @context.PlanSlug
+                        </MudChip>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                    </MudTd>
+                    <!-- Status -->
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@StatusColor(context.Status)"
+                                 Size="Size.Small" Icon="@StatusIcon(context.Status)"
+                                 Variant="Variant.Filled">
+                            @context.Status
+                        </MudChip>
+                    </MudTd>
+                    <!-- Last Payment -->
+                    <MudTd DataLabel="Last Payment">
+                        @{
+                            var last = context.Payments.FirstOrDefault();
+                        }
+                        @if (last is not null)
+                        {
+                            <MudText Typo="Typo.body2" Class="font-weight-medium">
+                                @last.Currency @last.Amount.ToString("N2")
+                            </MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">
+                                @last.PaidAt.ToString("MMM d, yyyy")
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">—</MudText>
+                        }
+                    </MudTd>
+                    <!-- Next Due -->
+                    <MudTd DataLabel="Next Due">
+                        @if (context.ExpiresAt.HasValue)
+                        {
+                            var days = (int)Math.Ceiling((context.ExpiresAt.Value - DateTime.UtcNow).TotalDays);
+                            <MudText Typo="Typo.body2"
+                                     Color="@(days <= 0 ? Color.Error : days <= 7 ? Color.Warning : days <= 30 ? Color.Warning : Color.Inherit)">
+                                @context.ExpiresAt.Value.ToString("MMM d, yyyy")
+                            </MudText>
+                            <MudText Typo="Typo.caption"
+                                     Color="@(days <= 0 ? Color.Error : days <= 30 ? Color.Warning : Color.Inherit)">
+                                @(days <= 0 ? "Overdue" : $"{days}d")
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">—</MudText>
+                        }
+                    </MudTd>
+                    <!-- Total Paid -->
+                    <MudTd DataLabel="Total Paid">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold" Color="Color.Success">
+                            @(context.Currency ?? "CAD") @context.Payments.Sum(p => p.Amount).ToString("N2")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                            @context.Payments.Count payment@(context.Payments.Count == 1 ? "" : "s")
+                        </MudText>
+                    </MudTd>
+                    <!-- ID -->
+                    <MudTd DataLabel="#">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">#@context.Id</MudText>
+                    </MudTd>
+                    <!-- Actions -->
+                    <MudTd DataLabel="Actions">
+                        <MudTooltip Text="Payment history">
+                            <MudIconButton Icon="@Icons.Material.Filled.Receipt"
+                                           Color="Color.Primary" Size="Size.Medium"
+                                           OnClick="@(() => ViewPaymentsAsync(context))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Record payment">
+                            <MudIconButton Icon="@Icons.Material.Filled.AddCard"
+                                           Color="Color.Success" Size="Size.Medium"
+                                           OnClick="@(() => RecordPaymentAsync(context))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Edit request">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Inherit" Size="Size.Medium"
+                                           OnClick="@(() => EditRequestAsync(context))" />
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8">
+                        No clients found.
+                    </MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudPaper>
+    }
+
+</MudContainer>
+
+@code {
+    private List<ClientInfo> _all      = new();
+    private List<ClientInfo> _filtered = new();
+    private bool    _loading       = true;
+    private string  _search        = "";
+    private string? _filterStatus  = null;
+    private bool    _onlyUpcoming  = false;
+
+    // ── computed ──
+    private List<ClientInfo> _upcoming    => _all
+        .Where(c => c.ExpiresAt.HasValue
+            && c.ExpiresAt.Value > DateTime.UtcNow
+            && c.ExpiresAt.Value <= DateTime.UtcNow.AddDays(30)
+            && c.Status != "Rejected")
+        .ToList();
+
+    private int _upcomingCount => _upcoming.Count;
+
+    private decimal RevenueThisMonth => _all
+        .SelectMany(c => c.Payments)
+        .Where(p => p.PaidAt.Year == DateTime.UtcNow.Year && p.PaidAt.Month == DateTime.UtcNow.Month)
+        .Sum(p => p.Amount);
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _all = await ProvisioningService.GetAllClientsAsync();
+        Filter();
+        _loading = false;
+    }
+
+    private void Filter()
+    {
+        _filtered = _all.Where(c =>
+        {
+            bool matchSearch = string.IsNullOrWhiteSpace(_search) ||
+                c.StoreName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                c.Email.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                c.FirstName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                c.LastName.Contains(_search, StringComparison.OrdinalIgnoreCase);
+
+            bool matchStatus = string.IsNullOrWhiteSpace(_filterStatus) ||
+                c.Status.Equals(_filterStatus, StringComparison.OrdinalIgnoreCase);
+
+            bool matchUpcoming = !_onlyUpcoming ||
+                (c.ExpiresAt.HasValue && c.ExpiresAt.Value <= DateTime.UtcNow.AddDays(30));
+
+            return matchSearch && matchStatus && matchUpcoming;
+        })
+        .OrderBy(c => c.ExpiresAt ?? DateTime.MaxValue)
+        .ToList();
+
+        StateHasChanged();
+    }
+
+    private async Task ViewPaymentsAsync(ClientInfo client)
+    {
+        var parameters = new DialogParameters<ClientPaymentsDialog> { { x => x.Client, client } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+        await DialogService.ShowAsync<ClientPaymentsDialog>("Payment History", parameters, options);
+    }
+
+    private async Task RecordPaymentAsync(ClientInfo client)
+    {
+        // Adapt ClientInfo → ProvisioningRequestInfo for the existing dialog
+        var asRequest = new ProvisioningRequestInfo(
+            client.Id, client.Email, client.FirstName, client.LastName,
+            client.StoreName, client.StorePhone, client.StoreTimezone, client.BusinessType,
+            client.PlanSlug, client.BillingCycle, client.Currency,
+            client.FederalTaxRate, client.ProvincialTaxRate, client.TaxInclusive,
+            client.Status, client.AppUrl,
+            client.RequestedAt, client.ExpiresAt, client.ProvisionedAt,
+            client.Notes, client.MarketingUserId);
+
+        var parameters = new DialogParameters<RecordPaymentDialog> { { x => x.Request, asRequest } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<RecordPaymentDialog>("Record Payment", parameters, options);
+        var result     = await dialog.Result;
+        if (result is { Canceled: false }) await LoadAsync();
+    }
+
+    private async Task EditRequestAsync(ClientInfo client)
+    {
+        var asRequest = new ProvisioningRequestInfo(
+            client.Id, client.Email, client.FirstName, client.LastName,
+            client.StoreName, client.StorePhone, client.StoreTimezone, client.BusinessType,
+            client.PlanSlug, client.BillingCycle, client.Currency,
+            client.FederalTaxRate, client.ProvincialTaxRate, client.TaxInclusive,
+            client.Status, client.AppUrl,
+            client.RequestedAt, client.ExpiresAt, client.ProvisionedAt,
+            client.Notes, client.MarketingUserId);
+
+        var parameters = new DialogParameters<ProvisioningEditDialog> { { x => x.Request, asRequest } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<ProvisioningEditDialog>("Edit Request", parameters, options);
+        var result     = await dialog.Result;
+        if (result is { Canceled: false }) await LoadAsync();
+    }
+
+    private static Color StatusColor(string s) => s switch
+    {
+        "Pending"      => Color.Warning,
+        "Provisioning" => Color.Info,
+        "Active"       => Color.Success,
+        "Rejected"     => Color.Error,
+        _              => Color.Inherit
+    };
+
+    private static string StatusIcon(string s) => s switch
+    {
+        "Pending"      => Icons.Material.Filled.HourglassEmpty,
+        "Provisioning" => Icons.Material.Filled.SettingsApplications,
+        "Active"       => Icons.Material.Filled.CheckCircle,
+        "Rejected"     => Icons.Material.Filled.Cancel,
+        _              => Icons.Material.Filled.Help
+    };
+}

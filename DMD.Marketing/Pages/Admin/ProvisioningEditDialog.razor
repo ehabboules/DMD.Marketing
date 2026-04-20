@@ -1,0 +1,122 @@
+@using MudBlazor
+@using DMD.Marketing.Services
+@inject ISnackbar Snackbar
+@inject ProvisioningService ProvisioningService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Request.StoreName</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Inherit">@Request.Email · #@Request.Id</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <!-- Read-only summary -->
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.caption" Color="Color.Inherit">Contact</MudText>
+                <MudText Typo="Typo.body2">@Request.FirstName @Request.LastName</MudText>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudText Typo="Typo.caption" Color="Color.Inherit">Requested</MudText>
+                <MudText Typo="Typo.body2">@Request.RequestedAt.ToString("MMM d, yyyy HH:mm") UTC</MudText>
+            </MudItem>
+
+            <MudItem xs="12"><MudDivider /></MudItem>
+
+            <!-- Editable fields -->
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_status" Label="Status" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("Pending")">Pending</MudSelectItem>
+                    <MudSelectItem Value="@("Provisioning")">Provisioning</MudSelectItem>
+                    <MudSelectItem Value="@("Active")">Active</MudSelectItem>
+                    <MudSelectItem Value="@("Rejected")">Rejected</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_expiresAt" Label="Expires At" Variant="Variant.Outlined"
+                               Dense="true" Clearable="true" Placeholder="No expiry" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_appUrl" Label="App URL" Variant="Variant.Outlined" Dense="true"
+                              Placeholder="https://client.stockshoponline.com"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Link" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_planSlug" Label="Plan" Variant="Variant.Outlined" Dense="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_billingCycle" Label="Billing Cycle" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("Monthly")">Monthly</MudSelectItem>
+                    <MudSelectItem Value="@("Annual")">Annual</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_notes" Label="Notes" Variant="Variant.Outlined" Lines="3"
+                              Dense="true" Placeholder="Internal notes…" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="SaveAsync" Variant="Variant.Filled" Color="Color.Primary"
+                   Disabled="_saving" StartIcon="@Icons.Material.Filled.Save">
+            @(_saving ? "Saving…" : "Save")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public ProvisioningRequestInfo Request { get; set; } = null!;
+
+    private string    _status      = "Pending";
+    private string?   _appUrl;
+    private string?   _notes;
+    private string    _planSlug    = "";
+    private string    _billingCycle = "Monthly";
+    private DateTime? _expiresAt;
+    private bool      _saving;
+
+    protected override void OnParametersSet()
+    {
+        _status       = Request.Status;
+        _appUrl       = Request.AppUrl;
+        _notes        = Request.Notes;
+        _planSlug     = Request.PlanSlug;
+        _billingCycle = Request.BillingCycle;
+        _expiresAt    = Request.ExpiresAt.HasValue
+            ? DateTime.SpecifyKind(Request.ExpiresAt.Value, DateTimeKind.Utc).ToLocalTime()
+            : null;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        try
+        {
+            var ok = await ProvisioningService.UpdateAsync(
+                email:         Request.Email,
+                planSlug:      _planSlug,
+                billingCycle:  _billingCycle,
+                appUrl:        _appUrl,
+                notes:         _notes,
+                status:        _status,
+                expiresAt:     _expiresAt.HasValue
+                    ? DateTime.SpecifyKind(_expiresAt.Value, DateTimeKind.Local).ToUniversalTime()
+                    : null);
+
+            if (ok)
+            {
+                Snackbar.Add("Request updated.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add("Update failed — check API configuration.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}
