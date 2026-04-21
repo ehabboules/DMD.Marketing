@@ -57,6 +57,10 @@ public class User
     // ── Subscription expiry ───────────────────────────────────────
     public DateTime? SubscriptionExpiresAt { get; set; }
 
+    // ── Stripe ───────────────────────────────────────────────────────
+    public string? StripeCustomerId     { get; set; }
+    public string? StripeSubscriptionId { get; set; }
+
     // ── Navigation ────────────────────────────────────────────────
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

@@ -14,14 +14,14 @@
         <!-- ═══════════════════════════════════════════════════════════
              MAIN CONTENT
         ════════════════════════════════════════════════════════════════ -->
-        <MudMainContent Class="dmd-main-content">
+        <MudMainContent Class="dmd-main-content" Style="display:flex;flex-direction:column;min-height:100vh;">
 
             <!-- Desktop NavBar — hidden on mobile via CSS -->
             <div class="dmd-desktop-navbar">
                 <NavBar @rendermode="new InteractiveServerRenderMode()" />
             </div>
 
-            <main>
+            <main style="flex:1;">
                 @Body
             </main>
 

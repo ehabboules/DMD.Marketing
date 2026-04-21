@@ -21,6 +21,8 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProvisioningService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<StripeService>();
+builder.Services.AddHostedService<TrialExpiryBackgroundService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // ── DbContext ──────────────────────────────────────────────────────

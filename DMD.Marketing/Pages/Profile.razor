@@ -133,6 +133,18 @@
                     </div>
                 </div>
 
+                @if (_user.ActivationStatus != ActivationStatus.Active)
+                {
+                    <div class="sub-payment-cta">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CreditCard"
+                                   Href="/payment">
+                            Subscribe Now
+                        </MudButton>
+                    </div>
+                }
+
                 <!-- Cancel flow -->
                 @if (_cancelSuccess)
                 {
@@ -663,6 +675,10 @@
     .btn-cancel-dismiss:hover { border-color: #9CA3AF; }
 
     /* ── Cancel success ── */
+    .sub-payment-cta {
+        margin-top: 16px;
+    }
+
     .sub-cancel-success {
         display: flex; align-items: center; gap: 7px;
         font-size: 0.875rem; font-weight: 600;

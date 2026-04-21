@@ -105,6 +105,56 @@ public class EmailService
         }
     }
 
+    public async Task<bool> SendTrialExpiryReminderAsync(string toEmail, string firstName, string paymentUrl, DateTime expiresAt)
+    {
+        try
+        {
+            var apiKey    = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"];
+            var fromName  = _config["SendGrid:FromName"];
+
+            if (string.IsNullOrEmpty(apiKey)) { _logger.LogWarning("SendGrid API key missing."); return false; }
+
+            var daysLeft = (int)Math.Ceiling((expiresAt - DateTime.UtcNow).TotalDays);
+            var urgency = daysLeft <= 0 ? "Your free trial has expired" : $"Your free trial expires in {daysLeft} day{(daysLeft == 1 ? "" : "s")}";
+
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage
+            {
+                From             = new EmailAddress(fromEmail, fromName),
+                Subject          = $"{urgency} — DMD Inventory",
+                PlainTextContent = $"Hi {firstName},\n\n{urgency}. To continue using DMD Inventory, please subscribe:\n{paymentUrl}\n\n— DMD Tech",
+                HtmlContent      = $"""
+                    <div style="font-family:sans-serif;max-width:560px;margin:auto;">
+                      <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
+                        <h2 style="color:#fff;margin:0;font-size:1.2rem;">{urgency}</h2>
+                      </div>
+                      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
+                        <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
+                        <p style="color:#374151;margin:0 0 24px;">Your 14-day free trial is coming to an end. Subscribe now to keep your store running smoothly with DMD Inventory.</p>
+                        <a href="{paymentUrl}" style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:0.95rem;">Subscribe Now</a>
+                        <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">If you have questions, reply to this email or contact our support team.</p>
+                      </div>
+                    </div>
+                    """
+            };
+            msg.AddTo(new EmailAddress(toEmail));
+
+            var response = await client.SendEmailAsync(msg);
+            var success = (int)response.StatusCode is >= 200 and < 300;
+            if (success)
+                _logger.LogInformation("Trial expiry reminder sent to {Email}", toEmail);
+            else
+                _logger.LogWarning("SendGrid returned {StatusCode} for trial reminder to {Email}", response.StatusCode, toEmail);
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send trial expiry reminder to {Email}", toEmail);
+            return false;
+        }
+    }
+
     private static string BuildPlainText(ContactFormModel model) =>
         $"""
         New Demo Request — DMD Inventory

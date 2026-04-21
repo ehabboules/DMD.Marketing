@@ -1,0 +1,267 @@
+@page "/payment"
+@page "/payment/success"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject ApplicationDbContext Db
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject StripeService StripeService
+
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Payment — DMD Inventory</PageTitle>
+
+<div class="payment-page">
+    @if (_loading)
+    {
+        <div class="payment-loading">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </div>
+    }
+    else if (_isSuccess)
+    {
+        <div class="payment-card">
+            <div class="payment-success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#00BFA5" stroke-width="2.5" width="48" height="48">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 12l3 3 5-5"/>
+                </svg>
+            </div>
+            <h1 class="payment-title">Payment Successful!</h1>
+            <p class="payment-subtitle">Your subscription is now active. Your store is ready to go.</p>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Nav.NavigateTo("/profile"))">
+                Go to Profile
+            </MudButton>
+        </div>
+    }
+    else if (_user is null)
+    {
+        <MudAlert Severity="Severity.Error">Could not load your account. Please log in again.</MudAlert>
+    }
+    else
+    {
+        <div class="payment-card">
+            <h1 class="payment-title">Complete Your Subscription</h1>
+            <p class="payment-subtitle">Subscribe to continue using DMD Inventory after your trial.</p>
+
+            <div class="plan-summary">
+                <div class="plan-summary-row">
+                    <span class="plan-summary-label">Plan</span>
+                    <span class="plan-summary-value">@_user.SelectedPlan</span>
+                </div>
+                <div class="plan-summary-row">
+                    <span class="plan-summary-label">Billing</span>
+                    <span class="plan-summary-value">@(_user.BillingCycle == BillingCycle.Annual ? "Annual" : "Monthly")</span>
+                </div>
+                <div class="plan-summary-row">
+                    <span class="plan-summary-label">Price</span>
+                    <span class="plan-summary-value">@GetPriceDisplay()</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-3">@_error</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="_processing"
+                       OnClick="StartCheckout"
+                       Class="mt-4">
+                @if (_processing)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" />
+                    <span>Redirecting to Stripe...</span>
+                }
+                else
+                {
+                    <span>Pay Now</span>
+                }
+            </MudButton>
+
+            <p class="payment-secure-note">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                Secure payment powered by Stripe. Your card details never touch our servers.
+            </p>
+        </div>
+    }
+</div>
+
+@code {
+    private User? _user;
+    private bool _loading = true;
+    private bool _processing;
+    private bool _isSuccess;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if this is the success page
+        var uri = new Uri(Nav.Uri);
+        _isSuccess = uri.AbsolutePath.TrimEnd('/').EndsWith("/payment/success", StringComparison.OrdinalIgnoreCase);
+
+        if (!_isSuccess)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            if (authState.User.Identity?.IsAuthenticated != true)
+            {
+                Nav.NavigateTo("/login?returnUrl=payment", forceLoad: false);
+                return;
+            }
+
+            var idStr = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (int.TryParse(idStr, out var userId))
+            {
+                _user = await Db.Users.FindAsync(userId);
+            }
+
+            if (_user is null)
+            {
+                Nav.NavigateTo("/login?returnUrl=payment", forceLoad: false);
+                return;
+            }
+        }
+
+        _loading = false;
+    }
+
+    private async Task StartCheckout()
+    {
+        if (_user is null) return;
+
+        _processing = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var baseUrl = Nav.BaseUri;
+            var checkoutUrl = await StripeService.CreateCheckoutSessionAsync(_user, baseUrl);
+
+            // Save the Stripe customer ID if newly created
+            if (!string.IsNullOrEmpty(_user.StripeCustomerId))
+            {
+                await Db.SaveChangesAsync();
+            }
+
+            Nav.NavigateTo(checkoutUrl, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            _error = "Something went wrong. Please try again.";
+            _processing = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetPriceDisplay()
+    {
+        return (_user?.SelectedPlan, _user?.BillingCycle) switch
+        {
+            (PlanSlug.Starter, BillingCycle.Monthly) => "$49/month",
+            (PlanSlug.Starter, BillingCycle.Annual) => "$39/month (billed annually)",
+            (PlanSlug.Growth, BillingCycle.Monthly) => "$99/month",
+            (PlanSlug.Growth, BillingCycle.Annual) => "$79/month (billed annually)",
+            (PlanSlug.Pro, BillingCycle.Monthly) => "$179/month",
+            (PlanSlug.Pro, BillingCycle.Annual) => "$143/month (billed annually)",
+            _ => "—"
+        };
+    }
+}
+
+<style>
+    .payment-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+    }
+
+    .payment-loading {
+        display: flex;
+        justify-content: center;
+        padding: 64px;
+    }
+
+    .payment-card {
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 48px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .payment-success-icon {
+        margin-bottom: 24px;
+    }
+
+    .payment-title {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: #1A237E;
+        margin: 0 0 8px;
+    }
+
+    .payment-subtitle {
+        font-family: 'DM Sans', sans-serif;
+        color: #6B7280;
+        font-size: 0.95rem;
+        margin: 0 0 32px;
+    }
+
+    .plan-summary {
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 20px 24px;
+        text-align: left;
+    }
+
+    .plan-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .plan-summary-row:last-child {
+        border-bottom: none;
+    }
+
+    .plan-summary-label {
+        font-family: 'DM Sans', sans-serif;
+        color: #6B7280;
+        font-size: 0.9rem;
+    }
+
+    .plan-summary-value {
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 600;
+        color: #1C1C1E;
+        font-size: 0.9rem;
+    }
+
+    .payment-secure-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 16px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+</style>

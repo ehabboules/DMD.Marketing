@@ -1,4 +1,5 @@
 @page "/admin/clients"
+@page "/admin/provisioning"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using DMD.Marketing.Services
 @inject ProvisioningService ProvisioningService
@@ -6,20 +7,19 @@
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
+@inject DMD.Marketing.Data.ApplicationDbContext Db
+@using Microsoft.EntityFrameworkCore
 
 @if (_authChecked)
 {
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 mb-8">
 
     <!-- ── Header ─────────────────────────────────────────── -->
     <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
         <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
         <div>
-            <MudText Typo="Typo.h4">Client History &amp; Billing</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Inherit">All clients, payment history and upcoming renewals</MudText>
+            <MudText Typo="Typo.h4">Client Management</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Inherit">Provisioning, billing, payments and renewals</MudText>
         </div>
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.Refresh" Variant="Variant.Outlined"
@@ -36,19 +36,32 @@
     {
         <!-- ── Stats ──────────────────────────────────────────── -->
         <MudGrid Spacing="3" Class="mb-5">
-            <MudItem xs="6" sm="3">
-                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+            <MudItem xs="6" sm="2">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Inherit">Total Clients</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Total</MudText>
                             <MudText Typo="Typo.h4" Class="font-weight-bold">@_all.Count</MudText>
                         </div>
                         <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
-                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+            <MudItem xs="6" sm="2">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Pending</MudText>
+                            <MudText Typo="Typo.h4" Color="Color.Warning" Class="font-weight-bold">
+                                @_all.Count(c => c.Status == "Pending")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Color="Color.Warning" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="2">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Inherit">Active</MudText>
@@ -61,7 +74,7 @@
                 </MudPaper>
             </MudItem>
             <MudItem xs="6" sm="3">
-                <MudPaper Elevation="2" Class="pa-4" Style="border-radius:14px;">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Inherit">Revenue This Month</MudText>
@@ -74,7 +87,7 @@
                 </MudPaper>
             </MudItem>
             <MudItem xs="6" sm="3">
-                <MudPaper Elevation="2" Class="pa-4"
+                <MudPaper Elevation="2" Class="pa-3"
                           Style="@($"border-radius:14px;{(_upcomingCount > 0 ? "border:2px solid #FF9800;" : "")}")">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
@@ -176,21 +189,31 @@
             <MudTable Items="@_filtered" Hover="true" Dense="false" Elevation="0" Breakpoint="Breakpoint.Md">
                 <HeaderContent>
                     <MudTh Style="font-weight:600;">Store</MudTh>
+                    <MudTh Style="font-weight:600;">Contact</MudTh>
                     <MudTh Style="font-weight:600;">Plan</MudTh>
+                    <MudTh Style="font-weight:600;">Defaults</MudTh>
                     <MudTh Style="font-weight:600;">Status</MudTh>
                     <MudTh Style="font-weight:600;">Last Payment</MudTh>
                     <MudTh Style="font-weight:600;">Next Due</MudTh>
                     <MudTh Style="font-weight:600;">Total Paid</MudTh>
-                    <MudTh Style="font-weight:600;">#</MudTh>
+                    <MudTh Style="font-weight:600;">Subscription</MudTh>
                     <MudTh Style="font-weight:600;">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <!-- Store / Contact -->
+                    <!-- Store -->
                     <MudTd DataLabel="Store">
                         <MudText Typo="Typo.body2" Class="font-weight-medium">@context.StoreName</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Inherit">
-                            @context.FirstName @context.LastName · @context.Email
-                        </MudText>
+                        @if (!string.IsNullOrEmpty(context.AppUrl))
+                        {
+                            <MudText Typo="Typo.caption">
+                                <a href="@context.AppUrl" target="_blank" style="color:#00BFA5;">@context.AppUrl</a>
+                            </MudText>
+                        }
+                    </MudTd>
+                    <!-- Contact -->
+                    <MudTd DataLabel="Contact">
+                        <MudText Typo="Typo.body2">@context.FirstName @context.LastName</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.Email</MudText>
                     </MudTd>
                     <!-- Plan -->
                     <MudTd DataLabel="Plan">
@@ -198,6 +221,13 @@
                             @context.PlanSlug
                         </MudChip>
                         <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                    </MudTd>
+                    <!-- Defaults -->
+                    <MudTd DataLabel="Defaults">
+                        <MudText Typo="Typo.caption">@(context.Currency ?? "CAD")</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                            GST @context.FederalTaxRate.ToString("F1")% + QST @context.ProvincialTaxRate.ToString("F1")%
+                        </MudText>
                     </MudTd>
                     <!-- Status -->
                     <MudTd DataLabel="Status">
@@ -254,9 +284,29 @@
                             @context.Payments.Count payment@(context.Payments.Count == 1 ? "" : "s")
                         </MudText>
                     </MudTd>
-                    <!-- ID -->
-                    <MudTd DataLabel="#">
-                        <MudText Typo="Typo.caption" Color="Color.Inherit">#@context.Id</MudText>
+                    <!-- Subscription -->
+                    <MudTd DataLabel="Subscription">
+                        @{
+                            var subInfo = GetSubscriptionInfo(context.Email);
+                        }
+                        @if (subInfo is not null)
+                        {
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="@(subInfo.Value.IsActive ? Color.Success : Color.Warning)"
+                                     Variant="Variant.Filled">
+                                @(subInfo.Value.IsActive ? "Paid" : "Trial")
+                            </MudChip>
+                            @if (!string.IsNullOrEmpty(subInfo.Value.StripeSubId))
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Inherit" Style="font-family:monospace;font-size:0.7rem;">
+                                    @subInfo.Value.StripeSubId[..Math.Min(20, subInfo.Value.StripeSubId.Length)]…
+                                </MudText>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">—</MudText>
+                        }
                     </MudTd>
                     <!-- Actions -->
                     <MudTd DataLabel="Actions">
@@ -297,9 +347,15 @@
     private string  _search        = "";
     private string? _filterStatus  = null;
     private bool    _onlyUpcoming  = false;
+    private Dictionary<string, SubInfo> _subscriptionMap = new(StringComparer.OrdinalIgnoreCase);
+
+    private record struct SubInfo(bool IsActive, string? StripeSubId);
+
+    private SubInfo? GetSubscriptionInfo(string email)
+        => _subscriptionMap.TryGetValue(email, out var info) ? info : null;
 
     // ── computed ──
-    private List<ClientInfo> _upcoming    => _all
+    private List<ClientInfo> _upcoming => _all
         .Where(c => c.ExpiresAt.HasValue
             && c.ExpiresAt.Value > DateTime.UtcNow
             && c.ExpiresAt.Value <= DateTime.UtcNow.AddDays(30)
@@ -338,6 +394,21 @@
     {
         _loading = true;
         _all = await ProvisioningService.GetAllClientsAsync();
+
+        // Load Stripe subscription info from local Users table
+        var emails = _all.Select(c => c.Email).Distinct().ToList();
+        var users = await Db.Users
+            .Where(u => emails.Contains(u.Email))
+            .Select(u => new { u.Email, u.StripeSubscriptionId, u.ActivationStatus })
+            .ToListAsync();
+
+        _subscriptionMap = users.ToDictionary(
+            u => u.Email,
+            u => new SubInfo(
+                u.ActivationStatus == DMD.Marketing.Models.ActivationStatus.Active && !string.IsNullOrEmpty(u.StripeSubscriptionId),
+                u.StripeSubscriptionId),
+            StringComparer.OrdinalIgnoreCase);
+
         Filter();
         _loading = false;
     }
@@ -375,7 +446,6 @@
 
     private async Task RecordPaymentAsync(ClientInfo client)
     {
-        // Adapt ClientInfo → ProvisioningRequestInfo for the existing dialog
         var asRequest = new ProvisioningRequestInfo(
             client.Id, client.Email, client.FirstName, client.LastName,
             client.StoreName, client.StorePhone, client.StoreTimezone, client.BusinessType,
