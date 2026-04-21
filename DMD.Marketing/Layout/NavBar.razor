@@ -101,7 +101,7 @@
                      @onmouseleave="@(() => _open = "")">
                     <button class="dmd-user-btn @(_open == "user" ? "dmd-nav-btn--active" : "")">
                         <span class="dmd-user-avatar">
-                            @((auth.User.FindFirst(ClaimTypes.GivenName)?.Value ?? "?").Substring(0,1).ToUpper())
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Style="color:#fff;" />
                         </span>
                         <span class="dmd-user-name">
                             @(auth.User.FindFirst(ClaimTypes.GivenName)?.Value ?? auth.User.FindFirst(ClaimTypes.Name)?.Value ?? "Account")
