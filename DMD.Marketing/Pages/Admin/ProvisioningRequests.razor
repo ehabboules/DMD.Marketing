@@ -1,12 +1,17 @@
 @page "/admin/provisioning"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
 @using DMD.Marketing.Services
 @inject ProvisioningService ProvisioningService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
+@if (_authChecked)
+{
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 mb-8">
 
     <!-- ── Header ─────────────────────────────────────────── -->
@@ -82,7 +87,7 @@
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true"
-                          OnDebounceIntervalElapsed="Filter"
+                          OnDebounceIntervalElapsed="@(_ => Filter())"
                           DebounceInterval="300"
                           Variant="Variant.Outlined"
                           Dense="true" />
@@ -198,15 +203,36 @@
     }
 
 </MudContainer>
+}
 
 @code {
+    private bool _authChecked = false;
     private List<ProvisioningRequestInfo> _all      = new();
     private List<ProvisioningRequestInfo> _filtered = new();
     private bool    _loading      = true;
     private string  _search       = "";
     private string? _filterStatus = null;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _authChecked) return;
+
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/login?returnUrl=admin/provisioning", forceLoad: true);
+            return;
+        }
+        if (!auth.User.IsInRole("Admin"))
+        {
+            Nav.NavigateTo("/", forceLoad: false);
+            return;
+        }
+
+        _authChecked = true;
+        await LoadAsync();
+        StateHasChanged();
+    }
 
     private async Task LoadAsync()
     {
@@ -221,13 +247,13 @@
         _filtered = _all.Where(r =>
         {
             bool matchSearch = string.IsNullOrWhiteSpace(_search) ||
-                r.StoreName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
-                r.Email.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
-                r.FirstName.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
-                r.LastName.Contains(_search, StringComparison.OrdinalIgnoreCase);
+                (r.StoreName?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (r.Email?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (r.FirstName?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (r.LastName?.Contains(_search, StringComparison.OrdinalIgnoreCase) ?? false);
 
             bool matchStatus = string.IsNullOrWhiteSpace(_filterStatus) ||
-                r.Status.Equals(_filterStatus, StringComparison.OrdinalIgnoreCase);
+                (r.Status?.Equals(_filterStatus, StringComparison.OrdinalIgnoreCase) ?? false);
 
             return matchSearch && matchStatus;
         }).ToList();
@@ -252,7 +278,7 @@
         await dialog.Result;
     }
 
-    private static Color StatusColor(string s) => s switch
+    private static Color StatusColor(string? s) => s switch
     {
         "Pending"      => Color.Warning,
         "Provisioning" => Color.Info,
@@ -261,7 +287,7 @@
         _              => Color.Inherit
     };
 
-    private static string StatusIcon(string s) => s switch
+    private static string StatusIcon(string? s) => s switch
     {
         "Pending"      => Icons.Material.Filled.HourglassEmpty,
         "Provisioning" => Icons.Material.Filled.SettingsApplications,

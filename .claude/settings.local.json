@@ -3,7 +3,8 @@
     "allow": [
       "Bash(dotnet build:*)",
       "Bash(xargs grep -l \"connect/token\\\\|password.*grant\\\\|GrantType.*Password\\\\|AuthorizationController\\\\|TokenController\")",
-      "Bash(xargs grep -l \"TokenResponse\\\\|LoginModel\\\\|RegisterModel\")"
+      "Bash(xargs grep -l \"TokenResponse\\\\|LoginModel\\\\|RegisterModel\")",
+      "Bash(tasklist:*)"
     ]
   }
 }

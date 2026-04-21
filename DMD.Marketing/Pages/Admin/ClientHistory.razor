@@ -1,12 +1,17 @@
 @page "/admin/clients"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
 @using DMD.Marketing.Services
 @inject ProvisioningService ProvisioningService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
+@if (_authChecked)
+{
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 mb-8">
 
     <!-- ── Header ─────────────────────────────────────────── -->
@@ -282,8 +287,10 @@
     }
 
 </MudContainer>
+}
 
 @code {
+    private bool _authChecked = false;
     private List<ClientInfo> _all      = new();
     private List<ClientInfo> _filtered = new();
     private bool    _loading       = true;
@@ -306,7 +313,26 @@
         .Where(p => p.PaidAt.Year == DateTime.UtcNow.Year && p.PaidAt.Month == DateTime.UtcNow.Month)
         .Sum(p => p.Amount);
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _authChecked) return;
+
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/login?returnUrl=admin/clients", forceLoad: true);
+            return;
+        }
+        if (!auth.User.IsInRole("Admin"))
+        {
+            Nav.NavigateTo("/", forceLoad: false);
+            return;
+        }
+
+        _authChecked = true;
+        await LoadAsync();
+        StateHasChanged();
+    }
 
     private async Task LoadAsync()
     {

@@ -1,10 +1,17 @@
 @page "/admin/users"
-@attribute [Authorize(Roles = "Admin")]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject UserService UserSvc
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
 <PageTitle>User Role Management — DMD</PageTitle>
 
+@if (_authChecked)
+{
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <div class="ur-page">
     <div class="ur-header">
         <div>
@@ -85,8 +92,10 @@
         </div>
     }
 </div>
+}
 
 @code {
+    private bool _authChecked = false;
     private List<User>  _users    = new();
     private List<Role>  _roles    = new();
     private User?       _selected;
@@ -94,11 +103,27 @@
     private bool        _loading  = true;
     private bool        _busy     = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender || _authChecked) return;
+
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (auth.User.Identity?.IsAuthenticated != true)
+        {
+            Nav.NavigateTo("/login?returnUrl=admin/users", forceLoad: true);
+            return;
+        }
+        if (!auth.User.IsInRole("Admin"))
+        {
+            Nav.NavigateTo("/", forceLoad: false);
+            return;
+        }
+
+        _authChecked = true;
         _roles = await UserSvc.GetAllRolesAsync();
         _users = await UserSvc.GetAllUsersWithRolesAsync();
         _loading = false;
+        StateHasChanged();
     }
 
     private bool HasRole(User user, string roleName) =>
