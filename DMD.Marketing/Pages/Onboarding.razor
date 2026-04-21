@@ -21,9 +21,7 @@
         <!-- ── Success screen ── -->
         <div class="ob-success-card">
             <div class="ob-success-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="32" height="32">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="font-size:32px;" />
             </div>
             <h1 class="ob-success-title">You're all set!</h1>
             <p class="ob-success-sub">
@@ -66,9 +64,7 @@
                     <div class="ob-step-circle">
                         @if (step < _step)
                         {
-                            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                                <polyline points="2 7 5.5 10.5 12 4"/>
-                            </svg>
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Style="font-size:12px;" />
                         }
                         else
                         {
@@ -240,7 +236,7 @@
                 </div>
 
                 <div class="ob-tax-info">
-                    <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" style="flex-shrink:0;color:#00897B"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Style="font-size:14px;flex-shrink:0;color:#00897B;" />
                     Combined rate applied at POS: <strong>@((_federalTaxRate + _provincialTaxRate).ToString("F2"))%</strong>
                 </div>
 
@@ -282,7 +278,7 @@
                 </div>
 
                 <div class="ob-trial-banner">
-                    <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                    <MudIcon Icon="@Icons.Material.Filled.Schedule" Style="font-size:16px;" />
                     <span>Your <strong>14-day free trial</strong> starts today. No charge until your instance is live and you decide to continue.</span>
                 </div>
 

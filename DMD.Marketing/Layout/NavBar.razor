@@ -17,23 +17,23 @@
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "product")" @onmouseleave="@(() => _open = "")">
             <button class="dmd-nav-btn @(_open == "product" ? "dmd-nav-btn--active" : "")">
                 Product
-                <svg class="dmd-chevron @(_open == "product" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "product" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "product" ? "dmd-dropdown--open" : "")">
                 <a href="/features" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.PlayCircle" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Features</strong><span>Everything DMD Inventory can do</span></span>
                 </a>
                 <a href="/pos-system" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 2H7C5.9 2 5 2.9 5 4v16c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V6h8v2z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.PointOfSale" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Point of Sale</strong><span>Fast, modern checkout experience</span></span>
                 </a>
                 <a href="/inventory-management" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Inventory</strong><span>Multi-warehouse stock control</span></span>
                 </a>
                 <a href="/reports-analytics" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Reports &amp; Analytics</strong><span>Profit, sales &amp; valuation reports</span></span>
                 </a>
             </div>
@@ -43,19 +43,19 @@
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "solutions")" @onmouseleave="@(() => _open = "")">
             <button class="dmd-nav-btn @(_open == "solutions" ? "dmd-nav-btn--active" : "")">
                 Solutions
-                <svg class="dmd-chevron @(_open == "solutions" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "solutions" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "solutions" ? "dmd-dropdown--open" : "")">
                 <a href="/retail" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4v2l8 5 8-5V4zm0 4l-8 5-8-5v10h16V8z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.Store" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Retail Stores</strong><span>General &amp; specialty retail</span></span>
                 </a>
                 <a href="/dry-goods" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8.17-15.03-8.17-15.03 0h15.03zM1.02 17h15v2h-15z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.SetMeal" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Nuts &amp; Dry Goods</strong><span>Bulk &amp; weight-based inventory</span></span>
                 </a>
                 <a href="/restaurants" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.Restaurant" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Restaurants</strong><span>Table management &amp; kitchen flow</span></span>
                 </a>
             </div>
@@ -65,19 +65,19 @@
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "company")" @onmouseleave="@(() => _open = "")">
             <button class="dmd-nav-btn @(_open == "company" ? "dmd-nav-btn--active" : "")">
                 Company
-                <svg class="dmd-chevron @(_open == "company" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "company" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "company" ? "dmd-dropdown--open" : "")">
                 <a href="/about" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>About DMD Tech</strong><span>Dynamic – Modern – Dedicated</span></span>
                 </a>
                 <a href="/blog" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Article" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Blog</strong><span>Tips, news &amp; product updates</span></span>
                 </a>
                 <a href="/contact" class="dmd-drop-link" @onclick="Close">
-                    <span class="dmd-drop-icon" style="color:#FF6F00;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+                    <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Contact Us</strong><span>Get in touch with our team</span></span>
                 </a>
             </div>
@@ -106,33 +106,33 @@
                         <span class="dmd-user-name">
                             @(auth.User.FindFirst(ClaimTypes.GivenName)?.Value ?? auth.User.FindFirst(ClaimTypes.Name)?.Value ?? "Account")
                         </span>
-                        <svg class="dmd-chevron @(_open == "user" ? "dmd-chevron--up" : "")" viewBox="0 0 24 24" width="14" height="14"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "user" ? "dmd-chevron--up" : ""))" />
                     </button>
                     <div class="dmd-dropdown dmd-dropdown--right @(_open == "user" ? "dmd-dropdown--open" : "")">
                         <a href="/profile" class="dmd-drop-link" @onclick="Close">
-                            <span class="dmd-drop-icon" style="color:#00BFA5;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></span>
+                            <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" /></span>
                             <span class="dmd-drop-text"><strong>My Profile</strong><span>Plan &amp; account settings</span></span>
                         </a>
                         <AuthorizeView Roles="Admin" Context="adminCtx">
                             <Authorized>
                                 <div style="height:1px;background:#F3F4F6;margin:4px 8px;"></div>
                                 <a href="/admin/clients" class="dmd-drop-link" @onclick="Close">
-                                    <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></span>
+                                    <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" /></span>
                                     <span class="dmd-drop-text"><strong>Client Management</strong><span>Provisioning, billing &amp; renewals</span></span>
                                 </a>
                                 <a href="/admin/users" class="dmd-drop-link" @onclick="Close">
-                                    <span class="dmd-drop-icon" style="color:#1A237E;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></span>
+                                    <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Small" /></span>
                                     <span class="dmd-drop-text"><strong>User Roles</strong><span>Manage user permissions</span></span>
                                 </a>
                             </Authorized>
                         </AuthorizeView>
                         <a href="/changepassword" class="dmd-drop-link" @onclick='() => Nav.NavigateTo("/changepassword", forceLoad: true)' @onclick:preventDefault>
-                            <span class="dmd-drop-icon" style="color:#607D8B;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg></span>
+                            <span class="dmd-drop-icon" style="color:#607D8B;"><MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" /></span>
                             <span class="dmd-drop-text"><strong>Change Password</strong><span>Update your credentials</span></span>
                         </a>
                         <div style="height:1px;background:#F3F4F6;margin:4px 8px;"></div>
                         <a href="/logout" class="dmd-drop-link" style="color:#E53935;" @onclick='() => Nav.NavigateTo("/logout", forceLoad: true)' @onclick:preventDefault>
-                            <span class="dmd-drop-icon" style="color:#E53935;"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg></span>
+                            <span class="dmd-drop-icon" style="color:#E53935;"><MudIcon Icon="@Icons.Material.Filled.Logout" Size="Size.Small" /></span>
                             <span class="dmd-drop-text"><strong>Sign Out</strong></span>
                         </a>
                     </div>
