@@ -65,7 +65,7 @@
                             }
                             else
                             {
-                                <span class="plan-preview-price">$@(IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                                <span class="plan-preview-price">$@((IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice).ToString("F2"))</span>
                                 <span class="plan-preview-period">/mo</span>
                             }
                         </div>
@@ -102,13 +102,13 @@
                     {
                         <div class="price-row">
                             <span class="currency">$</span>
-                            <span class="price-num">@(IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                            <span class="price-num">@((IsAnnual ? plan.AnnualPrice : plan.MonthlyPrice).ToString("F2"))</span>
                             <span class="price-period">/mo</span>
                         </div>
                         <p class="price-note">
                             @if (IsAnnual)
                             {
-                                <span>Billed annually &middot; $@plan.MonthlyPrice/mo if monthly</span>
+                                <span>Billed annually &middot; $@(plan.MonthlyPrice.ToString("F2"))/mo if monthly</span>
                             }
                             else
                             {
@@ -228,8 +228,8 @@
         string Name,
         string Description,
         string PreviewTagline,
-        int MonthlyPrice,
-        int AnnualPrice,
+        decimal MonthlyPrice,
+        decimal AnnualPrice,
         bool CustomPrice,
         bool Featured,
         string CtaLabel,
@@ -242,8 +242,8 @@
             Name: "Starter",
             Description: "One location, getting off the ground.",
             PreviewTagline: "1 register · 1 warehouse",
-            MonthlyPrice: 49,
-            AnnualPrice: 44,
+            MonthlyPrice: 54.99m,
+            AnnualPrice: 49.99m,
             CustomPrice: false,
             Featured: false,
             CtaLabel: "Start free trial",
@@ -267,8 +267,8 @@
             Name: "Growth",
             Description: "Scaling retail with full POS and reporting.",
             PreviewTagline: "Up to 5 users · 3 warehouses",
-            MonthlyPrice: 99,
-            AnnualPrice: 89,
+            MonthlyPrice: 99.99m,
+            AnnualPrice: 89.99m,
             CustomPrice: false,
             Featured: true,
             CtaLabel: "Start free trial",
@@ -292,8 +292,8 @@
             Name: "Pro",
             Description: "Multi-location with full control and localization.",
             PreviewTagline: "Unlimited · multi-language",
-            MonthlyPrice: 179,
-            AnnualPrice: 161,
+            MonthlyPrice: 199.99m,
+            AnnualPrice: 179.99m,
             CustomPrice: false,
             Featured: false,
             CtaLabel: "Start free trial",
@@ -317,8 +317,8 @@
             Name: "Enterprise",
             Description: "Custom deployments, SLAs, and dedicated support.",
             PreviewTagline: "Custom deployment",
-            MonthlyPrice: 0,
-            AnnualPrice: 0,
+            MonthlyPrice: 0m,
+            AnnualPrice: 0m,
             CustomPrice: true,
             Featured: false,
             CtaLabel: "Contact us →",

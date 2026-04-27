@@ -95,7 +95,7 @@
                             }
                             else
                             {
-                                <span class="price-amount">$@(_annual ? plan.AnnualPrice : plan.MonthlyPrice)</span>
+                                <span class="price-amount">$@((_annual ? plan.AnnualPrice : plan.MonthlyPrice).ToString("F2"))</span>
                                 <span class="price-period">/mo</span>
                             }
                         </div>
@@ -165,7 +165,7 @@
                 var nextDate  = GetNextPaymentDate();
                 var amount    = planDef is { CustomPrice: false }
                                     ? (_annual ? planDef.AnnualPrice : planDef.MonthlyPrice)
-                                    : (int?)null;
+                                    : (decimal?)null;
 
                 <div class="sub-grid">
                     <div class="sub-item">
@@ -221,12 +221,12 @@
                             {
                                 @if (_annual && amount.HasValue)
                                 {
-                                    @($"${amount * 12}/yr")
-                                    <span class="sub-billed-note">&nbsp;· ${amount}/mo</span>
+                                    @($"${(amount.Value * 12):F2}/yr")
+                                    <span class="sub-billed-note">&nbsp;· $@(amount.Value.ToString("F2"))/mo</span>
                                 }
                                 else
                                 {
-                                    @(amount.HasValue ? $"${amount}/mo" : "Custom")
+                                    @(amount.HasValue ? $"${amount.Value:F2}/mo" : "Custom")
                                 }
                             }
                         </span>
@@ -402,25 +402,25 @@
     // ── Plan definitions ─────────────────────────────────────────────
     private record PlanDef(
         PlanSlug Slug, string Name, string Description,
-        int MonthlyPrice, int AnnualPrice, bool CustomPrice, bool Featured,
+        decimal MonthlyPrice, decimal AnnualPrice, bool CustomPrice, bool Featured,
         List<string> Highlights);
 
     private readonly List<PlanDef> _plans = new()
     {
         new(PlanSlug.Starter, "Starter", "One location, getting off the ground.",
-            49, 44, false, false,
+            54.99m, 49.99m, false, false,
             new() { "1 register", "1 warehouse · 500 products", "1 user", "Sales & inventory reports" }),
 
         new(PlanSlug.Growth, "Growth", "Scaling retail with full POS and reporting.",
-            99, 89, false, true,
+            99.99m, 89.99m, false, true,
             new() { "2 registers", "3 warehouses · unlimited products", "5 users", "Financial dashboard", "Stripe Terminal" }),
 
         new(PlanSlug.Pro, "Pro", "Multi-location with full control and localization.",
-            179, 161, false, false,
+            199.99m, 179.99m, false, false,
             new() { "Unlimited registers & warehouses", "Unlimited users", "Multi-language (EN/FR/AR)", "Everything in Growth" }),
 
         new(PlanSlug.Enterprise, "Enterprise", "Custom deployments and dedicated support.",
-            0, 0, true, false,
+            0m, 0m, true, false,
             new() { "Everything in Pro", "Dedicated infrastructure", "Custom integrations", "SLA & priority support" }),
     };
 

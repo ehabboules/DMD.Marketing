@@ -164,12 +164,12 @@
     {
         return (_user?.SelectedPlan, _user?.BillingCycle) switch
         {
-            (PlanSlug.Starter, BillingCycle.Monthly) => "$49/month",
-            (PlanSlug.Starter, BillingCycle.Annual) => "$44/month (billed annually)",
-            (PlanSlug.Growth, BillingCycle.Monthly) => "$99/month",
-            (PlanSlug.Growth, BillingCycle.Annual) => "$89/month (billed annually)",
-            (PlanSlug.Pro, BillingCycle.Monthly) => "$179/month",
-            (PlanSlug.Pro, BillingCycle.Annual) => "$161/month (billed annually)",
+            (PlanSlug.Starter, BillingCycle.Monthly) => "$54.99/month",
+            (PlanSlug.Starter, BillingCycle.Annual) => "$49.99/month (billed annually)",
+            (PlanSlug.Growth, BillingCycle.Monthly) => "$99.99/month",
+            (PlanSlug.Growth, BillingCycle.Annual) => "$89.99/month (billed annually)",
+            (PlanSlug.Pro, BillingCycle.Monthly) => "$199.99/month",
+            (PlanSlug.Pro, BillingCycle.Annual) => "$179.99/month (billed annually)",
             _ => "—"
         };
     }

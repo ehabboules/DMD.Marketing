@@ -239,7 +239,7 @@
                         else
                         {
                             var price = _isAnnual ? _planDef?.AnnualPrice : _planDef?.MonthlyPrice;
-                            <span class="ob-plan-price">$@price<span class="ob-plan-per">/mo</span></span>
+                            <span class="ob-plan-price">$@(price?.ToString("F2"))<span class="ob-plan-per">/mo</span></span>
                             @if (_isAnnual)
                             {
                                 <span class="ob-plan-note">· billed annually</span>
@@ -330,13 +330,13 @@
 
     private readonly string[] _stepLabels = { "Store details", "Store defaults", "Review & submit" };
 
-    private record PlanDef(PlanSlug Slug, string Name, int MonthlyPrice, int AnnualPrice, bool CustomPrice);
+    private record PlanDef(PlanSlug Slug, string Name, decimal MonthlyPrice, decimal AnnualPrice, bool CustomPrice);
     private readonly List<PlanDef> _planDefs = new()
     {
-        new(PlanSlug.Starter,    "Starter",    49,  44,  false),
-        new(PlanSlug.Growth,     "Growth",     99,  89,  false),
-        new(PlanSlug.Pro,        "Pro",        179, 161, false),
-        new(PlanSlug.Enterprise, "Enterprise", 0,   0,   true),
+        new(PlanSlug.Starter,    "Starter",    54.99m,  49.99m,  false),
+        new(PlanSlug.Growth,     "Growth",     99.99m,  89.99m,  false),
+        new(PlanSlug.Pro,        "Pro",        199.99m, 179.99m, false),
+        new(PlanSlug.Enterprise, "Enterprise", 0m,      0m,      true),
     };
 
     private PlanDef? _planDef;
