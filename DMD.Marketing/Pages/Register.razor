@@ -369,7 +369,7 @@
                 _successMessage = "Account created and logged in! Redirecting…";
                 Snackbar.Add(_successMessage, Severity.Success);
                 await Task.Delay(400);
-                Navigation.NavigateTo("/", forceLoad: true);
+                Navigation.NavigateTo("/profile", forceLoad: true);
             }
             else
             {

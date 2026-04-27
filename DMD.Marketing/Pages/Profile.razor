@@ -3,6 +3,7 @@
  *@@* Correct syntax for component definition *@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+@using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext Db
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
@@ -49,168 +50,10 @@
             </div>
         }
 
-        <!-- ══════════════════════════════════════════════════
-             § SUBSCRIPTION SUMMARY
-        ═══════════════════════════════════════════════════ -->
+        <!-- ── Plan selection (moved above subscription summary) ── -->
         <div class="profile-section">
             <div class="section-header-row">
-                <h2 class="section-title">Subscription</h2>
-                @if (_user.ActivationStatus == ActivationStatus.Active)
-                {
-                    <span class="sub-status sub-status--active">
-                        <span class="sub-status-dot"></span>Active
-                    </span>
-                }
-                else if (_user.ActivationStatus == ActivationStatus.Pending)
-                {
-                    <span class="sub-status sub-status--pending">
-                        <span class="sub-status-dot sub-status-dot--amber"></span>Pending
-                    </span>
-                }
-                else if (_user.SelectedPlan != PlanSlug.None)
-                {
-                    <span class="sub-status sub-status--setup">
-                        Setup required
-                    </span>
-                }
-                else
-                {
-                    <span class="sub-status sub-status--none">No active plan</span>
-                }
-            </div>
-
-            @if (_user.SelectedPlan != PlanSlug.None)
-            {
-                var planDef   = _plans.FirstOrDefault(p => p.Slug == _user.SelectedPlan);
-                var isAnnual  = _user.BillingCycle == BillingCycle.Annual;
-                var nextDate  = GetNextPaymentDate();
-                var amount    = planDef is { CustomPrice: false }
-                                    ? (isAnnual ? planDef.AnnualPrice : planDef.MonthlyPrice)
-                                    : (int?)null;
-
-                <div class="sub-grid">
-                    <div class="sub-item">
-                        <span class="sub-item-label">Current plan</span>
-                        <span class="sub-item-value sub-plan-pill">
-                            @planDef?.Name
-                        </span>
-                    </div>
-                    <div class="sub-item">
-                        <span class="sub-item-label">Billing cycle</span>
-                        <span class="sub-item-value">@(isAnnual ? "Annual" : "Monthly")</span>
-                    </div>
-                    <div class="sub-item">
-                        <span class="sub-item-label">
-                            @(_user.ActivationStatus == ActivationStatus.Pending ? "Trial ends" : "Next payment")
-                        </span>
-                        <span class="sub-item-value sub-item-value--accent">
-                            @if (_user.SubscriptionExpiresAt.HasValue)
-                            {
-                                @_user.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
-                            }
-                            else
-                            {
-                                @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
-                            }
-                        </span>
-                    </div>
-                    <div class="sub-item">
-                        <span class="sub-item-label">Amount due</span>
-                        <span class="sub-item-value">
-                            @if (_user.ActivationStatus == ActivationStatus.Pending)
-                            {
-                                <span style="color:#00897B;font-size:0.85rem;">Free trial</span>
-                            }
-                            else
-                            {
-                                @(amount.HasValue ? $"${amount}/mo" : "Custom")
-                                @if (isAnnual && amount.HasValue)
-                                {
-                                    <span class="sub-billed-note">&nbsp;· billed annually</span>
-                                }
-                            }
-                        </span>
-                    </div>
-                </div>
-
-                @if (_user.ActivationStatus != ActivationStatus.Active)
-                {
-                    <div class="sub-payment-cta">
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CreditCard"
-                                   Href="/payment">
-                            Subscribe Now
-                        </MudButton>
-                    </div>
-                }
-
-                <!-- Cancel flow -->
-                @if (_cancelSuccess)
-                {
-                    <div class="sub-cancel-success">
-                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="font-size:15px;" />
-                        Subscription cancelled. Access continues until @(nextDate?.ToString("MMM d, yyyy") ?? "end of period").
-                    </div>
-                }
-                else if (_showCancelConfirm)
-                {
-                    <div class="sub-cancel-box">
-                        <p class="sub-cancel-question">
-                            Are you sure? You'll keep full access to <strong>@planDef?.Name</strong> until
-                            <strong>@(nextDate?.ToString("MMM d, yyyy") ?? "end of period")</strong>, then your account will downgrade.
-                        </p>
-                        <div class="sub-cancel-actions">
-                            <button class="btn-cancel-confirm"
-                                    disabled="@_cancelling"
-                                    @onclick="CancelSubscription">
-                                @(_cancelling ? "Cancelling…" : "Yes, cancel subscription")
-                            </button>
-                            <button class="btn-cancel-dismiss"
-                                    @onclick="() => _showCancelConfirm = false">
-                                Keep my subscription
-                            </button>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <button class="btn-cancel-sub" @onclick="() => _showCancelConfirm = true">
-                        Cancel subscription
-                    </button>
-                }
-            }
-            else
-            {
-                <p class="sub-no-plan">
-                    You don't have an active subscription. Choose a plan below to get started.
-                </p>
-            }
-        </div>
-
-        <!-- ── Account details ── -->
-        <div class="profile-section">
-            <h2 class="section-title">Account details</h2>
-            <div class="fields-grid">
-                <div class="field-group">
-                    <label class="field-label">First name</label>
-                    <input class="field-input" @bind="_firstName" placeholder="First name" />
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Last name</label>
-                    <input class="field-input" @bind="_lastName" placeholder="Last name" />
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Email</label>
-                    <input class="field-input" value="@_user.Email" disabled />
-                </div>
-            </div>
-        </div>
-
-        <!-- ── Plan selection ── -->
-        <div class="profile-section">
-            <div class="section-header-row">
-                <h2 class="section-title">Change plan</h2>
+                <h2 class="section-title">Choose plan</h2>
                 <div class="billing-toggle">
                     <span class="@(!_annual ? "toggle-label-active" : "toggle-label")">Monthly</span>
                     <button class="toggle-pill @(_annual ? "on" : "")"
@@ -219,7 +62,7 @@
                         <span class="toggle-knob"></span>
                     </button>
                     <span class="@(_annual ? "toggle-label-active" : "toggle-label")">Annual</span>
-                    <span class="save-tag">Save 20%</span>
+                    <span class="save-tag">Save 10%</span>
                 </div>
             </div>
 
@@ -271,6 +114,229 @@
             </div>
         </div>
 
+        <!-- ══════════════════════════════════════════════════
+             § SUBSCRIPTION SUMMARY (now uses live _selectedPlan / _annual)
+        ═══════════════════════════════════════════════════ -->
+        <div class="profile-section">
+            <div class="section-header-row">
+                <h2 class="section-title">Subscription</h2>
+                @if (_user.ActivationStatus == ActivationStatus.Active)
+                {
+                    <span class="sub-status sub-status--active">
+                        <span class="sub-status-dot"></span>Active
+                    </span>
+                }
+                else if (_user.ActivationStatus == ActivationStatus.Pending)
+                {
+                    <span class="sub-status sub-status--pending">
+                        <span class="sub-status-dot sub-status-dot--amber"></span>Pending
+                    </span>
+                }
+                else if (_selectedPlan != PlanSlug.None)
+                {
+                    <span class="sub-status sub-status--setup">
+                        Setup required
+                    </span>
+                }
+                else
+                {
+                    <span class="sub-status sub-status--none">No active plan</span>
+                }
+            </div>
+
+            @if (_selectedPlan != PlanSlug.None)
+            {
+                var planDef   = _plans.FirstOrDefault(p => p.Slug == _selectedPlan);
+                var nextDate  = GetNextPaymentDate();
+                var amount    = planDef is { CustomPrice: false }
+                                    ? (_annual ? planDef.AnnualPrice : planDef.MonthlyPrice)
+                                    : (int?)null;
+
+                <div class="sub-grid">
+                    <div class="sub-item">
+                        <span class="sub-item-label">Selected plan</span>
+                        <span class="sub-item-value sub-plan-pill">
+                            @planDef?.Name
+                        </span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">Billing cycle</span>
+                        <span class="sub-item-value">@(_annual ? "Annual" : "Monthly")</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">
+                            @if (_user.ActivationStatus == ActivationStatus.Pending)
+                            {
+                                @:Trial ends
+                            }
+                            else if (_user.PlanSelectedAt is null)
+                            {
+                                @:First payment
+                            }
+                            else
+                            {
+                                @:Next payment
+                            }
+                        </span>
+                        <span class="sub-item-value sub-item-value--accent">
+                            @if (_user.ActivationStatus == ActivationStatus.Pending && _user.SubscriptionExpiresAt.HasValue)
+                            {
+                                @_user.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
+                            }
+                            else if (_user.PlanSelectedAt is null)
+                            {
+                                var trialEnd = GetTrialEndDate();
+                                @trialEnd.ToString("MMM d, yyyy")
+                                <span class="sub-billed-note">&nbsp;· after 14-day trial</span>
+                            }
+                            else
+                            {
+                                @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
+                            }
+                        </span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-item-label">Amount due</span>
+                        <span class="sub-item-value">
+                            @if (_user.ActivationStatus == ActivationStatus.Pending)
+                            {
+                                <span style="color:#00897B;font-size:0.85rem;">Free trial</span>
+                            }
+                            else
+                            {
+                                @if (_annual && amount.HasValue)
+                                {
+                                    @($"${amount * 12}/yr")
+                                    <span class="sub-billed-note">&nbsp;· ${amount}/mo</span>
+                                }
+                                else
+                                {
+                                    @(amount.HasValue ? $"${amount}/mo" : "Custom")
+                                }
+                            }
+                        </span>
+                    </div>
+                </div>
+
+                var trialActive = _user.ActivationStatus == ActivationStatus.Pending
+                                 && _user.SubscriptionExpiresAt.HasValue
+                                 && _user.SubscriptionExpiresAt.Value > DateTime.UtcNow;
+                @if (_user.ActivationStatus != ActivationStatus.Active && !trialActive)
+                {
+                    <div class="sub-payment-cta">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CreditCard"
+                                   Href="/payment">
+                            Subscribe Now
+                        </MudButton>
+                    </div>
+                }
+
+                <!-- Cancel flow -->
+                @if (_cancelSuccess)
+                {
+                    <div class="sub-cancel-success">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="font-size:15px;" />
+                        Subscription cancelled. Access continues until @(nextDate?.ToString("MMM d, yyyy") ?? "end of period").
+                    </div>
+                }
+                else if (_showCancelConfirm)
+                {
+                    <div class="sub-cancel-box">
+                        <p class="sub-cancel-question">
+                            Are you sure? You'll keep full access to <strong>@planDef?.Name</strong> until
+                            <strong>@(nextDate?.ToString("MMM d, yyyy") ?? "end of period")</strong>, then your account will downgrade.
+                        </p>
+                        <div class="sub-cancel-actions">
+                            <button class="btn-cancel-confirm"
+                                    disabled="@_cancelling"
+                                    @onclick="CancelSubscription">
+                                @(_cancelling ? "Cancelling…" : "Yes, cancel subscription")
+                            </button>
+                            <button class="btn-cancel-dismiss"
+                                    @onclick="() => _showCancelConfirm = false">
+                                Keep my subscription
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <button class="btn-cancel-sub" @onclick="() => _showCancelConfirm = true">
+                        Cancel subscription
+                    </button>
+                }
+            }
+            else
+            {
+                <p class="sub-no-plan">
+                    You don't have an active subscription. Choose a plan above to get started.
+                </p>
+            }
+        </div>
+
+        <!-- ── Payment history ── -->
+        <div class="profile-section">
+            <h2 class="section-title">Payment history</h2>
+
+            @if (_payments is { Count: > 0 })
+            {
+                <div class="ph-table-wrap">
+                    <table class="ph-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Plan</th>
+                                <th>Billing</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Card</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in _payments)
+                            {
+                                <tr>
+                                    <td>@p.CreatedAt.ToString("MMM d, yyyy")</td>
+                                    <td>@p.PlanName</td>
+                                    <td>@p.BillingCycle</td>
+                                    <td>$@p.Amount.ToString("N2")</td>
+                                    <td>
+                                        <span class="ph-status ph-status--@p.Status.ToLower()">@p.Status</span>
+                                    </td>
+                                    <td>@(p.PaymentMethodLast4 is not null ? $"····{p.PaymentMethodLast4}" : "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="ph-empty">No payments yet.</p>
+            }
+        </div>
+
+        <!-- ── Account details ── -->
+        <div class="profile-section">
+            <h2 class="section-title">Account details</h2>
+            <div class="fields-grid">
+                <div class="field-group">
+                    <label class="field-label">First name</label>
+                    <input class="field-input" @bind="_firstName" placeholder="First name" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Last name</label>
+                    <input class="field-input" @bind="_lastName" placeholder="Last name" />
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Email</label>
+                    <input class="field-input" value="@_user.Email" disabled />
+                </div>
+            </div>
+        </div>
+
         <!-- ── Save button ── -->
         <div class="save-row">
             @if (_saveSuccess)
@@ -310,6 +376,9 @@
     private bool     _annual       = false;
     private PlanSlug _selectedPlan = PlanSlug.None;
 
+    // payment history
+    private List<PaymentHistory>? _payments;
+
     // cancel flow
     private bool _showCancelConfirm = false;
     private bool _cancelling        = false;
@@ -324,15 +393,15 @@
     private readonly List<PlanDef> _plans = new()
     {
         new(PlanSlug.Starter, "Starter", "One location, getting off the ground.",
-            49, 39, false, false,
+            49, 44, false, false,
             new() { "1 register", "1 warehouse · 500 products", "1 user", "Sales & inventory reports" }),
 
         new(PlanSlug.Growth, "Growth", "Scaling retail with full POS and reporting.",
-            99, 79, false, true,
+            99, 89, false, true,
             new() { "2 registers", "3 warehouses · unlimited products", "5 users", "Financial dashboard", "Stripe Terminal" }),
 
         new(PlanSlug.Pro, "Pro", "Multi-location with full control and localization.",
-            179, 143, false, false,
+            179, 161, false, false,
             new() { "Unlimited registers & warehouses", "Unlimited users", "Multi-language (EN/FR/AR)", "Everything in Growth" }),
 
         new(PlanSlug.Enterprise, "Enterprise", "Custom deployments and dedicated support.",
@@ -362,6 +431,12 @@
                 _lastName     = _user.LastName;
                 _selectedPlan = _user.SelectedPlan;
                 _annual       = _user.BillingCycle == BillingCycle.Annual;
+
+                _payments = await Db.PaymentHistory
+                    .Where(p => p.UserId == userId)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Take(10)
+                    .ToListAsync();
             }
         }
 
@@ -369,23 +444,27 @@
     }
 
     // ── Helpers ──────────────────────────────────────────────────────
+    private DateTime GetTrialEndDate() => DateTime.UtcNow.AddDays(14);
+
     private DateTime? GetNextPaymentDate()
     {
-        if (_user?.PlanSelectedAt is not { } start || _user.SelectedPlan == PlanSlug.None)
-            return null;
+        if (_selectedPlan == PlanSlug.None) return null;
 
-        var now  = DateTime.UtcNow;
-        var next = _user.BillingCycle == BillingCycle.Annual
-            ? start.AddYears(1)
-            : start.AddMonths(1);
+        // User has an existing subscription with a start date
+        if (_user?.PlanSelectedAt is { } start)
+        {
+            var now  = DateTime.UtcNow;
+            var next = _annual ? start.AddYears(1) : start.AddMonths(1);
 
-        // Roll forward until the date is in the future
-        while (next < now)
-            next = _user.BillingCycle == BillingCycle.Annual
-                ? next.AddYears(1)
-                : next.AddMonths(1);
+            while (next < now)
+                next = _annual ? next.AddYears(1) : next.AddMonths(1);
 
-        return next;
+            return next;
+        }
+
+        // New user — first payment after 14-day trial
+        var trialEnd = GetTrialEndDate();
+        return _annual ? trialEnd.AddYears(1) : trialEnd.AddMonths(1);
     }
 
     // ── Actions ──────────────────────────────────────────────────────
@@ -811,6 +890,75 @@
         font-size: 0.875rem; font-weight: 600; color: #00897B;
     }
     .save-error-msg { font-size: 0.875rem; color: #E53935; }
+
+    /* ── Payment history table ── */
+    .ph-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+    }
+
+    .ph-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+    }
+
+    .ph-table thead {
+        background: #F9FAFB;
+    }
+
+    .ph-table th {
+        text-align: left;
+        padding: 10px 14px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .ph-table td {
+        padding: 10px 14px;
+        color: #374151;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .ph-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ph-status {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+
+    .ph-status--paid {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .ph-status--failed {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .ph-status--refunded {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .ph-empty {
+        font-size: 0.9rem;
+        color: #9CA3AF;
+        margin: 0;
+        padding: 0.5rem 0;
+    }
 
     /* ── Responsive ── */
     @@media (max-width: 700px) {

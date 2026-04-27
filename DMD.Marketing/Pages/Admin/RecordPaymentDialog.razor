@@ -11,7 +11,12 @@
     <DialogContent>
         <MudGrid Spacing="3">
             <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="_planSlug" Label="Plan" Variant="Variant.Outlined" Dense="true" />
+                <MudSelect @bind-Value="_planSlug" Label="Plan" Variant="Variant.Outlined" Dense="true">
+                    <MudSelectItem Value="@("Starter")">Starter</MudSelectItem>
+                    <MudSelectItem Value="@("Growth")">Growth</MudSelectItem>
+                    <MudSelectItem Value="@("Pro")">Pro</MudSelectItem>
+                    <MudSelectItem Value="@("Enterprise")">Enterprise</MudSelectItem>
+                </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6">
                 <MudSelect @bind-Value="_billingCycle" Label="Billing Cycle" Variant="Variant.Outlined" Dense="true">

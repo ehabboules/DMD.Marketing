@@ -32,6 +32,10 @@
     {
         <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-6" />
     }
+    else if (_loadError is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@_loadError</MudAlert>
+    }
     else
     {
         <!-- ── Stats ──────────────────────────────────────────── -->
@@ -354,20 +358,27 @@
     private SubInfo? GetSubscriptionInfo(string email)
         => _subscriptionMap.TryGetValue(email, out var info) ? info : null;
 
-    // ── computed ──
-    private List<ClientInfo> _upcoming => _all
-        .Where(c => c.ExpiresAt.HasValue
-            && c.ExpiresAt.Value > DateTime.UtcNow
-            && c.ExpiresAt.Value <= DateTime.UtcNow.AddDays(30)
-            && c.Status != "Rejected")
-        .ToList();
+    // ── cached computed values (refreshed in LoadAsync) ──
+    private List<ClientInfo> _upcoming      = new();
+    private int              _upcomingCount = 0;
+    private decimal          RevenueThisMonth = 0m;
 
-    private int _upcomingCount => _upcoming.Count;
+    private void RefreshComputed()
+    {
+        var now = DateTime.UtcNow;
+        _upcoming = _all
+            .Where(c => c.ExpiresAt.HasValue
+                && c.ExpiresAt.Value > now
+                && c.ExpiresAt.Value <= now.AddDays(30)
+                && c.Status != "Rejected")
+            .ToList();
+        _upcomingCount = _upcoming.Count;
 
-    private decimal RevenueThisMonth => _all
-        .SelectMany(c => c.Payments)
-        .Where(p => p.PaidAt.Year == DateTime.UtcNow.Year && p.PaidAt.Month == DateTime.UtcNow.Month)
-        .Sum(p => p.Amount);
+        RevenueThisMonth = _all
+            .SelectMany(c => c.Payments)
+            .Where(p => p.PaidAt.Year == now.Year && p.PaidAt.Month == now.Month)
+            .Sum(p => p.Amount);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -390,27 +401,43 @@
         StateHasChanged();
     }
 
+    private string? _loadError;
+
     private async Task LoadAsync()
     {
-        _loading = true;
-        _all = await ProvisioningService.GetAllClientsAsync();
+        _loading  = true;
+        _loadError = null;
 
-        // Load Stripe subscription info from local Users table
-        var emails = _all.Select(c => c.Email).Distinct().ToList();
-        var users = await Db.Users
-            .Where(u => emails.Contains(u.Email))
-            .Select(u => new { u.Email, u.StripeSubscriptionId, u.ActivationStatus })
-            .ToListAsync();
+        try
+        {
+            _all = await ProvisioningService.GetAllClientsAsync();
 
-        _subscriptionMap = users.ToDictionary(
-            u => u.Email,
-            u => new SubInfo(
-                u.ActivationStatus == DMD.Marketing.Models.ActivationStatus.Active && !string.IsNullOrEmpty(u.StripeSubscriptionId),
-                u.StripeSubscriptionId),
-            StringComparer.OrdinalIgnoreCase);
+            // Load Stripe subscription info from local Users table
+            var emails = _all.Select(c => c.Email).Distinct().ToList();
+            var users = await Db.Users
+                .Where(u => emails.Contains(u.Email))
+                .Select(u => new { u.Email, u.StripeSubscriptionId, u.ActivationStatus })
+                .ToListAsync();
 
-        Filter();
-        _loading = false;
+            _subscriptionMap = users.ToDictionary(
+                u => u.Email,
+                u => new SubInfo(
+                    u.ActivationStatus == DMD.Marketing.Models.ActivationStatus.Active && !string.IsNullOrEmpty(u.StripeSubscriptionId),
+                    u.StripeSubscriptionId),
+                StringComparer.OrdinalIgnoreCase);
+
+            RefreshComputed();
+            Filter();
+        }
+        catch (Exception ex)
+        {
+            _loadError = $"Failed to load clients: {ex.Message}";
+            Snackbar.Add(_loadError, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void Filter()
@@ -437,6 +464,15 @@
         StateHasChanged();
     }
 
+    private static ProvisioningRequestInfo ToRequestInfo(ClientInfo c) => new(
+        c.Id, c.Email, c.FirstName, c.LastName,
+        c.StoreName, c.StorePhone, c.StoreTimezone, c.BusinessType,
+        c.PlanSlug, c.BillingCycle, c.Currency,
+        c.FederalTaxRate, c.ProvincialTaxRate, c.TaxInclusive,
+        c.Status, c.AppUrl,
+        c.RequestedAt, c.ExpiresAt, c.ProvisionedAt,
+        c.Notes, c.MarketingUserId);
+
     private async Task ViewPaymentsAsync(ClientInfo client)
     {
         var parameters = new DialogParameters<ClientPaymentsDialog> { { x => x.Client, client } };
@@ -446,16 +482,7 @@
 
     private async Task RecordPaymentAsync(ClientInfo client)
     {
-        var asRequest = new ProvisioningRequestInfo(
-            client.Id, client.Email, client.FirstName, client.LastName,
-            client.StoreName, client.StorePhone, client.StoreTimezone, client.BusinessType,
-            client.PlanSlug, client.BillingCycle, client.Currency,
-            client.FederalTaxRate, client.ProvincialTaxRate, client.TaxInclusive,
-            client.Status, client.AppUrl,
-            client.RequestedAt, client.ExpiresAt, client.ProvisionedAt,
-            client.Notes, client.MarketingUserId);
-
-        var parameters = new DialogParameters<RecordPaymentDialog> { { x => x.Request, asRequest } };
+        var parameters = new DialogParameters<RecordPaymentDialog> { { x => x.Request, ToRequestInfo(client) } };
         var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
         var dialog     = await DialogService.ShowAsync<RecordPaymentDialog>("Record Payment", parameters, options);
         var result     = await dialog.Result;
@@ -464,16 +491,7 @@
 
     private async Task EditRequestAsync(ClientInfo client)
     {
-        var asRequest = new ProvisioningRequestInfo(
-            client.Id, client.Email, client.FirstName, client.LastName,
-            client.StoreName, client.StorePhone, client.StoreTimezone, client.BusinessType,
-            client.PlanSlug, client.BillingCycle, client.Currency,
-            client.FederalTaxRate, client.ProvincialTaxRate, client.TaxInclusive,
-            client.Status, client.AppUrl,
-            client.RequestedAt, client.ExpiresAt, client.ProvisionedAt,
-            client.Notes, client.MarketingUserId);
-
-        var parameters = new DialogParameters<ProvisioningEditDialog> { { x => x.Request, asRequest } };
+        var parameters = new DialogParameters<ProvisioningEditDialog> { { x => x.Request, ToRequestInfo(client) } };
         var options    = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
         var dialog     = await DialogService.ShowAsync<ProvisioningEditDialog>("Edit Request", parameters, options);
         var result     = await dialog.Result;

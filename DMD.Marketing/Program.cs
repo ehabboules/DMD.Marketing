@@ -26,11 +26,13 @@ builder.Services.AddHostedService<TrialExpiryBackgroundService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // ── DbContext ──────────────────────────────────────────────────────
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// Scoped DbContext for standard DI (controllers, services, etc.)
+// Factory for Blazor interactive components that manage their own DbContext lifetime
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
     options.UseOpenIddict();
-});
+}, ServiceLifetime.Scoped);
 
 // ── Password hasher ────────────────────────────────────────────────
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

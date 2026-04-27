@@ -90,6 +90,19 @@ public class StripeWebhookController : ControllerBase
             ? DateTime.UtcNow.AddYears(1)
             : DateTime.UtcNow.AddMonths(1);
 
+        // Log payment history
+        _db.PaymentHistory.Add(new PaymentHistory
+        {
+            UserId              = user.Id,
+            PlanName            = user.SelectedPlan.ToString(),
+            BillingCycle        = user.BillingCycle.ToString(),
+            Amount              = session.AmountTotal.HasValue ? session.AmountTotal.Value / 100m : 0m,
+            Status              = "Paid",
+            StripePaymentIntentId = session.PaymentIntentId,
+            StripeInvoiceId     = session.InvoiceId,
+            CreatedAt           = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
         _logger.LogInformation("User {UserId} activated via Stripe checkout", userId);
     }
@@ -106,6 +119,36 @@ public class StripeWebhookController : ControllerBase
         user.SubscriptionExpiresAt = user.BillingCycle == BillingCycle.Annual
             ? DateTime.UtcNow.AddYears(1)
             : DateTime.UtcNow.AddMonths(1);
+
+        // Extract payment method last4
+        string? last4 = null;
+        if (invoice.ChargeId is not null)
+        {
+            try
+            {
+                var chargeService = new ChargeService();
+                var charge = await chargeService.GetAsync(invoice.ChargeId);
+                last4 = charge.PaymentMethodDetails?.Card?.Last4;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not fetch charge details for last4");
+            }
+        }
+
+        // Log payment history
+        _db.PaymentHistory.Add(new PaymentHistory
+        {
+            UserId              = user.Id,
+            PlanName            = user.SelectedPlan.ToString(),
+            BillingCycle        = user.BillingCycle.ToString(),
+            Amount              = invoice.AmountPaid / 100m,
+            Status              = "Paid",
+            StripePaymentIntentId = invoice.PaymentIntentId,
+            StripeInvoiceId     = invoice.Id,
+            PaymentMethodLast4  = last4,
+            CreatedAt           = DateTime.UtcNow
+        });
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("Subscription renewed for user {UserId} via invoice.paid", user.Id);

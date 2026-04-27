@@ -7,9 +7,10 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
-    public DbSet<User>     Users     => Set<User>();
-    public DbSet<Role>     Roles     => Set<Role>();
-    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<User>           Users          => Set<User>();
+    public DbSet<Role>           Roles          => Set<Role>();
+    public DbSet<UserRole>       UserRoles      => Set<UserRole>();
+    public DbSet<PaymentHistory> PaymentHistory => Set<PaymentHistory>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -43,6 +44,15 @@ public class ApplicationDbContext : DbContext
             e.HasOne(ur => ur.Role)
              .WithMany(r => r.UserRoles)
              .HasForeignKey(ur => ur.RoleId);
+        });
+
+        // ── PaymentHistory ───────────────────────────────────────────
+        builder.Entity<PaymentHistory>(e =>
+        {
+            e.Property(p => p.Id).UseIdentityColumn();
+            e.HasOne(p => p.User)
+             .WithMany()
+             .HasForeignKey(p => p.UserId);
         });
 
         // ── OpenIddict entity sets ─────────────────────────────────

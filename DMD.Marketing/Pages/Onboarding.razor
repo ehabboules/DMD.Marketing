@@ -1,7 +1,9 @@
 @page "/onboarding"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@implements IAsyncDisposable
 
-@inject ApplicationDbContext Db
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 @inject ProvisioningService ProvisioningService
@@ -31,13 +33,13 @@
                 <strong>@_trialExpiresAt.ToString("MMMM d, yyyy")</strong>.
             </p>
             <div class="ob-success-steps">
-                <div class="ob-step ob-step--done"><span class="ob-step-num">1</span><span>Request received</span></div>
-                <div class="ob-step-arrow">→</div>
-                <div class="ob-step"><span class="ob-step-num">2</span><span>We provision your DB</span></div>
-                <div class="ob-step-arrow">→</div>
-                <div class="ob-step"><span class="ob-step-num">3</span><span>Email with credentials</span></div>
-                <div class="ob-step-arrow">→</div>
-                <div class="ob-step"><span class="ob-step-num">4</span><span>Start selling</span></div>
+                <div class="ob-done-step ob-done-step--done"><span class="ob-done-num">1</span><span>Request received</span></div>
+                <div class="ob-done-arrow">→</div>
+                <div class="ob-done-step"><span class="ob-done-num">2</span><span>We provision your DB</span></div>
+                <div class="ob-done-arrow">→</div>
+                <div class="ob-done-step"><span class="ob-done-num">3</span><span>Email with credentials</span></div>
+                <div class="ob-done-arrow">→</div>
+                <div class="ob-done-step"><span class="ob-done-num">4</span><span>Start selling</span></div>
             </div>
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        OnClick='() => Nav.NavigateTo("/profile")'
@@ -57,7 +59,7 @@
 
         <!-- ── Step indicators ── -->
         <div class="ob-steps-bar">
-            @for (int i = 1; i <= 4; i++)
+            @for (int i = 1; i <= 3; i++)
             {
                 var step = i;
                 <div class="ob-step-indicator @(step == _step ? "active" : step < _step ? "done" : "")">
@@ -73,7 +75,7 @@
                     </div>
                     <span class="ob-step-label">@_stepLabels[step - 1]</span>
                 </div>
-                @if (i < 4)
+                @if (i < 3)
                 {
                     <div class="ob-step-connector @(step < _step ? "done" : "")"></div>
                 }
@@ -87,11 +89,6 @@
             @if (_step == 1)
             {
                 <h2 class="ob-card-title">Store details</h2>
-
-                @if (_error is { Length: > 0 })
-                {
-                    <div class="ob-alert-error">@_error</div>
-                }
 
                 <div class="ob-fields">
                     <div class="ob-field-group ob-field-group--full">
@@ -145,26 +142,6 @@
                             <option value="Egypt Standard Time">Cairo (UTC+2)</option>
                             <option value="Arab Standard Time">Kuwait / Riyadh (UTC+3)</option>
                             <option value="Arabian Standard Time">Dubai / Abu Dhabi (UTC+4)</option>
-                        </select>
-                    </div>
-
-                    <div class="ob-field-group">
-                        <label class="ob-label">Province</label>
-                        <select class="ob-select" @bind="_province">
-                            <option value="">Select province…</option>
-                            <option value="AB">Alberta</option>
-                            <option value="BC">British Columbia</option>
-                            <option value="MB">Manitoba</option>
-                            <option value="NB">New Brunswick</option>
-                            <option value="NL">Newfoundland &amp; Labrador</option>
-                            <option value="NS">Nova Scotia</option>
-                            <option value="NT">Northwest Territories</option>
-                            <option value="NU">Nunavut</option>
-                            <option value="ON">Ontario</option>
-                            <option value="PE">Prince Edward Island</option>
-                            <option value="QC">Quebec</option>
-                            <option value="SK">Saskatchewan</option>
-                            <option value="YT">Yukon</option>
                         </select>
                     </div>
                 </div>
@@ -250,10 +227,11 @@
                 </div>
             }
 
-            <!-- ════════════════ STEP 3 — Confirm plan ════════════════ -->
+            <!-- ════════════════ STEP 3 — Review & submit ════════════════ -->
             else if (_step == 3)
             {
-                <h2 class="ob-card-title">Confirm your plan</h2>
+                <h2 class="ob-card-title">Review &amp; submit</h2>
+                <p class="ob-activate-sub">Double-check everything below, then submit your request.</p>
 
                 <div class="ob-plan-card">
                     <div class="ob-plan-name">@_planDef?.Name</div>
@@ -273,7 +251,7 @@
                         }
                     </div>
                     <div class="ob-plan-cycle-badge @(_isAnnual ? "annual" : "monthly")">
-                        @(_isAnnual ? "Annual billing · save 20%" : "Monthly billing")
+                        @(_isAnnual ? "Annual billing · save 10%" : "Monthly billing")
                     </div>
                 </div>
 
@@ -281,32 +259,6 @@
                     <MudIcon Icon="@Icons.Material.Filled.Schedule" Style="font-size:16px;" />
                     <span>Your <strong>14-day free trial</strong> starts today. No charge until your instance is live and you decide to continue.</span>
                 </div>
-
-                <div class="ob-next-steps">
-                    <h3 class="ob-next-title">What happens next</h3>
-                    <ol class="ob-next-list">
-                        <li>Your provisioning request is sent to our team</li>
-                        <li>We spin up a dedicated database instance for your store</li>
-                        <li>You receive an email with your login URL and credentials</li>
-                        <li>Log in and start your 14-day trial — usually within 24 hours</li>
-                    </ol>
-                </div>
-
-                <div class="ob-actions">
-                    <button class="ob-btn-back" @onclick="() => _step = 2">← Back</button>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="NextStep"
-                               Style="font-weight:700;border-radius:10px;padding:12px 36px;">
-                        Looks good — activate
-                    </MudButton>
-                </div>
-            }
-
-            <!-- ════════════════ STEP 4 — Activate ════════════════ -->
-            else if (_step == 4)
-            {
-                <h2 class="ob-card-title">Review &amp; submit</h2>
-                <p class="ob-activate-sub">Double-check everything below, then submit your request.</p>
 
                 <div class="ob-summary">
                     <div class="ob-summary-section">Store</div>
@@ -324,7 +276,17 @@
                     <div class="ob-summary-row"><span>Tax inclusive</span><strong>@(_taxInclusive ? "Yes" : "No")</strong></div>
                     <div class="ob-summary-section">Plan</div>
                     <div class="ob-summary-row"><span>Plan</span><strong>@_planDef?.Name (@(_isAnnual ? "Annual" : "Monthly"))</strong></div>
-                    <div class="ob-summary-row"><span>Trial ends</span><strong>@DateTime.UtcNow.AddDays(14).ToString("MMMM d, yyyy")</strong></div>
+                    <div class="ob-summary-row"><span>Trial ends</span><strong>@_trialExpiresAt.ToString("MMMM d, yyyy")</strong></div>
+                </div>
+
+                <div class="ob-next-steps">
+                    <h3 class="ob-next-title">What happens next</h3>
+                    <ol class="ob-next-list">
+                        <li>Your provisioning request is sent to our team</li>
+                        <li>We spin up a dedicated database instance for your store</li>
+                        <li>You receive an email with your login URL and credentials</li>
+                        <li>Log in and start your 14-day trial — usually within 24 hours</li>
+                    </ol>
                 </div>
 
                 @if (_activationError is { Length: > 0 })
@@ -333,7 +295,7 @@
                 }
 
                 <div class="ob-actions">
-                    <button class="ob-btn-back" @onclick="() => _step = 3" disabled="@_activating">← Back</button>
+                    <button class="ob-btn-back" @onclick="() => _step = 2" disabled="@_activating">← Back</button>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                OnClick="Activate"
                                Disabled="_activating"
@@ -349,13 +311,12 @@
 </div>
 
 @code {
-    private User?   _user;
+    private int     _userId;
     private bool    _loading    = true;
     private int     _step       = 1;
     private bool    _submitted  = false;
     private bool    _activating = false;
     private bool    _showValidation = false;
-    private string? _error;
     private string? _activationError;
     private DateTime _trialExpiresAt;
 
@@ -364,7 +325,6 @@
     private string? _businessType;
     private string? _storePhone;
     private string? _storeTimezone;
-    private string? _province;
 
     // Step 2 fields
     private string  _currency          = "CAD";
@@ -372,19 +332,25 @@
     private decimal _provincialTaxRate = 0m;
     private bool    _taxInclusive      = false;
 
-    private readonly string[] _stepLabels = { "Store details", "Store defaults", "Confirm plan", "Activate" };
+    private readonly string[] _stepLabels = { "Store details", "Store defaults", "Review & submit" };
 
     private record PlanDef(PlanSlug Slug, string Name, int MonthlyPrice, int AnnualPrice, bool CustomPrice);
     private readonly List<PlanDef> _planDefs = new()
     {
-        new(PlanSlug.Starter,    "Starter",    49,  39,  false),
-        new(PlanSlug.Growth,     "Growth",     99,  79,  false),
-        new(PlanSlug.Pro,        "Pro",        179, 143, false),
+        new(PlanSlug.Starter,    "Starter",    49,  44,  false),
+        new(PlanSlug.Growth,     "Growth",     99,  89,  false),
+        new(PlanSlug.Pro,        "Pro",        179, 161, false),
         new(PlanSlug.Enterprise, "Enterprise", 0,   0,   true),
     };
 
     private PlanDef? _planDef;
     private bool     _isAnnual;
+
+    // User fields needed for Activate (avoid holding User entity across renders)
+    private string _userEmail     = "";
+    private string _userFirstName = "";
+    private string _userLastName  = "";
+    private PlanSlug _userPlan    = PlanSlug.None;
 
     protected override async Task OnInitializedAsync()
     {
@@ -397,25 +363,36 @@
         }
 
         var idStr = auth.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (int.TryParse(idStr, out var userId))
-            _user = await Db.Users.FindAsync(userId);
+        if (!int.TryParse(idStr, out var userId))
+        {
+            Nav.NavigateTo("/profile", forceLoad: false);
+            return;
+        }
 
-        if (_user is null) { Nav.NavigateTo("/profile", forceLoad: false); return; }
-        if (_user.ActivationStatus != ActivationStatus.None) { Nav.NavigateTo("/profile", forceLoad: false); return; }
-        if (_user.SelectedPlan == PlanSlug.None) { Nav.NavigateTo("/profile", forceLoad: false); return; }
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var user = await db.Users.FindAsync(userId);
 
-        _planDef  = _planDefs.FirstOrDefault(p => p.Slug == _user.SelectedPlan);
-        _isAnnual = _user.BillingCycle == BillingCycle.Annual;
+        if (user is null) { Nav.NavigateTo("/profile", forceLoad: false); return; }
+        if (user.ActivationStatus != ActivationStatus.None) { Nav.NavigateTo("/profile", forceLoad: false); return; }
+        if (user.SelectedPlan == PlanSlug.None) { Nav.NavigateTo("/profile", forceLoad: false); return; }
+
+        _userId        = user.Id;
+        _userEmail     = user.Email;
+        _userFirstName = user.FirstName ?? "";
+        _userLastName  = user.LastName ?? "";
+        _userPlan      = user.SelectedPlan;
+        _planDef       = _planDefs.FirstOrDefault(p => p.Slug == user.SelectedPlan);
+        _isAnnual      = user.BillingCycle == BillingCycle.Annual;
 
         // Pre-fill from previously saved data
-        _storeName        = _user.StoreName;
-        _storePhone       = _user.StorePhone;
-        _storeTimezone    = _user.StoreTimezone;
-        _businessType     = _user.BusinessType;
-        _currency         = _user.Currency ?? "CAD";
-        _federalTaxRate   = _user.FederalTaxRate;
-        _provincialTaxRate = _user.ProvincialTaxRate;
-        _taxInclusive     = _user.TaxInclusive;
+        _storeName        = user.StoreName;
+        _storePhone       = user.StorePhone;
+        _storeTimezone    = user.StoreTimezone;
+        _businessType     = user.BusinessType;
+        _currency         = user.Currency ?? "CAD";
+        _federalTaxRate   = user.FederalTaxRate;
+        _provincialTaxRate = user.ProvincialTaxRate;
+        _taxInclusive     = user.TaxInclusive;
 
         _trialExpiresAt = DateTime.UtcNow.AddDays(14);
         _loading = false;
@@ -435,61 +412,67 @@
         {
             _step = 3;
         }
-        else if (_step == 3)
-        {
-            _step = 4;
-        }
     }
 
     private async Task Activate()
     {
-        if (_user is null) return;
         _activating      = true;
         _activationError = null;
 
-        var success = await ProvisioningService.RequestActivationAsync(
-            email:             _user.Email,
-            firstName:         _user.FirstName ?? "",
-            lastName:          _user.LastName  ?? "",
-            planSlug:          _user.SelectedPlan.ToString(),
-            billingCycle:      _isAnnual ? "Annual" : "Monthly",
-            storeName:         _storeName!,
-            storePhone:        _storePhone,
-            storeTimezone:     _storeTimezone,
-            businessType:      _businessType,
-            currency:          _currency,
-            federalTaxRate:    _federalTaxRate,
-            provincialTaxRate: _provincialTaxRate,
-            taxInclusive:      _taxInclusive,
-            marketingUserId:   _user.Id);
-
-        if (success)
+        try
         {
-            var expiresAt = DateTime.UtcNow.AddDays(14);
+            var success = await ProvisioningService.RequestActivationAsync(
+                email:             _userEmail,
+                firstName:         _userFirstName,
+                lastName:          _userLastName,
+                planSlug:          _userPlan.ToString(),
+                billingCycle:      _isAnnual ? "Annual" : "Monthly",
+                storeName:         _storeName!,
+                storePhone:        _storePhone,
+                storeTimezone:     _storeTimezone,
+                businessType:      _businessType,
+                currency:          _currency,
+                federalTaxRate:    _federalTaxRate,
+                provincialTaxRate: _provincialTaxRate,
+                taxInclusive:      _taxInclusive,
+                marketingUserId:   _userId);
 
-            _user.StoreName             = _storeName?.Trim();
-            _user.StorePhone            = _storePhone?.Trim();
-            _user.StoreTimezone         = _storeTimezone;
-            _user.BusinessType          = _businessType;
-            _user.Currency              = _currency;
-            _user.FederalTaxRate        = _federalTaxRate;
-            _user.ProvincialTaxRate     = _provincialTaxRate;
-            _user.TaxInclusive          = _taxInclusive;
-            _user.ActivationStatus      = ActivationStatus.Pending;
-            _user.SubscriptionExpiresAt = expiresAt;
-            _user.ModifiedAt            = DateTime.UtcNow;
-            await Db.SaveChangesAsync();
+            if (success)
+            {
+                await using var db = await DbFactory.CreateDbContextAsync();
+                var user = await db.Users.FindAsync(_userId);
+                if (user is not null)
+                {
+                    user.StoreName             = _storeName?.Trim();
+                    user.StorePhone            = _storePhone?.Trim();
+                    user.StoreTimezone         = _storeTimezone;
+                    user.BusinessType          = _businessType;
+                    user.Currency              = _currency;
+                    user.FederalTaxRate        = _federalTaxRate;
+                    user.ProvincialTaxRate     = _provincialTaxRate;
+                    user.TaxInclusive          = _taxInclusive;
+                    user.ActivationStatus      = ActivationStatus.Pending;
+                    user.SubscriptionExpiresAt = _trialExpiresAt;
+                    user.ModifiedAt            = DateTime.UtcNow;
+                    await db.SaveChangesAsync();
+                }
 
-            _trialExpiresAt = expiresAt;
-            _submitted = true;
+                _submitted = true;
+            }
+            else
+            {
+                _activationError = "Could not submit your request. Please try again or contact support.";
+            }
         }
-        else
+        catch
         {
-            _activationError = "Could not submit your request. Please try again or contact support.";
+            _activationError = "Something went wrong. Please try again or contact support.";
         }
 
         _activating = false;
     }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
 <style>
@@ -640,7 +623,7 @@
         border-radius: 8px; padding: 10px 14px;
         font-family: 'DM Sans', sans-serif;
         font-size: 0.875rem; color: #B91C1C;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
     }
 
     /* ── Actions ── */
@@ -711,7 +694,7 @@
         font-size: 0.875rem; color: #374151; line-height: 1.55;
     }
 
-    /* ── Summary (step 4) ── */
+    /* ── Summary (step 3) ── */
     .ob-activate-sub {
         font-family: 'DM Sans', sans-serif;
         font-size: 0.9rem; color: #6B7280;
@@ -764,19 +747,19 @@
         display: flex; align-items: center; gap: 8px;
         flex-wrap: wrap; justify-content: center;
     }
-    .ob-step {
+    .ob-done-step {
         display: flex; align-items: center; gap: 6px;
         font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: #6B7280;
     }
-    .ob-step--done { color: #059669; }
-    .ob-step-num {
+    .ob-done-step--done { color: #059669; }
+    .ob-done-num {
         width: 20px; height: 20px; border-radius: 50%;
         background: #E5E7EB; color: #6B7280;
         display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.7rem; font-weight: 700;
     }
-    .ob-step--done .ob-step-num { background: #D1FAE5; color: #059669; }
-    .ob-step-arrow { color: #D1D5DB; font-size: 0.9rem; }
+    .ob-done-step--done .ob-done-num { background: #D1FAE5; color: #059669; }
+    .ob-done-arrow { color: #D1D5DB; font-size: 0.9rem; }
 
     /* ── Responsive ── */
     @@media (max-width: 600px) {
@@ -784,6 +767,6 @@
         .ob-field-group--full { grid-column: 1; }
         .ob-steps-bar .ob-step-label { display: none; }
         .ob-success-steps { flex-direction: column; align-items: flex-start; }
-        .ob-step-arrow { display: none; }
+        .ob-done-arrow { display: none; }
     }
 </style>
