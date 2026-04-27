@@ -112,6 +112,21 @@
                     </div>
                 }
             </div>
+
+            @if (_selectedPlan != PlanSlug.None && _user.ActivationStatus == ActivationStatus.None)
+            {
+                <div class="plan-next-row">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               OnClick="NextAfterPlan"
+                               Disabled="_saving"
+                               Style="font-weight:700;border-radius:10px;padding:12px 36px;">
+                        @(_saving ? "Saving…" : "Next")
+                    </MudButton>
+                </div>
+            }
         </div>
 
         <!-- ══════════════════════════════════════════════════
@@ -469,6 +484,29 @@
 
     // ── Actions ──────────────────────────────────────────────────────
     private void SelectPlan(PlanSlug slug) => _selectedPlan = slug;
+
+    private async Task NextAfterPlan()
+    {
+        if (_user is null || _selectedPlan == PlanSlug.None) return;
+        _saving    = true;
+        _saveError = null;
+
+        try
+        {
+            _user.SelectedPlan   = _selectedPlan;
+            _user.BillingCycle   = _annual ? BillingCycle.Annual : BillingCycle.Monthly;
+            _user.PlanSelectedAt = _user.PlanSelectedAt ?? DateTime.UtcNow;
+            _user.ModifiedAt     = DateTime.UtcNow;
+
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo("/onboarding", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            _saveError = ex.Message;
+            _saving = false;
+        }
+    }
 
     private async Task CancelSubscription()
     {
@@ -881,6 +919,13 @@
     .plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
     .plan-features li { display: flex; align-items: flex-start; gap: 6px; font-size: 0.75rem; color: #374151; line-height: 1.4; }
     .plan-features li svg { flex-shrink: 0; color: #00BFA5; margin-top: 2px; }
+
+    /* ── Plan next button ── */
+    .plan-next-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1.25rem;
+    }
 
     /* ── Save row ── */
     .save-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
