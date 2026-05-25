@@ -5,9 +5,70 @@
 <!-- Hero -->
 <div class="blog-hero">
     <div class="blog-hero-inner">
-        <div class="blog-eyebrow">DMD Blog</div>
-        <h1 class="blog-title">Insights for Canadian retailers.</h1>
-        <p class="blog-sub">Practical tips, product updates, and retail industry insights — written for the people running Canada's stores.</p>
+        <div class="blog-hero-copy">
+            <div class="blog-eyebrow">DMD Blog</div>
+            <h1 class="blog-title">Insights for Canadian retailers.</h1>
+            <p class="blog-sub">Practical tips, product updates, and retail industry insights — written for the people running Canada's stores.</p>
+        </div>
+        <div class="blog-hero-art">
+            <svg viewBox="0 0 400 320" width="400" height="320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Main article card -->
+                <rect x="60" y="30" width="230" height="170" rx="10" fill="white"/>
+                <rect x="60" y="30" width="230" height="60" rx="10" fill="#E0F7F4"/>
+                <rect x="60" y="74" width="230" height="16" rx="0" fill="#E0F7F4"/>
+                <!-- Article image placeholder in card -->
+                <rect x="68" y="38" width="90" height="44" rx="6" fill="#00BFA5" opacity="0.3"/>
+                <circle cx="113" cy="60" r="16" fill="#00BFA5" opacity="0.4"/>
+                <path d="M105 60 l12 0 M111 54 l6 6 -6 6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Article tag -->
+                <rect x="170" y="44" width="60" height="14" rx="4" fill="#00BFA5" opacity="0.9"/>
+                <text x="200" y="54" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="white" font-weight="600">Getting Started</text>
+                <!-- Article date -->
+                <text x="170" y="72" font-family="DM Sans, sans-serif" font-size="7" fill="#9CA3AF">May 2025</text>
+                <!-- Article title lines -->
+                <rect x="72" y="100" width="180" height="9" rx="3" fill="#1C1C1E" opacity="0.8"/>
+                <rect x="72" y="113" width="160" height="9" rx="3" fill="#1C1C1E" opacity="0.6"/>
+                <rect x="72" y="126" width="120" height="9" rx="3" fill="#1C1C1E" opacity="0.4"/>
+                <!-- Article excerpt lines -->
+                <rect x="72" y="148" width="190" height="6" rx="2" fill="#6B7280" opacity="0.5"/>
+                <rect x="72" y="158" width="170" height="6" rx="2" fill="#6B7280" opacity="0.4"/>
+                <rect x="72" y="168" width="140" height="6" rx="2" fill="#6B7280" opacity="0.3"/>
+                <!-- Read more -->
+                <text x="72" y="191" font-family="DM Sans, sans-serif" font-size="8" fill="#00897B" font-weight="600">Read article →</text>
+
+                <!-- Small card 1 -->
+                <rect x="50" y="210" width="150" height="88" rx="8" fill="white"/>
+                <rect x="58" y="218" width="50" height="14" rx="4" fill="#E8EAF6"/>
+                <text x="83" y="228" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="6" fill="#1A237E" font-weight="600">Tax &amp; Compliance</text>
+                <rect x="58" y="238" width="130" height="6" rx="2" fill="#1C1C1E" opacity="0.6"/>
+                <rect x="58" y="248" width="110" height="6" rx="2" fill="#1C1C1E" opacity="0.4"/>
+                <rect x="58" y="258" width="90" height="6" rx="2" fill="#1C1C1E" opacity="0.3"/>
+                <text x="58" y="291" font-family="DM Sans, sans-serif" font-size="7" fill="#9CA3AF">April 2025</text>
+
+                <!-- Small card 2 -->
+                <rect x="215" y="210" width="150" height="88" rx="8" fill="white"/>
+                <rect x="223" y="218" width="50" height="14" rx="4" fill="#FEF3C7"/>
+                <text x="248" y="228" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="6" fill="#92400E" font-weight="600">Inventory Tips</text>
+                <rect x="223" y="238" width="130" height="6" rx="2" fill="#1C1C1E" opacity="0.6"/>
+                <rect x="223" y="248" width="110" height="6" rx="2" fill="#1C1C1E" opacity="0.4"/>
+                <rect x="223" y="258" width="90" height="6" rx="2" fill="#1C1C1E" opacity="0.3"/>
+                <text x="223" y="291" font-family="DM Sans, sans-serif" font-size="7" fill="#9CA3AF">March 2025</text>
+
+                <!-- Floating pen tool icon -->
+                <circle cx="340" cy="60" r="30" fill="#E0F7F4"/>
+                <g transform="translate(323, 43)">
+                    <path d="M22 4 L30 12 L10 32 L2 34 L4 26 Z" fill="#00BFA5" opacity="0.7"/>
+                    <path d="M22 4 L30 12" stroke="#00897B" stroke-width="2" fill="none"/>
+                    <rect x="1" y="33" width="12" height="2" rx="1" fill="#6B7280" opacity="0.5"/>
+                </g>
+
+                <!-- Decorative circles -->
+                <circle cx="18" cy="50" r="14" fill="#E8EAF6"/>
+                <circle cx="18" cy="50" r="8" fill="#1A237E" opacity="0.2"/>
+                <circle cx="380" cy="280" r="18" fill="#E0F7F4"/>
+                <circle cx="380" cy="280" r="10" fill="#00BFA5" opacity="0.2"/>
+            </svg>
+        </div>
     </div>
 </div>
 
@@ -117,7 +178,7 @@
 
     .blog-hero {
         background: #FFFFFF; border-bottom: 1px solid var(--border);
-        padding: 5rem 2rem 4rem; text-align: center;
+        padding: 5rem 2rem 4rem;
         position: relative; overflow: hidden;
     }
     .blog-hero::after {
@@ -125,7 +186,10 @@
         background: radial-gradient(ellipse 70% 55% at 50% 100%, rgba(0,191,165,0.07) 0%, transparent 65%);
         pointer-events: none;
     }
-    .blog-hero-inner { position: relative; max-width: 640px; margin: 0 auto; }
+    .blog-hero-inner { position: relative; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .blog-hero-copy { text-align: left; }
+    .blog-hero-art { display: flex; justify-content: center; align-items: center; }
+    @@media (max-width: 768px) { .blog-hero-inner { grid-template-columns: 1fr; } .blog-hero-art { display: none; } }
     .blog-eyebrow {
         display: inline-block; background: var(--teal-light); color: var(--teal-dark);
         font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
