@@ -1,6 +1,7 @@
 @namespace DMD.Marketing.Layout
 @using System.Security.Claims
 @inject NavigationManager Nav
+@implements IDisposable
 
 <nav class="dmd-navbar">
 
@@ -15,24 +16,24 @@
 
         <!-- Product dropdown -->
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "product")" @onmouseleave="@(() => _open = "")">
-            <button class="dmd-nav-btn @(_open == "product" ? "dmd-nav-btn--active" : "")">
+            <button class="dmd-nav-btn @(_open == "product" ? "dmd-nav-btn--active" : "") @(IsProductRoute ? "dmd-nav-btn--page-active" : "")">
                 Product
                 <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "product" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "product" ? "dmd-dropdown--open" : "")">
-                <a href="/features" class="dmd-drop-link" @onclick="Close">
+                <a href="/features" class="dmd-drop-link @(IsPath("/features") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.PlayCircle" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Features</strong><span>Everything DMD Inventory can do</span></span>
                 </a>
-                <a href="/pos-system" class="dmd-drop-link" @onclick="Close">
+                <a href="/pos-system" class="dmd-drop-link @(IsPath("/pos-system") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.PointOfSale" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Point of Sale</strong><span>Fast, modern checkout experience</span></span>
                 </a>
-                <a href="/inventory-management" class="dmd-drop-link" @onclick="Close">
+                <a href="/inventory-management" class="dmd-drop-link @(IsPath("/inventory-management") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Inventory</strong><span>Multi-warehouse stock control</span></span>
                 </a>
-                <a href="/reports-analytics" class="dmd-drop-link" @onclick="Close">
+                <a href="/reports-analytics" class="dmd-drop-link @(IsPath("/reports-analytics") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Reports &amp; Analytics</strong><span>Profit, sales &amp; valuation reports</span></span>
                 </a>
@@ -41,20 +42,20 @@
 
         <!-- Solutions dropdown -->
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "solutions")" @onmouseleave="@(() => _open = "")">
-            <button class="dmd-nav-btn @(_open == "solutions" ? "dmd-nav-btn--active" : "")">
+            <button class="dmd-nav-btn @(_open == "solutions" ? "dmd-nav-btn--active" : "") @(IsSolutionsRoute ? "dmd-nav-btn--page-active" : "")">
                 Solutions
                 <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "solutions" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "solutions" ? "dmd-dropdown--open" : "")">
-                <a href="/retail" class="dmd-drop-link" @onclick="Close">
+                <a href="/retail" class="dmd-drop-link @(IsPath("/retail") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.Store" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Retail Stores</strong><span>General &amp; specialty retail</span></span>
                 </a>
-                <a href="/dry-goods" class="dmd-drop-link" @onclick="Close">
+                <a href="/dry-goods" class="dmd-drop-link @(IsPath("/dry-goods") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.SetMeal" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Nuts &amp; Dry Goods</strong><span>Bulk &amp; weight-based inventory</span></span>
                 </a>
-                <a href="/restaurants" class="dmd-drop-link" @onclick="Close">
+                <a href="/restaurants" class="dmd-drop-link @(IsPath("/restaurants") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#1A237E;"><MudIcon Icon="@Icons.Material.Filled.Restaurant" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Restaurants</strong><span>Table management &amp; kitchen flow</span></span>
                 </a>
@@ -63,20 +64,20 @@
 
         <!-- Company dropdown -->
         <li class="dmd-has-dropdown" @onmouseenter="@(() => _open = "company")" @onmouseleave="@(() => _open = "")">
-            <button class="dmd-nav-btn @(_open == "company" ? "dmd-nav-btn--active" : "")">
+            <button class="dmd-nav-btn @(_open == "company" ? "dmd-nav-btn--active" : "") @(IsCompanyRoute ? "dmd-nav-btn--page-active" : "")">
                 Company
                 <MudIcon Icon="@Icons.Material.Filled.ExpandMore" Size="Size.Small" Class="@("dmd-chevron " + (_open == "company" ? "dmd-chevron--up" : ""))" />
             </button>
             <div class="dmd-dropdown @(_open == "company" ? "dmd-dropdown--open" : "")">
-                <a href="/about" class="dmd-drop-link" @onclick="Close">
+                <a href="/about" class="dmd-drop-link @(IsPath("/about") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>About DMD Tech</strong><span>Dynamic – Modern – Dedicated</span></span>
                 </a>
-                <a href="/blog" class="dmd-drop-link" @onclick="Close">
+                <a href="/blog" class="dmd-drop-link @(IsPath("/blog") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Article" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Blog</strong><span>Tips, news &amp; product updates</span></span>
                 </a>
-                <a href="/contact" class="dmd-drop-link" @onclick="Close">
+                <a href="/contact" class="dmd-drop-link @(IsPath("/contact") ? "dmd-drop-link--active" : "")" @onclick="Close">
                     <span class="dmd-drop-icon" style="color:#FF6F00;"><MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Contact Us</strong><span>Get in touch with our team</span></span>
                 </a>
@@ -85,7 +86,7 @@
 
         <!-- Pricing — standalone -->
         <li>
-            <a href="/pricing" class="dmd-nav-link-plain" @onclick="Close">Pricing</a>
+            <a href="/pricing" class="dmd-nav-link-plain @(IsPath("/pricing") ? "dmd-nav-link-plain--active" : "")" @onclick="Close">Pricing</a>
         </li>
 
     </ul>
@@ -166,7 +167,7 @@
 
     /* ── Logo ────────────────────────────────────────────────────── */
     .dmd-logo { display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:36px;flex-shrink:0; }
-    .dmd-logo-text { font-family:'Syne',sans-serif;font-size:1.1rem;color:#1A237E;letter-spacing:-0.01em; }
+    .dmd-logo-text { font-family:'Poppins',sans-serif;font-size:1.1rem;color:#1A237E;letter-spacing:-0.01em; }
     .dmd-logo-text strong { color:#00BFA5; }
 
     /* ── Nav link list ───────────────────────────────────────────── */
@@ -180,6 +181,43 @@
         border-radius:8px;transition:background 0.15s,color 0.15s;white-space:nowrap;
     }
     .dmd-nav-btn:hover, .dmd-nav-btn--active { background:rgba(0,191,165,0.08);color:#00BFA5; }
+
+    /* ── Page-active state (current route) ──────────────────────── */
+    .dmd-nav-btn--page-active {
+        color: #00BFA5 !important;
+        position: relative;
+    }
+    .dmd-nav-btn--page-active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 10px;
+        right: 10px;
+        height: 2px;
+        background: #00BFA5;
+        border-radius: 2px;
+    }
+    .dmd-nav-link-plain--active {
+        color: #00BFA5 !important;
+        font-weight: 600;
+        position: relative;
+    }
+    .dmd-nav-link-plain--active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 10px;
+        right: 10px;
+        height: 2px;
+        background: #00BFA5;
+        border-radius: 2px;
+    }
+    .dmd-drop-link--active {
+        background: rgba(0,191,165,0.08) !important;
+        border-left: 3px solid #00BFA5;
+        padding-left: 9px;
+    }
+    .dmd-drop-link--active .dmd-drop-text strong { color: #00897B; }
 
     .dmd-chevron { transition:transform 0.2s ease;flex-shrink:0; }
     .dmd-chevron--up { transform:rotate(180deg); }
@@ -223,7 +261,7 @@
     .dmd-user-avatar {
         width:28px;height:28px;border-radius:50%;
         background:linear-gradient(135deg,#00BFA5,#1A237E);
-        color:#fff;font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;
+        color:#fff;font-family:'Poppins',sans-serif;font-size:0.8rem;font-weight:700;
         display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
     .dmd-user-name { max-width:120px;overflow:hidden;text-overflow:ellipsis; }
@@ -249,4 +287,28 @@
 @code {
     private string _open = "";
     private void Close() => _open = "";
+
+    private string CurrentPath =>
+        new Uri(Nav.Uri).AbsolutePath.TrimEnd('/').ToLowerInvariant();
+
+    private bool IsPath(string path) => CurrentPath == path;
+
+    private bool IsProductRoute => new[] { "/features", "/pos-system", "/inventory-management", "/reports-analytics" }
+        .Contains(CurrentPath);
+
+    private bool IsSolutionsRoute => new[] { "/retail", "/dry-goods", "/restaurants" }
+        .Contains(CurrentPath);
+
+    private bool IsCompanyRoute => new[] { "/about", "/blog", "/contact" }
+        .Contains(CurrentPath);
+
+    protected override void OnInitialized()
+        => Nav.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender,
+        Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+        => Nav.LocationChanged -= OnLocationChanged;
 }

@@ -1,0 +1,227 @@
+@page "/blog"
+
+<PageTitle>Blog — Tips & Updates for Canadian Retailers</PageTitle>
+
+<!-- Hero -->
+<div class="blog-hero">
+    <div class="blog-hero-inner">
+        <div class="blog-eyebrow">DMD Blog</div>
+        <h1 class="blog-title">Insights for Canadian retailers.</h1>
+        <p class="blog-sub">Practical tips, product updates, and retail industry insights — written for the people running Canada's stores.</p>
+    </div>
+</div>
+
+<!-- Featured post -->
+<section class="blog-section">
+    <div class="blog-container">
+        <div class="blog-featured-label">Featured</div>
+        <a href="/blog/getting-started-with-dmd" class="blog-featured-card">
+            <div class="blog-featured-meta">
+                <span class="blog-tag blog-tag--teal">Getting Started</span>
+                <span class="blog-date">May 2025</span>
+            </div>
+            <h2 class="blog-featured-title">Getting started with DMD Inventory: from signup to first sale in under an hour</h2>
+            <p class="blog-featured-excerpt">A step-by-step walkthrough of the onboarding process — adding your products, setting up your warehouse, and running your first POS transaction.</p>
+            <span class="blog-read-more">Read article →</span>
+        </a>
+    </div>
+</section>
+
+<!-- Post grid -->
+<section class="blog-section blog-section--alt">
+    <div class="blog-container">
+        <h2 class="blog-grid-heading">All articles</h2>
+        <div class="blog-grid">
+
+            <a href="/blog/canadian-tax-gst-pst-explained" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--navy">Tax & Compliance</span>
+                    <span class="blog-date">April 2025</span>
+                </div>
+                <h3>GST and PST for Canadian retailers: what your POS system should be doing automatically</h3>
+                <p>A plain-language breakdown of how federal and provincial taxes work at the point of sale — and what to look for in a compliant POS system.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+            <a href="/blog/multi-warehouse-inventory" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--teal">Inventory</span>
+                    <span class="blog-date">March 2025</span>
+                </div>
+                <h3>Why multi-warehouse inventory matters even for single-location stores</h3>
+                <p>Separating back stock from floor stock isn't just for warehouses. Here's how tracking two locations can improve accuracy in a single retail store.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+            <a href="/blog/purchase-orders-best-practices" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--orange">Purchasing</span>
+                    <span class="blog-date">February 2025</span>
+                </div>
+                <h3>Purchase order best practices for small retailers</h3>
+                <p>From creating your first PO to tracking last purchase costs per supplier — the habits that keep your margins predictable.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+            <a href="/blog/pos-speed-tips" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--teal">POS</span>
+                    <span class="blog-date">January 2025</span>
+                </div>
+                <h3>5 ways to speed up your POS checkout without buying new hardware</h3>
+                <p>Product images, category shortcuts, cashier training, and a few DMD-specific tips to reduce checkout time at peak hours.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+            <a href="/blog/understanding-retail-reports" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--green">Reports</span>
+                    <span class="blog-date">December 2024</span>
+                </div>
+                <h3>The 4 reports every retail owner should review every month</h3>
+                <p>Sales summary, inventory valuation, product profitability, and net income — what they tell you and how to act on them.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+            <a href="/blog/stripe-terminal-setup" class="blog-card">
+                <div class="blog-card-meta">
+                    <span class="blog-tag blog-tag--navy">Payments</span>
+                    <span class="blog-date">November 2024</span>
+                </div>
+                <h3>Setting up Stripe Terminal with DMD: a complete guide</h3>
+                <p>Hardware setup, pairing your reader, running your first card-present transaction, and troubleshooting common issues.</p>
+                <span class="blog-read-more">Read →</span>
+            </a>
+
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter CTA -->
+<section class="blog-cta">
+    <div class="blog-container blog-cta-inner">
+        <div class="blog-cta-icon">📬</div>
+        <h2>Product updates in your inbox</h2>
+        <p>New features, guides, and retail tips — sent occasionally. No spam.</p>
+        <a href="/contact" class="btn-primary">Get in touch to subscribe</a>
+    </div>
+</section>
+
+<style>
+    :root {
+        --teal: #00BFA5; --teal-dark: #00897B; --teal-light: #E0F7F4;
+        --navy: #1A237E; --navy-light: #E8EAF6;
+        --text: #1C1C1E; --text-muted: #6B7280;
+        --border: #E5E7EB; --surface: #F9FAFB; --white: #FFFFFF;
+    }
+
+    .blog-hero {
+        background: #FFFFFF; border-bottom: 1px solid var(--border);
+        padding: 5rem 2rem 4rem; text-align: center;
+        position: relative; overflow: hidden;
+    }
+    .blog-hero::after {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 55% at 50% 100%, rgba(0,191,165,0.07) 0%, transparent 65%);
+        pointer-events: none;
+    }
+    .blog-hero-inner { position: relative; max-width: 640px; margin: 0 auto; }
+    .blog-eyebrow {
+        display: inline-block; background: var(--teal-light); color: var(--teal-dark);
+        font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        padding: 0.35rem 1rem; border-radius: 20px;
+        border: 1px solid rgba(0,191,165,0.25); margin-bottom: 1.5rem;
+    }
+    .blog-title {
+        font-family: 'Poppins', sans-serif; font-size: 2.75rem;
+        font-weight: 700; color: var(--text); line-height: 1.2; margin: 0 0 1.25rem;
+    }
+    .blog-sub {
+        font-family: 'DM Sans', sans-serif; font-size: 1.1rem;
+        color: var(--text-muted); line-height: 1.7; margin: 0;
+    }
+
+    .blog-section { padding: 4rem 2rem; }
+    .blog-section--alt { background: var(--surface); }
+    .blog-container { max-width: 1100px; margin: 0 auto; }
+
+    /* Featured post */
+    .blog-featured-label {
+        font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-dark); margin-bottom: 1rem;
+    }
+    .blog-featured-card {
+        display: block; background: var(--white); border: 1px solid var(--border);
+        border-radius: 16px; padding: 2.5rem;
+        text-decoration: none; transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .blog-featured-card:hover { border-color: var(--teal); box-shadow: 0 8px 32px rgba(0,191,165,0.1); }
+    .blog-featured-meta { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .blog-featured-title {
+        font-family: 'Poppins', sans-serif; font-size: clamp(1.25rem, 3vw, 1.75rem);
+        font-weight: 700; color: var(--text); margin: 0 0 1rem; line-height: 1.3;
+    }
+    .blog-featured-excerpt {
+        font-family: 'DM Sans', sans-serif; font-size: 1rem;
+        color: var(--text-muted); line-height: 1.7; margin: 0 0 1.5rem;
+    }
+
+    /* Tags */
+    .blog-tag {
+        font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 600;
+        padding: 3px 10px; border-radius: 20px;
+    }
+    .blog-tag--teal { background: var(--teal-light); color: var(--teal-dark); }
+    .blog-tag--navy { background: var(--navy-light); color: var(--navy); }
+    .blog-tag--orange { background: #FFF3E0; color: #E65100; }
+    .blog-tag--green { background: #E8F5E9; color: #2E7D32; }
+    .blog-date { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--text-muted); }
+
+    .blog-read-more {
+        font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+        font-weight: 600; color: var(--teal-dark);
+    }
+
+    /* Post grid */
+    .blog-grid-heading {
+        font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700;
+        color: var(--text); margin: 0 0 2rem;
+    }
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    .blog-card {
+        display: flex; flex-direction: column; gap: 0.75rem;
+        background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+        padding: 1.5rem; text-decoration: none;
+        transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .blog-card:hover { border-color: var(--teal); box-shadow: 0 4px 20px rgba(0,191,165,0.1); transform: translateY(-2px); }
+    .blog-card-meta { display: flex; align-items: center; gap: 0.75rem; }
+    .blog-card h3 {
+        font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 700;
+        color: var(--text); margin: 0; line-height: 1.4; flex: 1;
+    }
+    .blog-card p {
+        font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+        color: var(--text-muted); line-height: 1.65; margin: 0; flex: 1;
+    }
+
+    /* Newsletter CTA */
+    .blog-cta { padding: 5rem 2rem; text-align: center; border-top: 1px solid var(--border); }
+    .blog-cta-inner { max-width: 500px; margin: 0 auto; }
+    .blog-cta-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .blog-cta h2 { font-family: 'Poppins', sans-serif; font-size: clamp(1.4rem, 3vw, 1.75rem); font-weight: 700; color: var(--text); margin: 0 0 0.75rem; }
+    .blog-cta p { font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text-muted); margin: 0 0 2rem; }
+
+    .btn-primary {
+        background: var(--teal); color: #FFFFFF; font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem; font-weight: 700; padding: 0.8rem 1.75rem;
+        border-radius: 8px; text-decoration: none; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    @@media (max-width: 640px) {
+        .blog-grid { grid-template-columns: 1fr; }
+        .blog-featured-card { padding: 1.5rem; }
+    }
+</style>

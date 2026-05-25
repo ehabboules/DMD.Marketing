@@ -1,0 +1,303 @@
+@page "/demo"
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@inject EmailService EmailService
+
+<PageTitle>Book a Free Demo — DMD Inventory</PageTitle>
+
+<!-- Hero -->
+<div class="demo-hero">
+    <div class="demo-hero-inner">
+        <div class="demo-eyebrow">Free Demo</div>
+        <h1 class="demo-title">See DMD Inventory<br />live in 30 minutes.</h1>
+        <p class="demo-sub">We'll walk you through the full platform — POS, inventory, purchasing, and reports — tailored to your store type. No slides, no sales pitch. Just the product.</p>
+    </div>
+</div>
+
+<section class="demo-section">
+    <div class="demo-container">
+        <div class="demo-layout">
+
+            <!-- Left: What to expect -->
+            <div class="demo-info">
+                <h2 class="demo-info-title">What happens on the call</h2>
+
+                <div class="demo-steps">
+                    <div class="demo-step">
+                        <div class="step-num">1</div>
+                        <div>
+                            <strong>You tell us about your store</strong>
+                            <p>5 minutes on your business type, team size, and current pain points.</p>
+                        </div>
+                    </div>
+                    <div class="demo-step">
+                        <div class="step-num">2</div>
+                        <div>
+                            <strong>We show you the platform live</strong>
+                            <p>POS terminal, inventory management, purchasing, and reporting — tailored to your setup.</p>
+                        </div>
+                    </div>
+                    <div class="demo-step">
+                        <div class="step-num">3</div>
+                        <div>
+                            <strong>You ask questions</strong>
+                            <p>No limit. We'd rather answer everything upfront than have you discover surprises later.</p>
+                        </div>
+                    </div>
+                    <div class="demo-step">
+                        <div class="step-num">4</div>
+                        <div>
+                            <strong>If it's a fit, we onboard you</strong>
+                            <p>Most stores are live the same day. 14-day free trial, no credit card required to start.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-also-info">
+                    <div class="also-icon">💬</div>
+                    <div>
+                        <strong>Prefer async?</strong>
+                        <p>You can also reach us at <a href="mailto:hello@dmd-inventory.com">hello@dmd-inventory.com</a> or fill in the form and we'll reply within one business day.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Form -->
+            <div class="demo-form-wrap">
+                @if (_submitted)
+                {
+                    <div class="demo-success">
+                        <div class="demo-success-icon">🎉</div>
+                        <h3>Demo request received!</h3>
+                        <p>Thanks <strong>@_model.Name</strong> — we'll be in touch within one business day to schedule your walkthrough.</p>
+                        <a href="/" class="btn-primary">Back to Home</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="demo-form-card">
+                        <h3 class="demo-form-title">Book your free walkthrough</h3>
+                        <p class="demo-form-sub">Takes less than 2 minutes.</p>
+
+                        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+                            <MudGrid Spacing="3">
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Name"
+                                                  For="() => _model.Name"
+                                                  Label="Full Name *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Email"
+                                                  For="() => _model.Email"
+                                                  Label="Email Address *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  InputType="InputType.Email" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Company"
+                                                  For="() => _model.Company"
+                                                  Label="Store / Company Name *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="_model.Phone"
+                                                  For="() => _model.Phone"
+                                                  Label="Phone (optional)"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  InputType="InputType.Telephone" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudSelect T="string"
+                                               @bind-Value="_model.BusinessType"
+                                               For="() => _model.BusinessType"
+                                               Label="Business Type *"
+                                               Variant="Variant.Outlined"
+                                               FullWidth="true">
+                                        @foreach (var type in _businessTypes)
+                                        {
+                                            <MudSelectItem T="string" Value="@type">@type</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="_model.Message"
+                                                  For="() => _model.Message"
+                                                  Label="Anything specific you'd like to see? *"
+                                                  Variant="Variant.Outlined"
+                                                  FullWidth="true"
+                                                  Lines="3"
+                                                  HelperText="E.g. number of locations, products, current system you're replacing." />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    @if (!string.IsNullOrEmpty(_errorMessage))
+                                    {
+                                        <MudAlert Severity="Severity.Error" Class="mb-3">@_errorMessage</MudAlert>
+                                    }
+                                    <MudButton ButtonType="ButtonType.Submit"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               Size="Size.Large"
+                                               FullWidth="true"
+                                               Disabled="_sending"
+                                               Style="height:52px;font-size:1rem;font-weight:700;border-radius:10px;">
+                                        @if (_sending)
+                                        {
+                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                            <span>Sending...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Book My Free Demo →</span>
+                                        }
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</section>
+
+@code {
+    private ContactFormModel _model = new();
+    private bool _submitted = false;
+    private bool _sending = false;
+    private string _errorMessage = string.Empty;
+
+    private List<string> _businessTypes = new()
+    {
+        "General Retail",
+        "Grocery / Supermarket",
+        "Nuts & Dry Goods",
+        "Electronics",
+        "Clothing & Fashion",
+        "Restaurant / Café",
+        "Pharmacy",
+        "Other",
+    };
+
+    private async Task HandleSubmit()
+    {
+        _sending = true;
+        _errorMessage = string.Empty;
+        try
+        {
+            var success = await EmailService.SendDemoRequestAsync(_model);
+            if (success) _submitted = true;
+            else _errorMessage = "Something went wrong. Please email us directly at hello@dmd-inventory.com";
+        }
+        catch
+        {
+            _errorMessage = "An unexpected error occurred. Please try again or contact us directly.";
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+}
+
+<style>
+    :root {
+        --teal: #00BFA5; --teal-dark: #00897B; --teal-light: #E0F7F4;
+        --navy: #1A237E; --text: #1C1C1E; --text-muted: #6B7280;
+        --border: #E5E7EB; --surface: #F9FAFB; --white: #FFFFFF;
+    }
+
+    .demo-hero {
+        background: linear-gradient(135deg, var(--navy), #283593);
+        padding: 6rem 2rem 4rem; text-align: center;
+        margin-top: 68px;
+    }
+    .demo-hero-inner { max-width: 640px; margin: 0 auto; }
+    .demo-eyebrow {
+        display: inline-block; background: rgba(0,191,165,0.2); color: var(--teal);
+        font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        padding: 0.35rem 1rem; border-radius: 20px;
+        border: 1px solid rgba(0,191,165,0.3); margin-bottom: 1.5rem;
+    }
+    .demo-title {
+        font-family: 'Poppins', sans-serif; font-size: 2.75rem;
+        font-weight: 700; color: #FFFFFF; line-height: 1.2; margin: 0 0 1.25rem;
+    }
+    .demo-sub {
+        font-family: 'DM Sans', sans-serif; font-size: 1.1rem;
+        color: rgba(255,255,255,0.75); line-height: 1.7; margin: 0;
+    }
+
+    .demo-section { padding: 4rem 2rem; background: var(--surface); }
+    .demo-container { max-width: 1100px; margin: 0 auto; }
+    .demo-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+
+    /* Info column */
+    .demo-info-title {
+        font-family: 'Poppins', sans-serif; font-size: 1.35rem; font-weight: 700;
+        color: var(--text); margin: 0 0 2rem;
+    }
+    .demo-steps { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
+    .demo-step { display: flex; align-items: flex-start; gap: 1rem; }
+    .step-num {
+        width: 36px; height: 36px; border-radius: 50%; background: var(--teal); color: #fff;
+        font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 800;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .demo-step strong { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .demo-step p { font-family: 'DM Sans', sans-serif; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+    .demo-also-info {
+        display: flex; gap: 1rem; align-items: flex-start;
+        background: var(--teal-light); border: 1px solid rgba(0,191,165,0.3);
+        border-radius: 12px; padding: 1.25rem;
+    }
+    .also-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .demo-also-info strong { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .demo-also-info p { font-family: 'DM Sans', sans-serif; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+    .demo-also-info a { color: var(--teal-dark); font-weight: 600; }
+
+    /* Form column */
+    .demo-form-card {
+        background: var(--white); border: 1px solid var(--border);
+        border-radius: 20px; padding: 2.5rem;
+        box-shadow: 0 8px 40px rgba(26,35,126,0.07);
+    }
+    .demo-form-title {
+        font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700;
+        color: var(--navy); margin: 0 0 0.25rem;
+    }
+    .demo-form-sub {
+        font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+        color: var(--text-muted); margin: 0 0 1.75rem;
+    }
+
+    /* Success state */
+    .demo-success {
+        background: var(--white); border: 1px solid var(--border);
+        border-radius: 20px; padding: 4rem 2.5rem; text-align: center;
+    }
+    .demo-success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .demo-success h3 { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin: 0 0 0.75rem; }
+    .demo-success p { font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text-muted); margin: 0 0 2rem; line-height: 1.65; }
+
+    .btn-primary {
+        display: inline-block; background: var(--teal); color: #FFFFFF;
+        font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700;
+        padding: 0.8rem 1.75rem; border-radius: 8px; text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    @@media (max-width: 768px) {
+        .demo-layout { grid-template-columns: 1fr; gap: 2rem; }
+        .demo-form-card { padding: 1.75rem; }
+    }
+</style>

@@ -168,12 +168,12 @@ All solution pages share: pain points grid (red-tinted), feature cards with hove
 
 | Plan | Monthly | Annual | Key limits |
 |---|---|---|---|
-| Starter | $49 | $44 | 1 register, 1 warehouse, 500 products, 1 user |
-| Growth | $99 | $89 | 3 registers, 3 warehouses, unlimited products, 5 users |
-| Pro | $179 | $161 | Unlimited everything, multi-language |
+| Starter | $54.99 | $49.99 | 1 register, 1 warehouse, unlimited products, unlimited user |
+| Growth | $99.99 | $89.99 | 3 registers, 3 warehouses, unlimited products, unlimited user |
+| Pro | $199.99 | $179.99 | Unlimited everything, multi-language |
 | Enterprise | Custom | Custom | Dedicated infra, SLA, custom integrations |
 
-Add-ons: warehouses ($15/$14 mo/annual), registers ($10/$9), Stripe Terminal reader ($399 one-time).
+Add-ons: warehouses ($15/ monthly), registers ($10), Stripe Terminal reader ($399 one-time).
 Annual billing saves 10%. Toggle is interactive on both `Pricing.razor` and `Profile.razor`.
 
 ---
