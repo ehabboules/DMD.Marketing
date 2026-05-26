@@ -1,0 +1,743 @@
+@page "/terms"
+@page "/terms/en"
+@page "/terms/fr"
+@inject NavigationManager Nav
+@inject IConfiguration Config
+
+@{
+    var isFr         = Nav.Uri.Contains("/terms/fr", StringComparison.OrdinalIgnoreCase);
+    var privacyUrl   = isFr ? "/privacy/fr" : "/privacy/en";
+    var contactEmail = Config["SendGrid:ToEmail"] ?? "hello@dmd-inventory.com";
+    var updatedStr   = LastUpdated.ToString(
+        isFr ? "d MMMM yyyy" : "MMMM d, yyyy",
+        new System.Globalization.CultureInfo(isFr ? "fr-CA" : "en-CA"));
+}
+
+<PageTitle>@(isFr ? "Conditions d'utilisation" : "Terms of Service") — Cloud Mobil POS</PageTitle>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO HEADER
+════════════════════════════════════════════════════════════════ -->
+<div class="tos-hero">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <div class="tos-hero-inner">
+            <div>
+                <p class="tos-eyebrow">@(isFr ? "Juridique" : "Legal")</p>
+                <h1 class="tos-hero-title">
+                    @(isFr ? "Conditions d'utilisation" : "Terms of Service")
+                </h1>
+                <p class="tos-hero-meta">
+                    @(isFr ? "Dernière mise à jour" : "Last updated"):
+                    <strong>@updatedStr</strong>
+                    &nbsp;·&nbsp;
+                    @(isFr ? "Droit applicable : Ontario, Canada" : "Governing law: Ontario, Canada")
+                </p>
+            </div>
+
+            <!-- Language toggle -->
+            <div class="tos-lang-toggle" role="group" aria-label="Language / Langue">
+                <a href="/terms/en" class="tos-lang-btn @(!isFr ? "tos-lang-active" : "")"
+                   aria-current="@(!isFr ? "page" : "false")">EN</a>
+                <span class="tos-lang-sep" aria-hidden="true">|</span>
+                <a href="/terms/fr" class="tos-lang-btn @(isFr ? "tos-lang-active" : "")"
+                   aria-current="@(isFr ? "page" : "false")">FR</a>
+            </div>
+        </div>
+    </MudContainer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BODY: STICKY TOC + CONTENT
+════════════════════════════════════════════════════════════════ -->
+<section class="section section-gray">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid Spacing="6" AlignItems="AlignItems.Start">
+
+            <!-- ── Sticky Table of Contents (hidden on mobile) ── -->
+            <MudItem xs="12" md="3" Class="tos-toc-wrap" Style="align-self:start;position:sticky;top:84px;">
+                <nav class="tos-toc" aria-label="@(isFr ? "Table des matières" : "Table of contents")">
+                    <p class="tos-toc-heading">@(isFr ? "Sommaire" : "On this page")</p>
+                    @foreach (var s in _sections)
+                    {
+                        <a href="#@s.Id" class="tos-toc-link">
+                            <span class="tos-toc-num">@s.Num</span>
+                            <span>@(isFr ? s.LabelFr : s.LabelEn)</span>
+                        </a>
+                    }
+                </nav>
+            </MudItem>
+
+            <!-- ── Main Content ────────────────────────────────── -->
+            <MudItem xs="12" md="9">
+                <div class="tos-content">
+
+                    @if (!isFr)
+                    {
+                        <!-- ╔══════════════════════════════════════╗
+                             ║           ENGLISH CONTENT            ║
+                             ╚══════════════════════════════════════╝ -->
+
+                        <div id="acceptance" class="tos-section">
+                            <h2 class="tos-section-title">1. Acceptance of Terms</h2>
+                            <p>These Terms of Service ("<strong>Terms</strong>") constitute a legally binding agreement
+                            between you (the "<strong>Customer</strong>") and <strong>DMD Tech Inc.</strong>
+                            ("<strong>DMD Tech</strong>", "<strong>we</strong>", "<strong>us</strong>") governing
+                            your access to and use of Cloud Mobil POS (the "<strong>Service</strong>").</p>
+                            <p>By registering for an account, starting a free trial, or continuing to use the Service
+                            after any update to these Terms, you agree to be bound by them.
+                            If you are accepting on behalf of a company, you represent that you have the authority
+                            to bind that entity. If you do not agree, do not use the Service.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="service-plans" class="tos-section">
+                            <h2 class="tos-section-title">2. The Service &amp; Plans</h2>
+                            <p>Cloud Mobil POS is a cloud-hosted SaaS point-of-sale and inventory management platform
+                            for Canadian retail businesses. We offer the following subscription tiers:</p>
+
+                            <div class="tos-table-wrap">
+                                <table class="tos-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Plan</th>
+                                            <th>Registers</th>
+                                            <th>Warehouses</th>
+                                            <th>Users</th>
+                                            <th>Price (CAD/mo)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Starter</strong></td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>$54.99 (or $49.99 billed annually)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Growth</strong></td>
+                                            <td>3</td>
+                                            <td>3</td>
+                                            <td>Up to 5</td>
+                                            <td>$99.99 (or $89.99 billed annually)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pro</strong></td>
+                                            <td>Unlimited</td>
+                                            <td>Up to 7</td>
+                                            <td>Unlimited</td>
+                                            <td>$199.99 (or $179.99 billed annually)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Enterprise</strong></td>
+                                            <td>Custom</td>
+                                            <td>Custom</td>
+                                            <td>Custom</td>
+                                            <td>Contact us</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p>Add-ons (additional warehouses at $15/mo, additional registers at $10/mo) are
+                            available on all plans and billed monthly with your subscription.</p>
+                            <p>All prices are in Canadian dollars (CAD) and exclude applicable sales taxes
+                            (HST/GST). Annual billing saves 10% and is charged upfront for a 12-month period.
+                            Feature availability may change between plan tiers; current features are always
+                            shown on the <a href="/pricing" class="tos-link">Pricing page</a>.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="free-trial" class="tos-section">
+                            <h2 class="tos-section-title">3. Free Trial</h2>
+                            <p>New accounts receive a <strong>14-day free trial</strong> with no credit card required.
+                            During the trial you have access to the features of your selected plan.
+                            At the end of the trial period, access is suspended until a paid subscription is activated.
+                            Your data is retained for <strong>30 days</strong> after trial expiry before permanent deletion.</p>
+                            <p>DMD Tech reserves the right to modify or discontinue trial terms at any time.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="billing" class="tos-section">
+                            <h2 class="tos-section-title">4. Subscription &amp; Billing</h2>
+                            <h3 class="tos-subsection-title">4.1 Payment</h3>
+                            <p>Subscriptions are billed via <strong>Stripe</strong>. By providing payment details you
+                            authorize DMD Tech to charge your payment method on a recurring basis for the selected
+                            plan and billing cycle. All charges are non-refundable except as required by law or as
+                            expressly stated herein.</p>
+                            <h3 class="tos-subsection-title">4.2 Upgrades &amp; Downgrades</h3>
+                            <p>Upgrades take effect immediately and are prorated. Downgrades take effect at the start
+                            of the next billing period; your current plan's features remain active until then.</p>
+                            <h3 class="tos-subsection-title">4.3 Late Payment</h3>
+                            <p>If payment fails, we will attempt to charge again within 3 business days.
+                            After two failed attempts your account may be suspended until payment is resolved.
+                            You remain responsible for all amounts due.</p>
+                            <h3 class="tos-subsection-title">4.4 Taxes</h3>
+                            <p>Applicable Canadian federal and provincial taxes will be added to your invoice
+                            based on your billing address. You are responsible for all taxes applicable in
+                            your jurisdiction.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="acceptable-use" class="tos-section">
+                            <h2 class="tos-section-title">5. Acceptable Use</h2>
+                            <p>You agree not to:</p>
+                            <ul class="tos-list">
+                                <li>Use the Service for any unlawful purpose or in violation of any applicable law.</li>
+                                <li>Attempt to gain unauthorized access to any part of the Service or its infrastructure.</li>
+                                <li>Introduce malware, viruses, or other harmful code.</li>
+                                <li>Reverse engineer, decompile, or create derivative works from the Service.</li>
+                                <li>Resell or sublicense access to the Service without our prior written consent.</li>
+                                <li>Use the Service to store or process regulated personal health data (PHI) without
+                                    a separate data processing agreement.</li>
+                                <li>Conduct load testing or penetration testing without prior written approval.</li>
+                            </ul>
+                            <p>We reserve the right to suspend or terminate accounts that violate this section
+                            immediately and without refund.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="ip" class="tos-section">
+                            <h2 class="tos-section-title">6. Intellectual Property</h2>
+                            <p>Cloud Mobil POS, including all software, designs, trademarks, and documentation,
+                            is the exclusive property of DMD Tech Inc. and is protected by Canadian copyright,
+                            trademark, and other intellectual property laws.</p>
+                            <p>We grant you a limited, non-exclusive, non-transferable, revocable licence to
+                            access and use the Service solely for your internal business purposes during the
+                            term of your subscription.</p>
+                            <p><strong>Your data remains yours.</strong> You retain all rights to the business
+                            data you input into the Service (products, sales, customers). We do not claim
+                            ownership of your data.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="privacy" class="tos-section">
+                            <h2 class="tos-section-title">7. Data &amp; Privacy</h2>
+                            <p>Our collection and use of personal information is governed by our
+                            <a href="@privacyUrl" class="tos-link">Privacy Policy</a>, which is incorporated
+                            into these Terms by reference. By using the Service you consent to the data
+                            practices described in the Privacy Policy.</p>
+                            <p>We store customer data on servers located in <strong>Canada or the United States</strong>
+                            (Railway.app infrastructure). Data transfers outside Canada comply with applicable
+                            Canadian privacy law.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="sla" class="tos-section">
+                            <h2 class="tos-section-title">8. Service Levels &amp; Support</h2>
+                            <p>We target high availability for all plans but do <strong>not</strong> provide
+                            a financially-backed uptime SLA on Starter, Growth, or Pro plans. Scheduled
+                            maintenance windows will be announced in advance where possible.</p>
+                            <p><strong>Enterprise customers</strong> receive a written SLA and priority support
+                            as part of their custom agreement. Contact us at
+                            <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a> to discuss
+                            Enterprise terms.</p>
+                            <p>Support channels for non-Enterprise plans:</p>
+                            <ul class="tos-list">
+                                <li>Email support via <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a></li>
+                                <li>In-app contact form at <a href="/contact" class="tos-link">/contact</a></li>
+                            </ul>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="warranties" class="tos-section">
+                            <h2 class="tos-section-title">9. Disclaimer of Warranties</h2>
+                            <p>THE SERVICE IS PROVIDED "<strong>AS IS</strong>" AND "<strong>AS AVAILABLE</strong>"
+                            WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+                            IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+                            NON-INFRINGEMENT.</p>
+                            <p>DMD Tech does not warrant that the Service will be uninterrupted, error-free, or free
+                            from viruses or other harmful components. You use the Service at your own risk.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="liability" class="tos-section">
+                            <h2 class="tos-section-title">10. Limitation of Liability</h2>
+                            <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, DMD TECH'S TOTAL CUMULATIVE
+                            LIABILITY ARISING OUT OF OR RELATED TO THESE TERMS OR THE SERVICE WILL NOT EXCEED
+                            THE FEES PAID BY YOU IN THE <strong>THREE (3) MONTHS</strong> PRECEDING THE CLAIM.</p>
+                            <p>IN NO EVENT WILL DMD TECH BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+                            CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS,
+                            DATA, BUSINESS GOODWILL, OR BUSINESS INTERRUPTION, EVEN IF ADVISED OF THE
+                            POSSIBILITY OF SUCH DAMAGES.</p>
+                            <p>Some jurisdictions do not allow the exclusion of certain warranties or the
+                            limitation of liability for certain damages. In such jurisdictions, our liability
+                            is limited to the greatest extent permitted by law.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="termination" class="tos-section">
+                            <h2 class="tos-section-title">11. Termination</h2>
+                            <h3 class="tos-subsection-title">11.1 By You</h3>
+                            <p>You may cancel your subscription at any time from your account profile or by
+                            contacting us. Cancellation takes effect at the end of the current billing period.
+                            No refunds are issued for unused time in the current period.</p>
+                            <h3 class="tos-subsection-title">11.2 By DMD Tech</h3>
+                            <p>We may suspend or terminate your access immediately if you breach these Terms,
+                            fail to pay, or if continued operation would expose us or others to legal or
+                            security risk. Where practical, we will provide advance notice.</p>
+                            <h3 class="tos-subsection-title">11.3 Effect of Termination</h3>
+                            <p>Upon termination, your licence to use the Service ends. Your data is retained
+                            for <strong>30 days</strong> during which you may request an export.
+                            After 30 days your tenant database is permanently deleted. Financial records are
+                            retained for 7 years as required by the <em>Income Tax Act</em> (Canada).</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="governing-law" class="tos-section">
+                            <h2 class="tos-section-title">12. Governing Law</h2>
+                            <p>These Terms are governed by and construed in accordance with the laws of the
+                            <strong>Province of Ontario and the federal laws of Canada</strong> applicable
+                            therein, without regard to conflict of law principles.</p>
+                            <p>Any dispute arising from these Terms shall be resolved exclusively in the
+                            courts of Ontario, Canada, and you consent to the personal jurisdiction of
+                            those courts.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="changes" class="tos-section">
+                            <h2 class="tos-section-title">13. Changes to These Terms</h2>
+                            <p>We may update these Terms from time to time. Material changes will be communicated
+                            by email to the address on file and/or by a prominent notice within the Service
+                            at least <strong>14 days</strong> before taking effect.</p>
+                            <p>Continued use of the Service after the effective date of revised Terms constitutes
+                            acceptance of those Terms. The current version date is always displayed at the top
+                            of this page.</p>
+                            <p>Questions about these Terms? Contact us at
+                            <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a>.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ╔══════════════════════════════════════╗
+                             ║           FRENCH CONTENT             ║
+                             ╚══════════════════════════════════════╝ -->
+
+                        <div id="acceptance" class="tos-section">
+                            <h2 class="tos-section-title">1. Acceptation des conditions</h2>
+                            <p>Les présentes conditions d'utilisation (les « <strong>Conditions</strong> ») constituent
+                            un accord juridiquement contraignant entre vous (le « <strong>Client</strong> ») et
+                            <strong>DMD Tech Inc.</strong> (« <strong>DMD Tech</strong> ») régissant votre accès à
+                            Cloud Mobil POS (le « <strong>Service</strong> ») et son utilisation.</p>
+                            <p>En créant un compte, en démarrant un essai gratuit ou en continuant à utiliser le
+                            Service après toute mise à jour des Conditions, vous acceptez d'être lié par celles-ci.
+                            Si vous acceptez au nom d'une entreprise, vous déclarez avoir l'autorité de lier
+                            cette entité. Si vous n'acceptez pas, n'utilisez pas le Service.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="service-plans" class="tos-section">
+                            <h2 class="tos-section-title">2. Le Service et les forfaits</h2>
+                            <p>Cloud Mobil POS est une plateforme SaaS hébergée dans le nuage, destinée aux
+                            détaillants canadiens. Nous proposons les niveaux d'abonnement suivants&nbsp;:</p>
+
+                            <div class="tos-table-wrap">
+                                <table class="tos-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Forfait</th>
+                                            <th>Caisses</th>
+                                            <th>Entrepôts</th>
+                                            <th>Utilisateurs</th>
+                                            <th>Prix (CAD/mois)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Starter</strong></td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>54,99 $ (ou 49,99 $ par année)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Growth</strong></td>
+                                            <td>3</td>
+                                            <td>3</td>
+                                            <td>Jusqu'à 5</td>
+                                            <td>99,99 $ (ou 89,99 $ par année)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Pro</strong></td>
+                                            <td>Illimité</td>
+                                            <td>Jusqu'à 7</td>
+                                            <td>Illimité</td>
+                                            <td>199,99 $ (ou 179,99 $ par année)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Enterprise</strong></td>
+                                            <td>Sur mesure</td>
+                                            <td>Sur mesure</td>
+                                            <td>Sur mesure</td>
+                                            <td>Nous contacter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p>Des modules complémentaires (entrepôt supplémentaire à 15 $/mois, caisse
+                            supplémentaire à 10 $/mois) sont disponibles sur tous les forfaits.</p>
+                            <p>Tous les prix sont en dollars canadiens (CAD) et excluent les taxes applicables
+                            (TPS/TVH). La facturation annuelle permet d'économiser 10 % et est facturée
+                            d'avance pour une période de 12 mois. Les fonctionnalités actuelles sont toujours
+                            affichées sur la <a href="/pricing" class="tos-link">page Tarifs</a>.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="free-trial" class="tos-section">
+                            <h2 class="tos-section-title">3. Période d'essai</h2>
+                            <p>Les nouveaux comptes bénéficient d'un <strong>essai gratuit de 14 jours</strong>
+                            sans carte de crédit requise. À la fin de la période d'essai, l'accès est suspendu
+                            jusqu'à l'activation d'un abonnement payant. Vos données sont conservées
+                            <strong>30 jours</strong> après l'expiration de l'essai avant d'être supprimées
+                            définitivement.</p>
+                            <p>DMD Tech se réserve le droit de modifier ou d'interrompre les modalités d'essai
+                            à tout moment.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="billing" class="tos-section">
+                            <h2 class="tos-section-title">4. Abonnement et facturation</h2>
+                            <h3 class="tos-subsection-title">4.1 Paiement</h3>
+                            <p>Les abonnements sont facturés via <strong>Stripe</strong>. En fournissant vos
+                            coordonnées de paiement, vous autorisez DMD Tech à débiter votre moyen de paiement
+                            de façon récurrente. Tous les frais sont non remboursables sauf disposition
+                            contraire légale.</p>
+                            <h3 class="tos-subsection-title">4.2 Changements de forfait</h3>
+                            <p>Les mises à niveau prennent effet immédiatement avec proratisation. Les
+                            rétrogradations prennent effet au début de la prochaine période de facturation.</p>
+                            <h3 class="tos-subsection-title">4.3 Paiement en retard</h3>
+                            <p>En cas d'échec de paiement, nous effectuerons une nouvelle tentative sous
+                            3 jours ouvrables. Après deux échecs, votre compte peut être suspendu jusqu'au
+                            règlement du solde.</p>
+                            <h3 class="tos-subsection-title">4.4 Taxes</h3>
+                            <p>Les taxes canadiennes fédérales et provinciales applicables seront ajoutées
+                            à votre facture selon votre adresse de facturation.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="acceptable-use" class="tos-section">
+                            <h2 class="tos-section-title">5. Utilisation acceptable</h2>
+                            <p>Vous acceptez de ne pas&nbsp;:</p>
+                            <ul class="tos-list">
+                                <li>Utiliser le Service à des fins illégales ou en violation de toute loi applicable.</li>
+                                <li>Tenter d'accéder de façon non autorisée à toute partie du Service.</li>
+                                <li>Introduire des logiciels malveillants ou des codes nuisibles.</li>
+                                <li>Procéder à l'ingénierie inverse, décompiler ou créer des œuvres dérivées du Service.</li>
+                                <li>Revendre ou sous-licencier l'accès au Service sans notre consentement écrit préalable.</li>
+                                <li>Utiliser le Service pour stocker des données de santé personnelles réglementées sans
+                                    accord de traitement distinct.</li>
+                            </ul>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="ip" class="tos-section">
+                            <h2 class="tos-section-title">6. Propriété intellectuelle</h2>
+                            <p>Cloud Mobil POS, y compris tous les logiciels, conceptions, marques de commerce et
+                            documentations, est la propriété exclusive de DMD Tech Inc., protégée par les lois
+                            canadiennes sur la propriété intellectuelle.</p>
+                            <p>Nous vous accordons une licence limitée, non exclusive, non transférable et
+                            révocable d'accès et d'utilisation du Service à des fins commerciales internes.</p>
+                            <p><strong>Vos données vous appartiennent.</strong> Vous conservez tous les droits
+                            sur les données commerciales que vous saisissez dans le Service.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="privacy" class="tos-section">
+                            <h2 class="tos-section-title">7. Données et confidentialité</h2>
+                            <p>La collecte et l'utilisation de renseignements personnels sont régies par notre
+                            <a href="@privacyUrl" class="tos-link">Politique de confidentialité</a>, incorporée
+                            aux présentes Conditions par référence.</p>
+                            <p>Les données des clients sont stockées sur des serveurs situés au
+                            <strong>Canada ou aux États-Unis</strong> (infrastructure Railway.app). Les
+                            transferts de données hors du Canada sont conformes à la LPRPDE.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="sla" class="tos-section">
+                            <h2 class="tos-section-title">8. Niveaux de service et soutien</h2>
+                            <p>Nous visons une haute disponibilité pour tous les forfaits, mais nous
+                            <strong>ne fournissons pas</strong> de convention de niveau de service (SLA)
+                            garantie financièrement pour les forfaits Starter, Growth ou Pro.</p>
+                            <p>Les <strong>clients Enterprise</strong> bénéficient d'une SLA écrite et d'un
+                            soutien prioritaire dans le cadre de leur accord personnalisé. Contactez-nous à
+                            <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a>.</p>
+                            <p>Canaux de soutien (forfaits non Enterprise)&nbsp;:</p>
+                            <ul class="tos-list">
+                                <li>Soutien par courriel via <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a></li>
+                                <li>Formulaire de contact à <a href="/contact" class="tos-link">/contact</a></li>
+                            </ul>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="warranties" class="tos-section">
+                            <h2 class="tos-section-title">9. Exclusion de garanties</h2>
+                            <p>LE SERVICE EST FOURNI « <strong>TEL QUEL</strong> » ET « <strong>SELON DISPONIBILITÉ</strong> »
+                            SANS AUCUNE GARANTIE, EXPRESSE OU IMPLICITE, Y COMPRIS LES GARANTIES IMPLICITES
+                            DE QUALITÉ MARCHANDE ET D'ADÉQUATION À UN USAGE PARTICULIER.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="liability" class="tos-section">
+                            <h2 class="tos-section-title">10. Limitation de responsabilité</h2>
+                            <p>DANS TOUTE LA MESURE PERMISE PAR LA LOI, LA RESPONSABILITÉ TOTALE DE DMD TECH
+                            NE DÉPASSERA PAS LES FRAIS QUE VOUS AVEZ PAYÉS AU COURS DES
+                            <strong>TROIS (3) MOIS</strong> PRÉCÉDANT LA RÉCLAMATION.</p>
+                            <p>DMD TECH NE SERA EN AUCUN CAS RESPONSABLE DES DOMMAGES INDIRECTS, ACCESSOIRES,
+                            SPÉCIAUX, CONSÉCUTIFS OU PUNITIFS, Y COMPRIS LA PERTE DE PROFITS OU DE DONNÉES.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="termination" class="tos-section">
+                            <h2 class="tos-section-title">11. Résiliation</h2>
+                            <h3 class="tos-subsection-title">11.1 Par vous</h3>
+                            <p>Vous pouvez annuler votre abonnement à tout moment depuis votre profil. L'annulation
+                            prend effet à la fin de la période de facturation en cours. Aucun remboursement
+                            n'est accordé pour le temps non utilisé.</p>
+                            <h3 class="tos-subsection-title">11.2 Par DMD Tech</h3>
+                            <p>Nous pouvons suspendre ou résilier votre accès immédiatement en cas de violation des
+                            présentes Conditions, de défaut de paiement ou de risque légal ou sécuritaire.</p>
+                            <h3 class="tos-subsection-title">11.3 Effets de la résiliation</h3>
+                            <p>À la résiliation, vos données sont conservées <strong>30 jours</strong> pour
+                            exportation, puis supprimées définitivement. Les documents financiers sont conservés
+                            7 ans conformément à la <em>Loi de l'impôt sur le revenu</em> (Canada).</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="governing-law" class="tos-section">
+                            <h2 class="tos-section-title">12. Droit applicable</h2>
+                            <p>Les présentes Conditions sont régies par les lois de la
+                            <strong>province de l'Ontario et les lois fédérales du Canada</strong>.
+                            Tout litige découlant des présentes Conditions sera résolu exclusivement devant
+                            les tribunaux de l'Ontario.</p>
+                        </div>
+                        <MudDivider Class="tos-divider" />
+
+                        <div id="changes" class="tos-section">
+                            <h2 class="tos-section-title">13. Modifications des conditions</h2>
+                            <p>Nous pouvons mettre à jour les présentes Conditions. Les modifications importantes
+                            seront communiquées par courriel et/ou par un avis bien visible dans le Service au
+                            moins <strong>14 jours</strong> avant leur entrée en vigueur.</p>
+                            <p>Questions sur ces Conditions? Contactez-nous à
+                            <a href="mailto:@contactEmail" class="tos-link">@contactEmail</a>.</p>
+                        </div>
+                    }
+
+                </div><!-- /tos-content -->
+            </MudItem>
+
+        </MudGrid>
+    </MudContainer>
+</section>
+
+<style>
+    .tos-hero {
+        background: linear-gradient(135deg, var(--dmd-navy-dark), var(--dmd-navy));
+        padding: 8rem 0 4rem;
+        margin-top: 68px;
+    }
+
+    .tos-hero-inner {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .tos-eyebrow {
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-teal);
+        margin: 0 0 0.75rem;
+    }
+
+    .tos-hero-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 0.75rem;
+        line-height: 1.15;
+    }
+
+    .tos-hero-meta {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
+
+    .tos-lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .tos-lang-btn {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.55);
+        text-decoration: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        transition: color 0.2s, background 0.2s;
+    }
+
+    .tos-lang-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .tos-lang-active {
+        color: #fff !important;
+        background: rgba(0, 191, 165, 0.25) !important;
+        border: 1px solid rgba(0, 191, 165, 0.5);
+    }
+
+    .tos-lang-sep { color: rgba(255,255,255,0.25); font-size: 0.9rem; }
+
+    @@media (max-width: 959px) {
+        .tos-toc-wrap { display: none !important; }
+    }
+
+    .tos-toc {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 12px;
+        padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .tos-toc-heading {
+        font-family: var(--font-body);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-text-muted);
+        margin: 0 0 0.75rem;
+    }
+
+    .tos-toc-link {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.83rem;
+        color: var(--dmd-text-muted);
+        text-decoration: none;
+        padding: 0.35rem 0;
+        border-left: 2px solid transparent;
+        padding-left: 0.6rem;
+        margin-left: -0.6rem;
+        line-height: 1.45;
+        transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tos-toc-link:hover { color: var(--dmd-navy); border-left-color: var(--dmd-teal); }
+
+    .tos-toc-num {
+        font-weight: 700;
+        color: var(--dmd-teal);
+        flex-shrink: 0;
+        min-width: 1.4rem;
+    }
+
+    .tos-content {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 16px;
+        padding: 2.5rem;
+    }
+
+    .tos-section { scroll-margin-top: 96px; padding-bottom: 0.5rem; }
+
+    .tos-section-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dmd-navy);
+        margin: 0 0 1rem;
+    }
+
+    .tos-subsection-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dmd-navy);
+        margin: 1.25rem 0 0.6rem;
+    }
+
+    .tos-content p { color: var(--dmd-text-muted); line-height: 1.75; margin: 0 0 0.9rem; }
+
+    .tos-divider { margin: 2rem 0 !important; }
+
+    .tos-list {
+        color: var(--dmd-text-muted);
+        line-height: 1.75;
+        padding-left: 1.4rem;
+        margin: 0 0 0.9rem;
+    }
+
+    .tos-list li { margin-bottom: 0.5rem; }
+
+    .tos-table-wrap { overflow-x: auto; margin: 1rem 0 1.25rem; }
+
+    .tos-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        min-width: 480px;
+    }
+
+    .tos-table th {
+        background: var(--dmd-navy);
+        color: #fff;
+        font-weight: 700;
+        text-align: left;
+        padding: 0.65rem 0.9rem;
+    }
+
+    .tos-table td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--dmd-gray-mid);
+        color: var(--dmd-text-muted);
+        vertical-align: top;
+    }
+
+    .tos-table tr:nth-child(even) td { background: var(--dmd-gray); }
+    .tos-table td:first-child { color: var(--dmd-navy); }
+
+    .tos-link { color: var(--dmd-teal-dark); font-weight: 600; text-decoration: none; }
+    .tos-link:hover { text-decoration: underline; }
+
+    @@media (max-width: 599px) {
+        .tos-hero { padding: 6rem 0 3rem; }
+        .tos-content { padding: 1.5rem; }
+    }
+</style>
+
+@code {
+    // ── Update this date whenever the Terms are revised ────────────────────
+    [Parameter] public DateTime LastUpdated { get; set; } = new DateTime(2026, 5, 25);
+
+    private record TocEntry(string Id, string Num, string LabelEn, string LabelFr);
+
+    private static readonly TocEntry[] _sections =
+    [
+        new("acceptance",    "1",  "Acceptance of Terms",         "Acceptation"),
+        new("service-plans", "2",  "The Service & Plans",         "Le Service et les forfaits"),
+        new("free-trial",    "3",  "Free Trial",                  "Période d'essai"),
+        new("billing",       "4",  "Subscription & Billing",      "Abonnement et facturation"),
+        new("acceptable-use","5",  "Acceptable Use",              "Utilisation acceptable"),
+        new("ip",            "6",  "Intellectual Property",       "Propriété intellectuelle"),
+        new("privacy",       "7",  "Data & Privacy",              "Données et confidentialité"),
+        new("sla",           "8",  "Service Levels",              "Niveaux de service"),
+        new("warranties",    "9",  "Disclaimer of Warranties",    "Exclusion de garanties"),
+        new("liability",     "10", "Limitation of Liability",     "Limitation de responsabilité"),
+        new("termination",   "11", "Termination",                 "Résiliation"),
+        new("governing-law", "12", "Governing Law",               "Droit applicable"),
+        new("changes",       "13", "Changes to Terms",            "Modifications"),
+    ];
+}

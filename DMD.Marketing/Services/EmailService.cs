@@ -77,8 +77,8 @@ public class EmailService
             var msg = new SendGridMessage
             {
                 From             = new EmailAddress(fromEmail, fromName),
-                Subject          = "Reset your DMD Inventory password",
-                PlainTextContent = $"Hi {firstName},\n\nClick the link below to reset your password (expires in 1 hour):\n{resetUrl}\n\nIf you didn't request this, ignore this email.\n\n— DMD Tech",
+                Subject          = "Reset your Cloud Mobil POS password",
+                PlainTextContent = $"Hi {firstName},\n\nClick the link below to reset your password (expires in 1 hour):\n{resetUrl}\n\nIf you didn't request this, ignore this email.\n\n— Cloud Mobil POS",
                 HtmlContent      = $"""
                     <div style="font-family:sans-serif;max-width:560px;margin:auto;">
                       <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
@@ -122,8 +122,8 @@ public class EmailService
             var msg = new SendGridMessage
             {
                 From             = new EmailAddress(fromEmail, fromName),
-                Subject          = $"{urgency} — DMD Inventory",
-                PlainTextContent = $"Hi {firstName},\n\n{urgency}. To continue using DMD Inventory, please subscribe:\n{paymentUrl}\n\n— DMD Tech",
+                Subject          = $"{urgency} — Cloud Mobil POS",
+                PlainTextContent = $"Hi {firstName},\n\n{urgency}. To continue using Cloud Mobil POS, please subscribe:\n{paymentUrl}\n\n— Cloud Mobil POS",
                 HtmlContent      = $"""
                     <div style="font-family:sans-serif;max-width:560px;margin:auto;">
                       <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
@@ -131,7 +131,7 @@ public class EmailService
                       </div>
                       <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
                         <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
-                        <p style="color:#374151;margin:0 0 24px;">Your 14-day free trial is coming to an end. Subscribe now to keep your store running smoothly with DMD Inventory.</p>
+                        <p style="color:#374151;margin:0 0 24px;">Your 14-day free trial is coming to an end. Subscribe now to keep your store running smoothly with Cloud Mobil POS.</p>
                         <a href="{paymentUrl}" style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:0.95rem;">Subscribe Now</a>
                         <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">If you have questions, reply to this email or contact our support team.</p>
                       </div>
@@ -157,7 +157,7 @@ public class EmailService
 
     private static string BuildPlainText(ContactFormModel model) =>
         $"""
-        New Demo Request — DMD Inventory
+        New Demo Request — Cloud Mobil POS
 
         Name:          {model.Name}
         Email:         {model.Email}
@@ -174,7 +174,7 @@ public class EmailService
         <div style="font-family:sans-serif;max-width:600px;margin:auto;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
           <div style="background:#1A237E;padding:24px 32px;">
             <h2 style="color:#fff;margin:0;">New Demo Request</h2>
-            <p style="color:#90CAF9;margin:4px 0 0;">DMD Inventory — Marketing Site</p>
+            <p style="color:#90CAF9;margin:4px 0 0;">Cloud Mobil POS — Marketing Site</p>
           </div>
           <div style="padding:32px;">
             <table style="width:100%;border-collapse:collapse;">
@@ -189,7 +189,7 @@ public class EmailService
             <p style="background:#F5F7FA;padding:16px;border-radius:6px;margin:0;">{model.Message}</p>
           </div>
           <div style="background:#F5F7FA;padding:16px 32px;text-align:center;">
-            <p style="color:#999;font-size:12px;margin:0;">DMD Inventory · SaaS Platform · Reply directly to this email to respond to {model.Name}</p>
+            <p style="color:#999;font-size:12px;margin:0;">Cloud Mobil POS · SaaS Platform · Reply directly to this email to respond to {model.Name}</p>
           </div>
         </div>
         """;

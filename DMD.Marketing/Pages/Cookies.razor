@@ -1,0 +1,628 @@
+@page "/cookies"
+@page "/cookies/en"
+@page "/cookies/fr"
+@inject NavigationManager Nav
+
+@{
+    var isFr       = Nav.Uri.Contains("/cookies/fr", StringComparison.OrdinalIgnoreCase);
+    var updatedStr = LastUpdated.ToString(
+        isFr ? "d MMMM yyyy" : "MMMM d, yyyy",
+        new System.Globalization.CultureInfo(isFr ? "fr-CA" : "en-CA"));
+}
+
+<PageTitle>@(isFr ? "Politique sur les témoins" : "Cookie Policy") — Cloud Mobil POS</PageTitle>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════════ -->
+<div class="ck-hero">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <div class="ck-hero-inner">
+            <div>
+                <p class="ck-eyebrow">@(isFr ? "Juridique" : "Legal")</p>
+                <h1 class="ck-hero-title">
+                    @(isFr ? "Politique sur les témoins" : "Cookie Policy")
+                </h1>
+                <p class="ck-hero-meta">
+                    @(isFr ? "Dernière mise à jour" : "Last updated"):
+                    <strong>@updatedStr</strong>
+                </p>
+            </div>
+
+            <div class="ck-lang-toggle" role="group" aria-label="Language / Langue">
+                <a href="/cookies/en" class="ck-lang-btn @(!isFr ? "ck-lang-active" : "")"
+                   aria-current="@(!isFr ? "page" : "false")">EN</a>
+                <span class="ck-lang-sep" aria-hidden="true">|</span>
+                <a href="/cookies/fr" class="ck-lang-btn @(isFr ? "ck-lang-active" : "")"
+                   aria-current="@(isFr ? "page" : "false")">FR</a>
+            </div>
+        </div>
+    </MudContainer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BODY
+════════════════════════════════════════════════════════════════ -->
+<section class="section section-gray">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid Spacing="6" AlignItems="AlignItems.Start">
+
+            <!-- ── Sticky TOC ──────────────────────────────── -->
+            <MudItem xs="12" md="3" Class="ck-toc-wrap" Style="align-self:start;position:sticky;top:84px;">
+                <nav class="ck-toc" aria-label="@(isFr ? "Table des matières" : "Table of contents")">
+                    <p class="ck-toc-heading">@(isFr ? "Sommaire" : "On this page")</p>
+                    @foreach (var s in _sections)
+                    {
+                        <a href="#@s.Id" class="ck-toc-link">
+                            <span class="ck-toc-num">@s.Num</span>
+                            <span>@(isFr ? s.LabelFr : s.LabelEn)</span>
+                        </a>
+                    }
+                </nav>
+            </MudItem>
+
+            <!-- ── Content ─────────────────────────────────── -->
+            <MudItem xs="12" md="9">
+                <div class="ck-content">
+
+                    @if (!isFr)
+                    {
+                        <!-- ═══ ENGLISH ═══ -->
+
+                        <div id="what-are-cookies" class="ck-section">
+                            <h2 class="ck-section-title">1. What Are Cookies?</h2>
+                            <p>Cookies are small text files placed on your device by a website when you visit it.
+                            They are widely used to make websites work, improve efficiency, and provide information
+                            to site owners. Cookies cannot run programs or deliver viruses to your device.</p>
+                            <p>We also use <strong>browser storage</strong> (localStorage) for certain functional
+                            data. Unlike cookies, localStorage values are never sent to the server automatically.
+                            See <a href="#browser-storage" class="ck-link">Section 4</a> for details.</p>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="cookies-we-use" class="ck-section">
+                            <h2 class="ck-section-title">2. Cookies We Use</h2>
+                            <p>The following cookies may be set when you use Cloud Mobil POS. We have no
+                            advertising or analytics cookies.</p>
+
+                            <h3 class="ck-subsection-title">Strictly Necessary</h3>
+                            <p>These cookies are required for the site to function. They cannot be disabled
+                            without breaking core features.</p>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cookie name</th>
+                                            <th>Set by</th>
+                                            <th>Purpose</th>
+                                            <th>Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>.AspNetCore.Cookies</code></td>
+                                            <td>Cloud Mobil POS</td>
+                                            <td>Maintains your authenticated session after signing in via a server-rendered form (login / register). HttpOnly; never accessible to JavaScript.</td>
+                                            <td>14 days (sliding — refreshed on each visit)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>.AspNetCore.Antiforgery.*</code></td>
+                                            <td>Cloud Mobil POS</td>
+                                            <td>Protects form submissions against cross-site request forgery (CSRF). One token per browser session, matched server-side on every form POST.</td>
+                                            <td>Session (cleared when browser closes)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="ck-subsection-title" style="margin-top:1.75rem;">Functional (third-party)</h3>
+                            <p>These cookies are set by <strong>Stripe</strong> only when you visit the Stripe
+                            Checkout page to complete a payment. They are never set during regular browsing of
+                            this site.</p>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cookie name</th>
+                                            <th>Set by</th>
+                                            <th>Purpose</th>
+                                            <th>Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>__stripe_mid</code></td>
+                                            <td>Stripe (stripe.com)</td>
+                                            <td>Device identification used by Stripe's fraud-prevention system. Helps Stripe distinguish legitimate users from bots.</td>
+                                            <td>1 year</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>__stripe_sid</code></td>
+                                            <td>Stripe (stripe.com)</td>
+                                            <td>Short-lived session identifier used by Stripe to link your checkout session across page loads.</td>
+                                            <td>30 minutes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="ck-subsection-title" style="margin-top:1.75rem;">Analytics &amp; Advertising</h3>
+                            <div class="ck-none-badge">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="color:var(--dmd-teal);font-size:1.2rem;" />
+                                <span>None. We do not use Google Analytics, advertising pixels, or any
+                                third-party tracking scripts.</span>
+                            </div>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="google-fonts" class="ck-section">
+                            <h2 class="ck-section-title">3. Google Fonts</h2>
+                            <p>Our pages load two typefaces — <strong>Poppins</strong> and <strong>DM Sans</strong>
+                            — from <code>fonts.googleapis.com</code>. This is a stylesheet request, not a
+                            script. Google Fonts does <strong>not</strong> set cookies via the CSS API; however,
+                            Google's servers will log your IP address and browser user-agent as part of normal
+                            HTTP request logging.</p>
+                            <p>If you prefer to block this request, you can self-host the fonts or use a
+                            browser extension that blocks third-party font CDNs.</p>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="browser-storage" class="ck-section">
+                            <h2 class="ck-section-title">4. Browser Storage (localStorage)</h2>
+                            <p>When you sign in, we store your authentication tokens in your browser's
+                            <strong>localStorage</strong> — not in cookies. These values are encrypted using
+                            ASP.NET Core Data Protection and are never transmitted to the server automatically.</p>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Purpose</th>
+                                            <th>Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>dmd_access_token</code></td>
+                                            <td>Encrypted JWT access token. Used to authenticate API and page requests inside the app.</td>
+                                            <td>Until token expires (typically 14 days) or sign-out</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_token_expiry</code></td>
+                                            <td>Unix timestamp marking when the access token expires. Read by the client to detect session expiry.</td>
+                                            <td>Same as access token</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_refresh_token</code></td>
+                                            <td>Encrypted refresh token used to silently obtain a new access token without re-authentication.</td>
+                                            <td>Until sign-out</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_cookie_consent</code></td>
+                                            <td>Records your cookie consent preference (<code>accepted</code> or <code>essential</code>). Used to suppress the consent banner on return visits.</td>
+                                            <td>Persistent (until cleared manually)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>You can clear all localStorage data at any time via your browser's developer
+                            tools (Application → Local Storage → Clear All).</p>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="your-choices" class="ck-section">
+                            <h2 class="ck-section-title">5. Your Choices</h2>
+                            <h3 class="ck-subsection-title">Browser settings</h3>
+                            <p>Most browsers allow you to refuse or delete cookies. Common browser help pages:</p>
+                            <ul class="ck-list">
+                                <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener" class="ck-link">Google Chrome</a></li>
+                                <li><a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" target="_blank" rel="noopener" class="ck-link">Mozilla Firefox</a></li>
+                                <li><a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471" target="_blank" rel="noopener" class="ck-link">Apple Safari</a></li>
+                                <li><a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge" target="_blank" rel="noopener" class="ck-link">Microsoft Edge</a></li>
+                            </ul>
+                            <p>Note: disabling the <code>.AspNetCore.Cookies</code> cookie will prevent you
+                            from signing in. All other cookies listed here can be blocked without affecting
+                            public page access.</p>
+                            <h3 class="ck-subsection-title">Consent preference</h3>
+                            <p>You can update your cookie consent at any time using the buttons below:</p>
+                            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem;">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                           Style="font-weight:700;border-radius:8px;"
+                                           OnClick="@(() => UpdateConsent("accepted"))">
+                                    Accept All Cookies
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                           Style="font-weight:700;border-radius:8px;"
+                                           OnClick="@(() => UpdateConsent("essential"))">
+                                    Essential Only
+                                </MudButton>
+                            </div>
+                            @if (_consentUpdated)
+                            {
+                                <MudAlert Severity="Severity.Success" Dense="true" Class="mt-3">
+                                    Preference saved. You can change it again at any time.
+                                </MudAlert>
+                            }
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="contact" class="ck-section">
+                            <h2 class="ck-section-title">6. Contact Us</h2>
+                            <p>Questions about this Cookie Policy?
+                            See our <a href="/privacy" class="ck-link">Privacy Policy</a> or contact our
+                            Privacy Officer at
+                            <a href="mailto:privacy@dmd-inventory.com" class="ck-link">privacy@dmd-inventory.com</a>.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ═══ FRENCH ═══ -->
+
+                        <div id="what-are-cookies" class="ck-section">
+                            <h2 class="ck-section-title">1. Qu'est-ce qu'un témoin de navigation?</h2>
+                            <p>Les témoins (cookies) sont de petits fichiers texte placés sur votre appareil par
+                            un site Web lors de votre visite. Ils sont largement utilisés pour faire fonctionner
+                            les sites Web, améliorer leur efficacité et fournir des informations aux propriétaires
+                            de sites. Les témoins ne peuvent pas exécuter de programmes ni propager des virus.</p>
+                            <p>Nous utilisons également le <strong>stockage navigateur</strong> (localStorage)
+                            pour certaines données fonctionnelles. Voir la
+                            <a href="#browser-storage" class="ck-link">Section 4</a> pour les détails.</p>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="cookies-we-use" class="ck-section">
+                            <h2 class="ck-section-title">2. Témoins utilisés</h2>
+                            <p>Les témoins suivants peuvent être définis lors de l'utilisation de Cloud Mobil POS.
+                            Nous n'utilisons aucun témoin publicitaire ou analytique.</p>
+
+                            <h3 class="ck-subsection-title">Strictement nécessaires</h3>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom du témoin</th>
+                                            <th>Défini par</th>
+                                            <th>Finalité</th>
+                                            <th>Durée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>.AspNetCore.Cookies</code></td>
+                                            <td>Cloud Mobil POS</td>
+                                            <td>Maintient votre session authentifiée après connexion via un formulaire rendu côté serveur. HttpOnly; jamais accessible au JavaScript.</td>
+                                            <td>14 jours (glissant — renouvelé à chaque visite)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>.AspNetCore.Antiforgery.*</code></td>
+                                            <td>Cloud Mobil POS</td>
+                                            <td>Protège les soumissions de formulaires contre les attaques CSRF. Un jeton par session navigateur, validé côté serveur à chaque POST.</td>
+                                            <td>Session (effacé à la fermeture du navigateur)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="ck-subsection-title" style="margin-top:1.75rem;">Fonctionnels (tiers)</h3>
+                            <p>Ces témoins sont définis par <strong>Stripe</strong> uniquement lorsque vous visitez
+                            la page de paiement Stripe Checkout.</p>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom du témoin</th>
+                                            <th>Défini par</th>
+                                            <th>Finalité</th>
+                                            <th>Durée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>__stripe_mid</code></td>
+                                            <td>Stripe (stripe.com)</td>
+                                            <td>Identification de l'appareil utilisée par le système de prévention de la fraude de Stripe.</td>
+                                            <td>1 an</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>__stripe_sid</code></td>
+                                            <td>Stripe (stripe.com)</td>
+                                            <td>Identifiant de session de courte durée utilisé par Stripe pour lier votre session de paiement.</td>
+                                            <td>30 minutes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="ck-subsection-title" style="margin-top:1.75rem;">Analytiques et publicitaires</h3>
+                            <div class="ck-none-badge">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="color:var(--dmd-teal);font-size:1.2rem;" />
+                                <span>Aucun. Nous n'utilisons pas Google Analytics, de pixels publicitaires
+                                ni de scripts de suivi tiers.</span>
+                            </div>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="google-fonts" class="ck-section">
+                            <h2 class="ck-section-title">3. Google Fonts</h2>
+                            <p>Nos pages chargent les polices <strong>Poppins</strong> et <strong>DM Sans</strong>
+                            depuis <code>fonts.googleapis.com</code>. Il s'agit d'une requête de feuille de style,
+                            non d'un script. L'API Google Fonts ne définit <strong>pas</strong> de témoins;
+                            cependant, les serveurs de Google enregistrent votre adresse IP dans le cadre de la
+                            journalisation HTTP normale.</p>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="browser-storage" class="ck-section">
+                            <h2 class="ck-section-title">4. Stockage navigateur (localStorage)</h2>
+                            <p>Lors de votre connexion, nous stockons vos jetons d'authentification dans le
+                            <strong>localStorage</strong> de votre navigateur — et non dans des témoins. Ces
+                            valeurs sont chiffrées à l'aide d'ASP.NET Core Data Protection et ne sont jamais
+                            transmises automatiquement au serveur.</p>
+                            <div class="ck-table-wrap">
+                                <table class="ck-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Clé</th>
+                                            <th>Finalité</th>
+                                            <th>Durée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>dmd_access_token</code></td>
+                                            <td>Jeton JWT d'accès chiffré. Utilisé pour authentifier les requêtes.</td>
+                                            <td>Jusqu'à expiration (14 jours) ou déconnexion</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_token_expiry</code></td>
+                                            <td>Horodatage Unix de l'expiration du jeton d'accès.</td>
+                                            <td>Identique au jeton d'accès</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_refresh_token</code></td>
+                                            <td>Jeton de rafraîchissement chiffré pour obtenir un nouveau jeton sans re-authentification.</td>
+                                            <td>Jusqu'à la déconnexion</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>dmd_cookie_consent</code></td>
+                                            <td>Enregistre votre préférence de consentement aux témoins (<code>accepted</code> ou <code>essential</code>).</td>
+                                            <td>Persistant (jusqu'à effacement manuel)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="your-choices" class="ck-section">
+                            <h2 class="ck-section-title">5. Vos choix</h2>
+                            <h3 class="ck-subsection-title">Paramètres du navigateur</h3>
+                            <p>La plupart des navigateurs vous permettent de refuser ou de supprimer les témoins.
+                            Note: la désactivation du témoin <code>.AspNetCore.Cookies</code> vous empêchera
+                            de vous connecter.</p>
+                            <h3 class="ck-subsection-title">Préférence de consentement</h3>
+                            <p>Vous pouvez mettre à jour votre préférence à tout moment&nbsp;:</p>
+                            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem;">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                           Style="font-weight:700;border-radius:8px;"
+                                           OnClick="@(() => UpdateConsent("accepted"))">
+                                    Accepter tous les témoins
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                           Style="font-weight:700;border-radius:8px;"
+                                           OnClick="@(() => UpdateConsent("essential"))">
+                                    Essentiels seulement
+                                </MudButton>
+                            </div>
+                            @if (_consentUpdated)
+                            {
+                                <MudAlert Severity="Severity.Success" Dense="true" Class="mt-3">
+                                    Préférence enregistrée. Vous pouvez la modifier à tout moment.
+                                </MudAlert>
+                            }
+                        </div>
+                        <MudDivider Class="ck-divider" />
+
+                        <div id="contact" class="ck-section">
+                            <h2 class="ck-section-title">6. Nous contacter</h2>
+                            <p>Questions sur cette politique? Consultez notre
+                            <a href="/privacy/fr" class="ck-link">Politique de confidentialité</a> ou
+                            contactez notre responsable à
+                            <a href="mailto:privacy@dmd-inventory.com" class="ck-link">privacy@dmd-inventory.com</a>.
+                            </p>
+                        </div>
+                    }
+
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</section>
+
+<style>
+    .ck-hero {
+        background: linear-gradient(135deg, var(--dmd-navy-dark), var(--dmd-navy));
+        padding: 8rem 0 4rem;
+        margin-top: 68px;
+    }
+    .ck-hero-inner {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    .ck-eyebrow {
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-teal);
+        margin: 0 0 0.75rem;
+    }
+    .ck-hero-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 0.75rem;
+        line-height: 1.15;
+    }
+    .ck-hero-meta { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin: 0; }
+    .ck-lang-toggle { display:flex;align-items:center;gap:0.5rem;flex-shrink:0;margin-top:0.25rem; }
+    .ck-lang-btn {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        transition: color 0.2s, background 0.2s;
+    }
+    .ck-lang-btn:hover { color:#fff;background:rgba(255,255,255,0.1); }
+    .ck-lang-active {
+        color: #fff !important;
+        background: rgba(0,191,165,0.25) !important;
+        border: 1px solid rgba(0,191,165,0.5);
+    }
+    .ck-lang-sep { color:rgba(255,255,255,0.25);font-size:0.9rem; }
+
+    @@media (max-width: 959px) { .ck-toc-wrap { display:none !important; } }
+
+    .ck-toc {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 12px;
+        padding: 1.25rem 1.25rem 1rem;
+    }
+    .ck-toc-heading {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-text-muted);
+        margin: 0 0 0.75rem;
+    }
+    .ck-toc-link {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.83rem;
+        color: var(--dmd-text-muted);
+        text-decoration: none;
+        padding: 0.35rem 0;
+        border-left: 2px solid transparent;
+        padding-left: 0.6rem;
+        margin-left: -0.6rem;
+        line-height: 1.45;
+        transition: color 0.15s, border-color 0.15s;
+    }
+    .ck-toc-link:hover { color:var(--dmd-navy);border-left-color:var(--dmd-teal); }
+    .ck-toc-num { font-weight:700;color:var(--dmd-teal);flex-shrink:0;min-width:1.2rem; }
+
+    .ck-content {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 16px;
+        padding: 2.5rem;
+    }
+    .ck-section { scroll-margin-top: 96px; padding-bottom: 0.5rem; }
+    .ck-section-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dmd-navy);
+        margin: 0 0 1rem;
+    }
+    .ck-subsection-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dmd-navy);
+        margin: 1.25rem 0 0.6rem;
+    }
+    .ck-content p { color:var(--dmd-text-muted);line-height:1.75;margin:0 0 0.9rem; }
+    .ck-divider { margin: 2rem 0 !important; }
+    .ck-list { color:var(--dmd-text-muted);line-height:1.75;padding-left:1.4rem;margin:0 0 0.9rem; }
+    .ck-list li { margin-bottom:0.4rem; }
+
+    .ck-table-wrap { overflow-x:auto;margin:0.75rem 0; }
+    .ck-table { width:100%;border-collapse:collapse;font-size:0.85rem;min-width:480px; }
+    .ck-table th {
+        background: var(--dmd-navy);
+        color: #fff;
+        font-weight: 700;
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        white-space: nowrap;
+    }
+    .ck-table td {
+        padding: 0.65rem 0.9rem;
+        border-bottom: 1px solid var(--dmd-gray-mid);
+        color: var(--dmd-text-muted);
+        vertical-align: top;
+        line-height: 1.55;
+    }
+    .ck-table tr:nth-child(even) td { background:var(--dmd-gray); }
+    .ck-table code {
+        font-size: 0.8rem;
+        background: var(--dmd-teal-light);
+        color: var(--dmd-teal-dark);
+        padding: 1px 5px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+
+    .ck-none-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--dmd-teal-light);
+        border: 1px solid rgba(0,191,165,0.3);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.9rem;
+        color: var(--dmd-navy);
+        margin: 0.5rem 0;
+    }
+
+    .ck-link { color:var(--dmd-teal-dark);font-weight:600;text-decoration:none; }
+    .ck-link:hover { text-decoration:underline; }
+
+    @@media (max-width: 599px) {
+        .ck-hero { padding:6rem 0 3rem; }
+        .ck-content { padding:1.5rem; }
+    }
+</style>
+
+@* Needs interactivity for the consent buttons *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IJSRuntime JS
+
+@code {
+    // ── Update whenever the Cookie Policy is revised ───────────────────────
+    [Parameter] public DateTime LastUpdated { get; set; } = new DateTime(2026, 5, 25);
+
+    private bool _consentUpdated = false;
+
+    private record TocEntry(string Id, string Num, string LabelEn, string LabelFr);
+
+    private static readonly TocEntry[] _sections =
+    [
+        new("what-are-cookies",  "1", "What Are Cookies?",        "Qu'est-ce qu'un témoin?"),
+        new("cookies-we-use",    "2", "Cookies We Use",           "Témoins utilisés"),
+        new("google-fonts",      "3", "Google Fonts",             "Google Fonts"),
+        new("browser-storage",   "4", "Browser Storage",          "Stockage navigateur"),
+        new("your-choices",      "5", "Your Choices",             "Vos choix"),
+        new("contact",           "6", "Contact Us",               "Nous contacter"),
+    ];
+
+    private async Task UpdateConsent(string value)
+    {
+        await JS.InvokeVoidAsync("localStorage.setItem", "dmd_cookie_consent", value);
+        _consentUpdated = true;
+    }
+}

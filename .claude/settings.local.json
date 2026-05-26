@@ -6,7 +6,10 @@
       "Bash(xargs grep -l \"TokenResponse\\\\|LoginModel\\\\|RegisterModel\")",
       "Bash(tasklist:*)",
       "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\":*)",
-      "Bash(dotnet ef:*)"
+      "Bash(dotnet ef:*)",
+      "Bash(xargs sed:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ]
   }
 }

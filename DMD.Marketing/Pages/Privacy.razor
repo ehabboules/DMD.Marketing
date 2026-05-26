@@ -1,0 +1,768 @@
+@page "/privacy"
+@page "/privacy/en"
+@page "/privacy/fr"
+@inject NavigationManager Nav
+@inject IConfiguration Config
+
+@{
+    var isFr          = Nav.Uri.Contains("/privacy/fr", StringComparison.OrdinalIgnoreCase);
+    var privacyEmail  = Config["Privacy:OfficerEmail"] ?? string.Empty;
+    var hasEmail      = !string.IsNullOrWhiteSpace(privacyEmail);
+    var fmtCulture    = new System.Globalization.CultureInfo(isFr ? "fr-CA" : "en-CA");
+    var updatedStr    = LastUpdated.ToString(isFr ? "d MMMM yyyy" : "MMMM d, yyyy", fmtCulture);
+}
+
+<PageTitle>@(isFr ? "Politique de confidentialité" : "Privacy Policy") — Cloud Mobil POS</PageTitle>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO HEADER
+════════════════════════════════════════════════════════════════ -->
+<div class="priv-hero">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <div class="priv-hero-inner">
+            <div>
+                <p class="priv-eyebrow">@(isFr ? "Confidentialité" : "Legal")</p>
+                <h1 class="priv-hero-title">
+                    @(isFr ? "Politique de confidentialité" : "Privacy Policy")
+                </h1>
+                <p class="priv-hero-meta">
+                    @(isFr ? "Dernière mise à jour" : "Last updated"):
+                    <strong>@updatedStr</strong>
+                    &nbsp;·&nbsp;
+                    @(isFr ? "Conforme à la LPRPDE (Canada)" : "PIPEDA-compliant (Canada)")
+                </p>
+            </div>
+
+            <!-- Language toggle -->
+            <div class="priv-lang-toggle" role="group" aria-label="Language / Langue">
+                <a href="/privacy/en" class="priv-lang-btn @(!isFr ? "priv-lang-active" : "")"
+                   aria-current="@(!isFr ? "page" : "false")">EN</a>
+                <span class="priv-lang-sep" aria-hidden="true">|</span>
+                <a href="/privacy/fr" class="priv-lang-btn @(isFr ? "priv-lang-active" : "")"
+                   aria-current="@(isFr ? "page" : "false")">FR</a>
+            </div>
+        </div>
+    </MudContainer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BODY: STICKY TOC + CONTENT
+════════════════════════════════════════════════════════════════ -->
+<section class="section section-gray">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid Spacing="6" AlignItems="AlignItems.Start">
+
+            <!-- ── Sticky Table of Contents (hidden on mobile) ── -->
+            <MudItem xs="12" md="3" Class="priv-toc-wrap" Style="align-self:start;position:sticky;top:84px;">
+                <nav class="priv-toc" aria-label="@(isFr ? "Table des matières" : "Table of contents")">
+                    <p class="priv-toc-heading">@(isFr ? "Sommaire" : "On this page")</p>
+                    @foreach (var s in _sections)
+                    {
+                        <a href="#@s.Id" class="priv-toc-link">
+                            <span class="priv-toc-num">@s.Num</span>
+                            <span>@(isFr ? s.LabelFr : s.LabelEn)</span>
+                        </a>
+                    }
+                </nav>
+            </MudItem>
+
+            <!-- ── Main Content ────────────────────────────────── -->
+            <MudItem xs="12" md="9">
+                <div class="priv-content">
+
+                    @if (!isFr)
+                    {
+                        <!-- ╔══════════════════════════════════════╗
+                             ║           ENGLISH CONTENT            ║
+                             ╚══════════════════════════════════════╝ -->
+
+                        <div id="intro" class="priv-section">
+                            <h2 class="priv-section-title">1. Introduction</h2>
+                            <p>DMD Tech Inc. ("<strong>we</strong>", "<strong>us</strong>", or "<strong>our</strong>") operates
+                            Cloud Mobil POS — a SaaS point-of-sale and inventory management platform for Canadian retailers
+                            (collectively, the "<strong>Service</strong>"). This Privacy Policy explains how we collect, use,
+                            disclose, and safeguard personal information in accordance with Canada's
+                            <em>Personal Information Protection and Electronic Documents Act</em> (PIPEDA) and applicable
+                            provincial legislation.</p>
+                            <p>By accessing the Service you consent to the practices described here. If you do not agree,
+                            please discontinue use.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-collected" class="priv-section">
+                            <h2 class="priv-section-title">2. Information We Collect</h2>
+                            <h3 class="priv-subsection-title">2.1 Information You Provide</h3>
+                            <ul class="priv-list">
+                                <li><strong>Account details</strong> — name, business email, and password when you register.</li>
+                                <li><strong>Business profile</strong> — store name, phone number, time zone, and business type provided during onboarding.</li>
+                                <li><strong>Payment details</strong> — billing information processed directly by Stripe; we never store full card numbers.</li>
+                                <li><strong>Communications</strong> — messages you send via our contact or demo-request form.</li>
+                            </ul>
+                            <h3 class="priv-subsection-title">2.2 Information Collected Automatically</h3>
+                            <ul class="priv-list">
+                                <li><strong>Usage data</strong> — pages visited, features used, session duration, and error logs.</li>
+                                <li><strong>Device &amp; network data</strong> — IP address, browser type, operating system, and referring URL.</li>
+                                <li><strong>Cookies</strong> — see Section 4 for details.</li>
+                            </ul>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="how-we-use" class="priv-section">
+                            <h2 class="priv-section-title">3. How We Use Your Information</h2>
+                            <p>We use personal information only for the purposes below. We do <strong>not</strong> sell personal information to third parties.</p>
+                            <div class="priv-purpose-grid">
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">⚙️</div>
+                                    <div>
+                                        <strong>Service delivery</strong>
+                                        <p>Provision and maintain your Cloud Mobil POS account and store instance.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">💳</div>
+                                    <div>
+                                        <strong>Billing &amp; payments</strong>
+                                        <p>Process subscription fees and trial-expiry notices via Stripe.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">📧</div>
+                                    <div>
+                                        <strong>Transactional email</strong>
+                                        <p>Deliver password resets, onboarding credentials, and service notifications via SendGrid.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">📊</div>
+                                    <div>
+                                        <strong>Product improvement</strong>
+                                        <p>Analyze anonymized usage patterns to improve features and resolve defects.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">🔒</div>
+                                    <div>
+                                        <strong>Security &amp; fraud prevention</strong>
+                                        <p>Detect and investigate abuse, enforce our Terms of Service.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">⚖️</div>
+                                    <div>
+                                        <strong>Legal compliance</strong>
+                                        <p>Meet applicable Canadian legal obligations and respond to lawful government requests.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="cookies" class="priv-section">
+                            <h2 class="priv-section-title">4. Cookies &amp; Tracking</h2>
+                            <p>We use session cookies to maintain your authenticated session (via ASP.NET Core Data Protection).
+                            We do not deploy third-party advertising trackers. The following cookies may be set:</p>
+                            <div class="priv-table-wrap">
+                                <table class="priv-table">
+                                    <thead>
+                                        <tr><th>Cookie</th><th>Purpose</th><th>Duration</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td><code>.AspNetCore.Session</code></td><td>Maintains your login state</td><td>Session</td></tr>
+                                        <tr><td><code>__stripe_mid</code></td><td>Stripe fraud prevention</td><td>1 year</td></tr>
+                                        <tr><td><code>__stripe_sid</code></td><td>Stripe session identification</td><td>30 minutes</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>You may disable cookies in your browser settings; however, disabling session cookies will prevent you from signing in.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-sharing" class="priv-section">
+                            <h2 class="priv-section-title">5. Data Sharing</h2>
+                            <p>We share personal information only in the following limited circumstances:</p>
+                            <ul class="priv-list">
+                                <li><strong>Stripe</strong> — payment processing. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener" class="priv-link">stripe.com/privacy</a>.</li>
+                                <li><strong>SendGrid (Twilio)</strong> — transactional email delivery.</li>
+                                <li><strong>Railway.app</strong> — cloud hosting. Data may reside in Canada or the United States.</li>
+                                <li><strong>Legal requirements</strong> — we may disclose information when compelled by a court order, subpoena, or applicable law.</li>
+                                <li><strong>Business transfers</strong> — in a merger or acquisition, personal information may be transferred subject to equivalent privacy protections.</li>
+                            </ul>
+                            <p>All sub-processors are contractually bound to protect personal information in accordance with applicable privacy law.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-retention" class="priv-section">
+                            <h2 class="priv-section-title">6. Data Retention</h2>
+                            <ul class="priv-list">
+                                <li><strong>Active accounts</strong> — retained for the duration of your subscription plus 90 days.</li>
+                                <li><strong>Cancelled accounts</strong> — personal data purged within 90 days of cancellation; aggregated, anonymized data may be retained indefinitely.</li>
+                                <li><strong>Financial records</strong> — retained for 7 years as required by the <em>Income Tax Act</em> (Canada).</li>
+                                <li><strong>Server logs</strong> — retained for 30 days for security and debugging purposes.</li>
+                            </ul>
+                            <p>You may request earlier deletion by contacting our Privacy Officer (Section 9).</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="your-rights" class="priv-section">
+                            <h2 class="priv-section-title">7. Your Rights</h2>
+                            <p>Under PIPEDA you have the right to:</p>
+                            <ul class="priv-list">
+                                <li><strong>Access</strong> — request a copy of the personal information we hold about you.</li>
+                                <li><strong>Correction</strong> — request correction of inaccurate or incomplete records.</li>
+                                <li><strong>Withdrawal of consent</strong> — withdraw consent for non-essential processing; note this may limit use of certain features.</li>
+                                <li><strong>Deletion</strong> — request deletion of your account and associated data, subject to legal retention obligations.</li>
+                                <li><strong>Complaint</strong> — file a complaint with the
+                                    <a href="https://www.priv.gc.ca" target="_blank" rel="noopener" class="priv-link">Office of the Privacy Commissioner of Canada</a>.
+                                </li>
+                            </ul>
+                            <p>Requests will be acknowledged within <strong>5 business days</strong> and fully addressed within <strong>30 days</strong>.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="security" class="priv-section">
+                            <h2 class="priv-section-title">8. Security</h2>
+                            <p>We implement industry-standard technical and organizational safeguards, including:</p>
+                            <ul class="priv-list">
+                                <li>TLS 1.2+ encryption for all data in transit.</li>
+                                <li>Passwords hashed with ASP.NET Core Identity (PBKDF2 + HMAC-SHA512).</li>
+                                <li>Role-based access controls limiting data access to authorized personnel only.</li>
+                                <li>Regular dependency updates and security patching.</li>
+                            </ul>
+                            <p>No transmission method is 100% secure. In the event of a breach materially affecting your rights, we will notify you and the Privacy Commissioner as required under PIPEDA's mandatory breach notification rules.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="contact" class="priv-section">
+                            <h2 class="priv-section-title">9. Contact Our Privacy Officer</h2>
+                            <p>Questions, requests, or complaints regarding this Privacy Policy should be directed to our Privacy Officer:</p>
+                            <div class="priv-contact-card">
+                                <div class="priv-contact-row">
+                                    <MudIcon Icon="@Icons.Material.Filled.Business" Class="priv-contact-icon" />
+                                    <span><strong>DMD Tech Inc.</strong> — Privacy Officer</span>
+                                </div>
+                                <div class="priv-contact-row">
+                                    <MudIcon Icon="@Icons.Material.Filled.Email" Class="priv-contact-icon" />
+                                    @if (hasEmail)
+                                    {
+                                        <a href="mailto:@privacyEmail" class="priv-link">@privacyEmail</a>
+                                    }
+                                    else
+                                    {
+                                        <MudAlert Severity="Severity.Warning" Dense="true" Style="margin:0;">
+                                            <strong>Config missing:</strong> Add <code>Privacy:OfficerEmail</code>
+                                            to <code>appsettings.json</code> to surface this email address.
+                                        </MudAlert>
+                                    }
+                                </div>
+                            </div>
+                            <p class="priv-update-note">
+                                We will respond to all privacy requests within <strong>30 days</strong> of receipt,
+                                as required by PIPEDA.
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ╔══════════════════════════════════════╗
+                             ║           FRENCH CONTENT             ║
+                             ╚══════════════════════════════════════╝ -->
+
+                        <div id="intro" class="priv-section">
+                            <h2 class="priv-section-title">1. Introduction</h2>
+                            <p>DMD Tech Inc. (« <strong>nous</strong> ») exploite Cloud Mobil POS — une plateforme SaaS
+                            de point de vente et de gestion d'inventaire pour les détaillants canadiens (collectivement,
+                            le « <strong>Service</strong> »). La présente politique explique comment nous recueillons,
+                            utilisons, communiquons et protégeons les renseignements personnels conformément à la
+                            <em>Loi sur la protection des renseignements personnels et les documents électroniques</em>
+                            (LPRPDE) et aux lois provinciales applicables.</p>
+                            <p>En utilisant le Service, vous consentez aux pratiques décrites ici. Si vous n'y consentez
+                            pas, veuillez cesser d'utiliser le Service.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-collected" class="priv-section">
+                            <h2 class="priv-section-title">2. Renseignements collectés</h2>
+                            <h3 class="priv-subsection-title">2.1 Renseignements fournis par vous</h3>
+                            <ul class="priv-list">
+                                <li><strong>Coordonnées du compte</strong> — nom, courriel professionnel et mot de passe lors de l'inscription.</li>
+                                <li><strong>Profil commercial</strong> — nom du magasin, numéro de téléphone, fuseau horaire et type d'entreprise lors de l'intégration.</li>
+                                <li><strong>Renseignements de paiement</strong> — traités directement par Stripe; nous ne conservons jamais les numéros de carte complets.</li>
+                                <li><strong>Communications</strong> — messages envoyés via nos formulaires de contact ou de demande de démonstration.</li>
+                            </ul>
+                            <h3 class="priv-subsection-title">2.2 Renseignements collectés automatiquement</h3>
+                            <ul class="priv-list">
+                                <li><strong>Données d'utilisation</strong> — pages visitées, fonctionnalités utilisées, durée de session et journaux d'erreurs.</li>
+                                <li><strong>Données d'appareil et de réseau</strong> — adresse IP, type de navigateur, système d'exploitation et URL de référence.</li>
+                                <li><strong>Témoins de navigation</strong> — voir la section 4 pour les détails.</li>
+                            </ul>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="how-we-use" class="priv-section">
+                            <h2 class="priv-section-title">3. Utilisation des renseignements</h2>
+                            <p>Nous utilisons les renseignements personnels uniquement aux fins décrites ci-dessous. Nous ne <strong>vendons pas</strong> de renseignements personnels à des tiers.</p>
+                            <div class="priv-purpose-grid">
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">⚙️</div>
+                                    <div>
+                                        <strong>Prestation du service</strong>
+                                        <p>Approvisionner et maintenir votre compte et votre instance Cloud Mobil POS.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">💳</div>
+                                    <div>
+                                        <strong>Facturation et paiements</strong>
+                                        <p>Traiter les frais d'abonnement et les avis d'expiration d'essai via Stripe.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">📧</div>
+                                    <div>
+                                        <strong>Courriels transactionnels</strong>
+                                        <p>Envoyer les réinitialisations de mot de passe et les notifications de service via SendGrid.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">📊</div>
+                                    <div>
+                                        <strong>Amélioration du produit</strong>
+                                        <p>Analyser les données d'utilisation anonymisées pour améliorer les fonctionnalités.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">🔒</div>
+                                    <div>
+                                        <strong>Sécurité et prévention de la fraude</strong>
+                                        <p>Détecter et enquêter sur les abus; appliquer nos Conditions d'utilisation.</p>
+                                    </div>
+                                </div>
+                                <div class="priv-purpose-card">
+                                    <div class="priv-purpose-icon">⚖️</div>
+                                    <div>
+                                        <strong>Conformité légale</strong>
+                                        <p>Satisfaire aux obligations légales canadiennes applicables.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="cookies" class="priv-section">
+                            <h2 class="priv-section-title">4. Témoins de navigation</h2>
+                            <p>Nous utilisons des témoins de session pour maintenir votre session authentifiée (via ASP.NET Core Data Protection). Nous n'utilisons pas de traceurs publicitaires tiers. Les témoins suivants peuvent être définis&nbsp;:</p>
+                            <div class="priv-table-wrap">
+                                <table class="priv-table">
+                                    <thead>
+                                        <tr><th>Témoin</th><th>Finalité</th><th>Durée</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td><code>.AspNetCore.Session</code></td><td>Maintient votre session de connexion</td><td>Session</td></tr>
+                                        <tr><td><code>__stripe_mid</code></td><td>Prévention de la fraude Stripe</td><td>1 an</td></tr>
+                                        <tr><td><code>__stripe_sid</code></td><td>Identification de session Stripe</td><td>30 minutes</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>Vous pouvez désactiver les témoins dans les paramètres de votre navigateur; toutefois, la désactivation des témoins de session vous empêchera de vous connecter.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-sharing" class="priv-section">
+                            <h2 class="priv-section-title">5. Communication des données</h2>
+                            <p>Nous communiquons des renseignements personnels uniquement dans les circonstances limitées suivantes&nbsp;:</p>
+                            <ul class="priv-list">
+                                <li><strong>Stripe</strong> — traitement des paiements. Voir <a href="https://stripe.com/fr-ca/privacy" target="_blank" rel="noopener" class="priv-link">stripe.com/fr-ca/privacy</a>.</li>
+                                <li><strong>SendGrid (Twilio)</strong> — acheminement des courriels transactionnels.</li>
+                                <li><strong>Railway.app</strong> — hébergement infonuagique. Les données peuvent résider au Canada ou aux États-Unis.</li>
+                                <li><strong>Exigences légales</strong> — nous pouvons divulguer des renseignements en réponse à une ordonnance judiciaire ou à une loi applicable.</li>
+                                <li><strong>Transferts commerciaux</strong> — lors d'une fusion ou acquisition, les renseignements peuvent être transférés sous des protections équivalentes.</li>
+                            </ul>
+                            <p>Tous les sous-traitants sont liés contractuellement à la protection des renseignements personnels conformément aux lois sur la vie privée applicables.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="data-retention" class="priv-section">
+                            <h2 class="priv-section-title">6. Conservation des données</h2>
+                            <ul class="priv-list">
+                                <li><strong>Comptes actifs</strong> — conservés pendant la durée de l'abonnement plus 90 jours.</li>
+                                <li><strong>Comptes résiliés</strong> — données personnelles supprimées dans les 90 jours suivant la résiliation; les données agrégées et anonymisées peuvent être conservées indéfiniment.</li>
+                                <li><strong>Documents financiers</strong> — conservés 7 ans conformément à la <em>Loi de l'impôt sur le revenu</em> (Canada).</li>
+                                <li><strong>Journaux de serveur</strong> — conservés 30 jours à des fins de sécurité et de débogage.</li>
+                            </ul>
+                            <p>Vous pouvez demander une suppression anticipée en contactant notre responsable de la protection des renseignements personnels (section 9).</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="your-rights" class="priv-section">
+                            <h2 class="priv-section-title">7. Vos droits</h2>
+                            <p>En vertu de la LPRPDE, vous avez le droit de&nbsp;:</p>
+                            <ul class="priv-list">
+                                <li><strong>Accès</strong> — demander une copie des renseignements personnels que nous détenons à votre sujet.</li>
+                                <li><strong>Rectification</strong> — demander la correction de renseignements inexacts ou incomplets.</li>
+                                <li><strong>Retrait du consentement</strong> — retirer votre consentement au traitement non essentiel; notez que cela peut limiter l'utilisation de certaines fonctionnalités.</li>
+                                <li><strong>Suppression</strong> — demander la suppression de votre compte et des données associées, sous réserve des obligations légales de conservation.</li>
+                                <li><strong>Plainte</strong> — déposer une plainte auprès du
+                                    <a href="https://www.priv.gc.ca/fr/" target="_blank" rel="noopener" class="priv-link">Commissariat à la protection de la vie privée du Canada</a>.
+                                </li>
+                            </ul>
+                            <p>Les demandes seront accusées réception dans les <strong>5 jours ouvrables</strong> et traitées dans les <strong>30 jours</strong>.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="security" class="priv-section">
+                            <h2 class="priv-section-title">8. Sécurité</h2>
+                            <p>Nous appliquons des mesures techniques et organisationnelles conformes aux normes de l'industrie, notamment&nbsp;:</p>
+                            <ul class="priv-list">
+                                <li>Chiffrement TLS 1.2+ pour toutes les données en transit.</li>
+                                <li>Mots de passe hachés avec ASP.NET Core Identity (PBKDF2 + HMAC-SHA512).</li>
+                                <li>Contrôles d'accès basés sur les rôles limitant l'accès aux données au personnel autorisé.</li>
+                                <li>Mises à jour régulières des dépendances et correctifs de sécurité.</li>
+                            </ul>
+                            <p>Aucune méthode de transmission n'est sécurisée à 100 %. En cas d'atteinte à la protection des données touchant vos droits, nous vous en informerons ainsi que le Commissariat, conformément aux règles de notification obligatoire de la LPRPDE.</p>
+                        </div>
+                        <MudDivider Class="priv-divider" />
+
+                        <div id="contact" class="priv-section">
+                            <h2 class="priv-section-title">9. Communiquer avec notre responsable</h2>
+                            <p>Toute question, demande ou plainte concernant la présente politique doit être adressée à notre responsable de la protection des renseignements personnels&nbsp;:</p>
+                            <div class="priv-contact-card">
+                                <div class="priv-contact-row">
+                                    <MudIcon Icon="@Icons.Material.Filled.Business" Class="priv-contact-icon" />
+                                    <span><strong>DMD Tech Inc.</strong> — Responsable de la protection des renseignements personnels</span>
+                                </div>
+                                <div class="priv-contact-row">
+                                    <MudIcon Icon="@Icons.Material.Filled.Email" Class="priv-contact-icon" />
+                                    @if (hasEmail)
+                                    {
+                                        <a href="mailto:@privacyEmail" class="priv-link">@privacyEmail</a>
+                                    }
+                                    else
+                                    {
+                                        <MudAlert Severity="Severity.Warning" Dense="true" Style="margin:0;">
+                                            <strong>Config manquante&nbsp;:</strong> Ajoutez <code>Privacy:OfficerEmail</code>
+                                            à <code>appsettings.json</code> pour afficher l'adresse courriel ici.
+                                        </MudAlert>
+                                    }
+                                </div>
+                            </div>
+                            <p class="priv-update-note">
+                                Nous répondrons à toutes les demandes de confidentialité dans les <strong>30 jours</strong>
+                                suivant leur réception, conformément à la LPRPDE.
+                            </p>
+                        </div>
+                    }
+
+                </div><!-- /priv-content -->
+            </MudItem>
+
+        </MudGrid>
+    </MudContainer>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════════════════════════ -->
+<style>
+    /* ── Hero ──────────────────────────────────────────────── */
+    .priv-hero {
+        background: linear-gradient(135deg, var(--dmd-navy-dark), var(--dmd-navy));
+        padding: 8rem 0 4rem;
+        margin-top: 68px;
+    }
+
+    .priv-hero-inner {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .priv-eyebrow {
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-teal);
+        margin: 0 0 0.75rem;
+    }
+
+    .priv-hero-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 0.75rem;
+        line-height: 1.15;
+    }
+
+    .priv-hero-meta {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
+
+    /* ── Language toggle ────────────────────────────────────── */
+    .priv-lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .priv-lang-btn {
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.55);
+        text-decoration: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        transition: color 0.2s, background 0.2s;
+    }
+
+    .priv-lang-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .priv-lang-active {
+        color: #fff !important;
+        background: rgba(0, 191, 165, 0.25) !important;
+        border: 1px solid rgba(0, 191, 165, 0.5);
+    }
+
+    .priv-lang-sep { color: rgba(255,255,255,0.25); font-size: 0.9rem; }
+
+    /* ── Table of contents ──────────────────────────────────── */
+    .priv-toc-wrap {
+        /* Sticky handled via inline Style on MudItem */
+    }
+
+    @@media (max-width: 959px) {
+        .priv-toc-wrap { display: none !important; }
+    }
+
+    .priv-toc {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 12px;
+        padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .priv-toc-heading {
+        font-family: var(--font-body);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dmd-text-muted);
+        margin: 0 0 0.75rem;
+    }
+
+    .priv-toc-link {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.83rem;
+        color: var(--dmd-text-muted);
+        text-decoration: none;
+        padding: 0.35rem 0;
+        border-left: 2px solid transparent;
+        padding-left: 0.6rem;
+        margin-left: -0.6rem;
+        line-height: 1.45;
+        transition: color 0.15s, border-color 0.15s;
+    }
+
+    .priv-toc-link:hover {
+        color: var(--dmd-navy);
+        border-left-color: var(--dmd-teal);
+    }
+
+    .priv-toc-num {
+        font-weight: 700;
+        color: var(--dmd-teal);
+        flex-shrink: 0;
+        min-width: 1.2rem;
+    }
+
+    /* ── Content ────────────────────────────────────────────── */
+    .priv-content {
+        background: #fff;
+        border: 1px solid var(--dmd-gray-mid);
+        border-radius: 16px;
+        padding: 2.5rem;
+    }
+
+    .priv-section {
+        scroll-margin-top: 96px; /* clears sticky navbar */
+        padding-bottom: 0.5rem;
+    }
+
+    .priv-section-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dmd-navy);
+        margin: 0 0 1rem;
+    }
+
+    .priv-subsection-title {
+        font-family: 'Poppins', var(--font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dmd-navy);
+        margin: 1.25rem 0 0.6rem;
+    }
+
+    .priv-content p {
+        color: var(--dmd-text-muted);
+        line-height: 1.75;
+        margin: 0 0 0.9rem;
+    }
+
+    .priv-divider {
+        margin: 2rem 0 !important;
+    }
+
+    .priv-list {
+        color: var(--dmd-text-muted);
+        line-height: 1.75;
+        padding-left: 1.4rem;
+        margin: 0 0 0.9rem;
+    }
+
+    .priv-list li { margin-bottom: 0.5rem; }
+
+    /* ── Purpose grid ───────────────────────────────────────── */
+    .priv-purpose-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    @@media (max-width: 600px) {
+        .priv-purpose-grid { grid-template-columns: 1fr; }
+    }
+
+    .priv-purpose-card {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        background: var(--dmd-gray);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .priv-purpose-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; }
+
+    .priv-purpose-card strong {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--dmd-navy);
+        margin-bottom: 0.25rem;
+    }
+
+    .priv-purpose-card p {
+        font-size: 0.83rem;
+        margin: 0 !important;
+        line-height: 1.5;
+    }
+
+    /* ── Table ──────────────────────────────────────────────── */
+    .priv-table-wrap { overflow-x: auto; margin: 1rem 0; }
+
+    .priv-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+
+    .priv-table th {
+        background: var(--dmd-gray);
+        color: var(--dmd-navy);
+        font-weight: 700;
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        border-bottom: 2px solid var(--dmd-gray-mid);
+    }
+
+    .priv-table td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--dmd-gray-mid);
+        color: var(--dmd-text-muted);
+        vertical-align: top;
+    }
+
+    .priv-table code {
+        font-size: 0.8rem;
+        background: var(--dmd-teal-light);
+        color: var(--dmd-teal-dark);
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+
+    /* ── Contact card ───────────────────────────────────────── */
+    .priv-contact-card {
+        background: var(--dmd-teal-light);
+        border: 1px solid rgba(0, 191, 165, 0.3);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin: 1rem 0 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .priv-contact-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .priv-contact-icon {
+        color: var(--dmd-teal) !important;
+        flex-shrink: 0;
+    }
+
+    /* ── Misc ───────────────────────────────────────────────── */
+    .priv-link {
+        color: var(--dmd-teal-dark);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .priv-link:hover { text-decoration: underline; }
+
+    .priv-update-note {
+        font-size: 0.85rem;
+        color: var(--dmd-text-muted);
+        margin-top: 1rem !important;
+    }
+
+    @@media (max-width: 599px) {
+        .priv-hero { padding: 6rem 0 3rem; }
+        .priv-content { padding: 1.5rem; }
+    }
+</style>
+
+@code {
+    // ── Update this date whenever the policy content is revised ────────────
+    [Parameter] public DateTime LastUpdated { get; set; } = new DateTime(2026, 5, 25);
+
+    private record TocEntry(string Id, string Num, string LabelEn, string LabelFr);
+
+    private static readonly TocEntry[] _sections =
+    [
+        new("intro",          "1", "Introduction",         "Introduction"),
+        new("data-collected", "2", "Information We Collect","Renseignements collectés"),
+        new("how-we-use",     "3", "How We Use Your Info", "Utilisation des renseignements"),
+        new("cookies",        "4", "Cookies & Tracking",   "Témoins de navigation"),
+        new("data-sharing",   "5", "Data Sharing",         "Communication des données"),
+        new("data-retention", "6", "Data Retention",       "Conservation des données"),
+        new("your-rights",    "7", "Your Rights",          "Vos droits"),
+        new("security",       "8", "Security",             "Sécurité"),
+        new("contact",        "9", "Contact Us",           "Nous contacter"),
+    ];
+}

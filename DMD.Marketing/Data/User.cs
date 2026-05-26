@@ -61,6 +61,11 @@ public class User
     public string? StripeCustomerId     { get; set; }
     public string? StripeSubscriptionId { get; set; }
 
+    // ── Terms acceptance ──────────────────────────────────────────
+    public DateTime? TermsAcceptedAt { get; set; }
+    [MaxLength(20)]
+    public string?   TermsVersion    { get; set; }
+
     // ── Navigation ────────────────────────────────────────────────
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

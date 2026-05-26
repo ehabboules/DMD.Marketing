@@ -1,0 +1,205 @@
+@* ══════════════════════════════════════════════════════════════════════
+   CookieConsentBanner — shown once per browser on first visit.
+   Stores consent in localStorage under key "dmd_cookie_consent":
+     "accepted"  → user accepted all cookies
+     "essential" → user accepted essential cookies only
+   A null / missing value means consent has not been recorded yet.
+
+   Wire-up: add <CookieConsentBanner /> inside MainLayout.razor,
+   AFTER the <MudLayout> providers so MudButton works.
+   ══════════════════════════════════════════════════════════════════════ *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+@if (_visible)
+{
+    <div class="ccb-overlay" role="dialog" aria-modal="true"
+         aria-label="Cookie consent" aria-live="polite">
+        <div class="ccb-card">
+
+            <!-- Icon + heading -->
+            <div class="ccb-header">
+                <div class="ccb-icon" aria-hidden="true">🍪</div>
+                <div>
+                    <p class="ccb-title">We use cookies</p>
+                    <p class="ccb-subtitle">Nous utilisons des témoins</p>
+                </div>
+            </div>
+
+            <!-- Body text -->
+            <p class="ccb-body">
+                We use <strong>strictly necessary</strong> cookies to keep you signed in and protect
+                your forms. No advertising or analytics cookies are used.
+                <a href="/cookies" class="ccb-learn" @onclick="Dismiss">Learn more</a>
+            </p>
+
+            <!-- Action row -->
+            <div class="ccb-actions">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Medium"
+                           Style="font-weight:700;border-radius:8px;min-width:140px;"
+                           OnClick="AcceptAll">
+                    Accept All
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Size="Size.Medium"
+                           Style="font-weight:700;border-radius:8px;min-width:140px;"
+                           OnClick="EssentialOnly">
+                    Essential Only
+                </MudButton>
+            </div>
+
+        </div>
+    </div>
+}
+
+<style>
+    /* ── Banner overlay ──────────────────────────────────────── */
+    .ccb-overlay {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 9000;
+        display: flex;
+        justify-content: center;
+        padding: 0 1rem 1.25rem;
+        animation: ccb-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+        pointer-events: none;   /* let click-through to the rest of the page */
+    }
+
+    .ccb-card {
+        pointer-events: all;    /* re-enable clicks on the card */
+        background: #ffffff;
+        border: 1px solid var(--dmd-gray-mid, #E8ECF0);
+        border-radius: 16px;
+        box-shadow: 0 8px 48px rgba(26, 35, 126, 0.16);
+        padding: 1.5rem 1.75rem;
+        max-width: 680px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    .ccb-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .ccb-icon {
+        font-size: 1.8rem;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .ccb-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1A237E;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .ccb-subtitle {
+        font-size: 0.78rem;
+        color: #607D8B;
+        margin: 0;
+    }
+
+    /* ── Body ────────────────────────────────────────────────── */
+    .ccb-body {
+        font-size: 0.875rem;
+        color: #607D8B;
+        line-height: 1.65;
+        margin: 0;
+    }
+
+    .ccb-body strong { color: #1A237E; }
+
+    .ccb-learn {
+        color: #00897B;
+        font-weight: 600;
+        text-decoration: none;
+        margin-left: 0.25rem;
+    }
+
+    .ccb-learn:hover { text-decoration: underline; }
+
+    /* ── Action row ──────────────────────────────────────────── */
+    .ccb-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    /* ── Slide-up animation ──────────────────────────────────── */
+    @@keyframes ccb-slide-up {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    @@media (max-width: 480px) {
+        .ccb-card { padding: 1.25rem; border-radius: 12px 12px 0 0; }
+        .ccb-actions { flex-direction: column; }
+        .ccb-actions .mud-button { width: 100%; }
+    }
+</style>
+
+@code {
+    private const string ConsentKey = "dmd_cookie_consent";
+    private bool _visible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            var stored = await JS.InvokeAsync<string?>("localStorage.getItem", ConsentKey);
+            if (string.IsNullOrEmpty(stored))
+            {
+                _visible = true;
+                StateHasChanged();
+            }
+        }
+        catch
+        {
+            // localStorage unavailable (e.g., private browsing that blocks storage).
+            // Silently suppress — banner simply won't show.
+        }
+    }
+
+    private async Task AcceptAll()
+    {
+        await SaveConsent("accepted");
+    }
+
+    private async Task EssentialOnly()
+    {
+        await SaveConsent("essential");
+    }
+
+    /// <summary>Dismiss without saving (used when the user navigates to /cookies).</summary>
+    private void Dismiss() => _visible = false;
+
+    private async Task SaveConsent(string value)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", ConsentKey, value);
+        }
+        catch { /* ignore — banner will reappear next visit */ }
+        finally
+        {
+            _visible = false;
+        }
+    }
+}

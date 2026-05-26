@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @using DMD.Marketing.Layout
+@using DMD.Marketing.Components
 
 <MudRTLProvider RightToLeft="false">
     <MudThemeProvider Theme="@_theme" />
@@ -31,6 +32,9 @@
 
     </MudLayout>
 </MudRTLProvider>
+
+<!-- ─── COOKIE CONSENT BANNER ─── -->
+<CookieConsentBanner />
 
 <!-- ─── SCROLL TO TOP ─── -->
 <MudScrollToTop>
