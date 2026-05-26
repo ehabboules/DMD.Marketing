@@ -8,12 +8,32 @@ public class UserService
 {
     private readonly ApplicationDbContext    _db;
     private readonly IPasswordHasher<User>   _hasher;
+    private readonly IHttpContextAccessor    _http;
 
-    public UserService(ApplicationDbContext db, IPasswordHasher<User> hasher)
+    public UserService(ApplicationDbContext db, IPasswordHasher<User> hasher,
+                       IHttpContextAccessor http)
     {
         _db     = db;
         _hasher = hasher;
+        _http   = http;
     }
+
+    private string? ClientIp =>
+        _http.HttpContext?.Connection.RemoteIpAddress?.ToString();
+
+    private void Audit(string action, int? userId = null,
+                       string? entityType = null, string? entityId = null,
+                       string? detail = null) =>
+        _db.AuditLogs.Add(new AuditLog
+        {
+            UserId     = userId,
+            Action     = action,
+            EntityType = entityType,
+            EntityId   = entityId,
+            Detail     = detail,
+            IpAddress  = ClientIp,
+            CreatedAt  = DateTime.UtcNow,
+        });
 
     // ── Lookup ─────────────────────────────────────────────────────────
     public Task<User?> FindByEmailAsync(string email) =>
@@ -34,32 +54,36 @@ public class UserService
 
     // ── Register ──────────────────────────────────────────────────────
     public async Task<(User? User, string? Error)> CreateAsync(
-        string email, string firstName, string lastName, string password)
+        string email, string firstName, string lastName, string password,
+        string? termsVersion = null)
     {
         if (await FindByEmailAsync(email) is not null)
             return (null, "An account with this email already exists.");
 
         var user = new User
         {
-            Email         = email.Trim().ToLower(),
-            FirstName     = firstName.Trim(),
-            LastName      = lastName.Trim(),
-            IsActive      = true,
-            SecurityStamp = Guid.NewGuid().ToString("N"),
-            CreatedAt     = DateTime.UtcNow,
+            Email            = email.Trim().ToLower(),
+            FirstName        = firstName.Trim(),
+            LastName         = lastName.Trim(),
+            IsActive         = true,
+            SecurityStamp    = Guid.NewGuid().ToString("N"),
+            CreatedAt        = DateTime.UtcNow,
+            TermsAcceptedAt  = termsVersion is not null ? DateTime.UtcNow : null,
+            TermsVersion     = termsVersion,
         };
         user.PasswordHash = _hasher.HashPassword(user, password);
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        // Assign default "User" role
+        // Assign default "User" role + audit log in one save
         var userRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User");
         if (userRole is not null)
-        {
             _db.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = userRole.Id, CreatedAt = DateTime.UtcNow });
-            await _db.SaveChangesAsync();
-        }
+
+        Audit("UserRegistered", userId: user.Id, entityType: "User", entityId: user.Id.ToString(),
+              detail: $"email={user.Email} termsVersion={termsVersion}");
+        await _db.SaveChangesAsync();
 
         return (user, null);
     }
@@ -76,6 +100,7 @@ public class UserService
         user.SecurityStamp = Guid.NewGuid().ToString("N");
         user.ModifiedAt    = DateTime.UtcNow;
 
+        Audit("PasswordChanged", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
         return (true, null);
     }
@@ -91,6 +116,7 @@ public class UserService
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
         user.ModifiedAt               = DateTime.UtcNow;
 
+        Audit("PasswordResetRequested", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
         return (user, token);
     }
@@ -113,6 +139,7 @@ public class UserService
         user.MustChangePassword       = false;
         user.ModifiedAt               = DateTime.UtcNow;
 
+        Audit("PasswordReset", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
         return (true, null);
     }

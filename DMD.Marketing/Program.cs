@@ -41,10 +41,13 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath         = "/login";
-        options.AccessDeniedPath  = "/login";
-        options.ExpireTimeSpan    = TimeSpan.FromDays(14);
-        options.SlidingExpiration = true;
+        options.LoginPath           = "/login";
+        options.AccessDeniedPath    = "/login";
+        options.ExpireTimeSpan      = TimeSpan.FromDays(14);
+        options.SlidingExpiration   = true;
+        options.Cookie.HttpOnly     = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite     = SameSiteMode.Strict;
     });
 
 builder.Services.AddAuthorization();
@@ -109,6 +112,26 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ── Security response headers ──────────────────────────────────────
+app.Use(async (ctx, next) =>
+{
+    ctx.Response.Headers["X-Frame-Options"]           = "SAMEORIGIN";
+    ctx.Response.Headers["X-Content-Type-Options"]    = "nosniff";
+    ctx.Response.Headers["Referrer-Policy"]           = "strict-origin-when-cross-origin";
+    ctx.Response.Headers["Permissions-Policy"]        = "camera=(), microphone=(), geolocation=()";
+    // CSP: allow Blazor SignalR (wss:) + Stripe.js from js.stripe.com
+    ctx.Response.Headers["Content-Security-Policy"]   =
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' js.stripe.com; " +
+        "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
+        "font-src 'self' fonts.gstatic.com; " +
+        "connect-src 'self' wss: api.stripe.com; " +
+        "frame-src js.stripe.com hooks.stripe.com; " +
+        "img-src 'self' data:;";
+    await next();
+});
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

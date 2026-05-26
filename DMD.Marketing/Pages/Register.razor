@@ -206,6 +206,20 @@
 
                     <ValidationSummary />
 
+                    <MudCheckBox @bind-Value="_model.AcceptsTerms"
+                                 Color="Color.Primary"
+                                 For="@(() => _model.AcceptsTerms)"
+                                 Disabled="@_isLoading">
+                        <ChildContent>
+                            <MudText Typo="Typo.body2">
+                                I agree to the
+                                <MudLink Href="/terms" Target="_blank" Color="Color.Primary">Terms of Service</MudLink>
+                                and
+                                <MudLink Href="/privacy" Target="_blank" Color="Color.Primary">Privacy Policy</MudLink>
+                            </MudText>
+                        </ChildContent>
+                    </MudCheckBox>
+
                     <MudButton ButtonType="ButtonType.Submit"
                                Variant="Variant.Filled"
                                Color="Color.Primary"
@@ -321,7 +335,8 @@
 
             // Register directly via UserService
             var (user, error) = await UserSvc.CreateAsync(
-                _model.Email, _model.FirstName, _model.LastName, _model.Password);
+                _model.Email, _model.FirstName, _model.LastName, _model.Password,
+                termsVersion: CurrentTermsVersion);
 
             if (user is null)
             {
@@ -390,6 +405,8 @@
         }
     }
 
+    private const string CurrentTermsVersion = "2026-05-25";
+
     private class RegisterModel
     {
         [Required(ErrorMessage = "First name is required")]
@@ -411,5 +428,9 @@
         [Required(ErrorMessage = "Please confirm your password")]
         [Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Range(typeof(bool), "true", "true",
+               ErrorMessage = "You must accept the Terms of Service and Privacy Policy.")]
+        public bool AcceptsTerms { get; set; } = false;
     }
 }

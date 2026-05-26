@@ -1,3 +1,4 @@
+using DMD.Marketing.Data;
 using DMD.Marketing.Services;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -13,14 +14,20 @@ namespace DMD.Marketing.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly UserService _userService;
+    private readonly UserService             _userService;
     private readonly ILogger<AuthController> _logger;
+    private readonly ApplicationDbContext    _db;
 
-    public AuthController(UserService userService, ILogger<AuthController> logger)
+    public AuthController(UserService userService, ILogger<AuthController> logger,
+                          ApplicationDbContext db)
     {
         _userService = userService;
-        _logger = logger;
+        _logger      = logger;
+        _db          = db;
     }
+
+    private string? ClientIp =>
+        HttpContext.Connection.RemoteIpAddress?.ToString();
 
     [HttpPost("/connect/token")]
     public async Task<IActionResult> Exchange()
@@ -36,6 +43,16 @@ public class AuthController : ControllerBase
             var user = await _userService.ValidateCredentialsAsync(email, password);
             if (user is null)
             {
+                _db.AuditLogs.Add(new AuditLog
+                {
+                    Action     = "LoginFailed",
+                    EntityType = "User",
+                    Detail     = $"email={email}",
+                    IpAddress  = ClientIp,
+                    CreatedAt  = DateTime.UtcNow,
+                });
+                await _db.SaveChangesAsync();
+
                 var props = new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error]            = Errors.InvalidGrant,
@@ -46,6 +63,17 @@ public class AuthController : ControllerBase
 
             if (!user.IsActive)
             {
+                _db.AuditLogs.Add(new AuditLog
+                {
+                    UserId     = user.Id,
+                    Action     = "LoginDeniedInactive",
+                    EntityType = "User",
+                    EntityId   = user.Id.ToString(),
+                    IpAddress  = ClientIp,
+                    CreatedAt  = DateTime.UtcNow,
+                });
+                await _db.SaveChangesAsync();
+
                 var props = new AuthenticationProperties(new Dictionary<string, string?>
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error]            = Errors.InvalidGrant,
@@ -75,6 +103,17 @@ public class AuthController : ControllerBase
             var principal = new ClaimsPrincipal(identity);
             principal.SetScopes(new[] { Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.OfflineAccess });
             principal.SetDestinations(_ => new[] { Destinations.AccessToken, Destinations.IdentityToken });
+
+            _db.AuditLogs.Add(new AuditLog
+            {
+                UserId     = user.Id,
+                Action     = "LoginSuccess",
+                EntityType = "User",
+                EntityId   = user.Id.ToString(),
+                IpAddress  = ClientIp,
+                CreatedAt  = DateTime.UtcNow,
+            });
+            await _db.SaveChangesAsync();
 
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }

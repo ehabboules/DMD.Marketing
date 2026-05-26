@@ -1,0 +1,9 @@
+global using Xunit;
+global using Moq;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Logging.Abstractions;
+global using Microsoft.AspNetCore.Identity;
+global using DMD.Marketing.Data;
+global using DMD.Marketing.Models;
+global using DMD.Marketing.Services;
+global using DMD.Marketing.Controllers;

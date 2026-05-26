@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Role>           Roles          => Set<Role>();
     public DbSet<UserRole>       UserRoles      => Set<UserRole>();
     public DbSet<PaymentHistory> PaymentHistory => Set<PaymentHistory>();
+    public DbSet<AuditLog>       AuditLogs      => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -53,6 +54,12 @@ public class ApplicationDbContext : DbContext
             e.HasOne(p => p.User)
              .WithMany()
              .HasForeignKey(p => p.UserId);
+        });
+
+        // ── AuditLogs ────────────────────────────────────────────────
+        builder.Entity<AuditLog>(e =>
+        {
+            e.Property(a => a.Id).UseIdentityColumn();
         });
 
         // ── OpenIddict entity sets ─────────────────────────────────

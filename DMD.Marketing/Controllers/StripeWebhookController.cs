@@ -22,6 +22,8 @@ public class StripeWebhookController : ControllerBase
         _config = config;
         _db = db;
         _logger = logger;
+        // Ensure Stripe API key is set for any Stripe SDK calls made in this controller
+        StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
     }
 
     [HttpPost("webhook")]
@@ -66,12 +68,13 @@ public class StripeWebhookController : ControllerBase
         return Ok();
     }
 
-    private async Task HandleCheckoutCompleted(Event stripeEvent)
+    internal async Task HandleCheckoutCompleted(Event stripeEvent)
     {
         var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
         if (session is null) return;
 
-        var userId = session.Metadata.TryGetValue("UserId", out var id) ? int.Parse(id) : 0;
+        var userId = session.Metadata.TryGetValue("UserId", out var id)
+                    && int.TryParse(id, out var parsed) ? parsed : 0;
         if (userId == 0)
         {
             _logger.LogWarning("Checkout session {SessionId} has no UserId metadata", session.Id);
@@ -107,7 +110,7 @@ public class StripeWebhookController : ControllerBase
         _logger.LogInformation("User {UserId} activated via Stripe checkout", userId);
     }
 
-    private async Task HandleInvoicePaid(Event stripeEvent)
+    internal async Task HandleInvoicePaid(Event stripeEvent)
     {
         var invoice = stripeEvent.Data.Object as Invoice;
         if (invoice is null) return;
@@ -154,7 +157,7 @@ public class StripeWebhookController : ControllerBase
         _logger.LogInformation("Subscription renewed for user {UserId} via invoice.paid", user.Id);
     }
 
-    private async Task HandleSubscriptionDeleted(Event stripeEvent)
+    internal async Task HandleSubscriptionDeleted(Event stripeEvent)
     {
         var subscription = stripeEvent.Data.Object as Subscription;
         if (subscription is null) return;

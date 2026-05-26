@@ -66,6 +66,9 @@ public class User
     [MaxLength(20)]
     public string?   TermsVersion    { get; set; }
 
+    // ── GDPR / PIPEDA data deletion ───────────────────────────────
+    public DateTime? DataDeletionRequestedAt { get; set; }
+
     // ── Navigation ────────────────────────────────────────────────
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }
