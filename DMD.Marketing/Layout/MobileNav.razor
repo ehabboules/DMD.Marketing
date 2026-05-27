@@ -56,10 +56,9 @@
 
     <MudNavMenu>
 
-        <!-- ═══ SOLUTIONS ═══ -->
-        <MudNavGroup Title="Solutions"                     
-                     @bind-Expanded="@ExpandSolutions"
-                     IconColor="Color.Primary">
+        <!-- ═══ PRODUCT ═══ -->
+        <MudNavGroup Title="Product"
+                     @bind-Expanded="@ExpandProduct">
 
             <MudNavLink Href="/features"
                         Icon="@Icons.Material.Filled.AutoAwesome"
@@ -71,7 +70,43 @@
                 </div>
             </MudNavLink>
 
-            <div class="nav-section-divider"><span>By industry</span></div>
+            <MudNavLink Href="/pos-system"
+                        Icon="@Icons.Material.Filled.PointOfSale"
+                        IconColor="Color.Primary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Point of Sale</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Fast, modern checkout experience</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/inventory-management"
+                        Icon="@Icons.Material.Filled.Inventory"
+                        IconColor="Color.Primary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Inventory</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Multi-warehouse stock control</MudText>
+                </div>
+            </MudNavLink>
+
+            <MudNavLink Href="/reports-analytics"
+                        Icon="@Icons.Material.Filled.BarChart"
+                        IconColor="Color.Primary"
+                        Match="NavLinkMatch.All">
+                <div class="nav-link-content">
+                    <span>Reports &amp; Analytics</span>
+                    <MudText Typo="Typo.caption" Class="nav-desc">Profit, sales &amp; valuation reports</MudText>
+                </div>
+            </MudNavLink>
+
+        </MudNavGroup>
+
+        <MudDivider Class="my-2" />
+
+        <!-- ═══ SOLUTIONS ═══ -->
+        <MudNavGroup Title="Solutions"
+                     @bind-Expanded="@ExpandSolutions">
 
             <MudNavLink Href="/retail"
                         Icon="@Icons.Material.Filled.Store"
@@ -109,8 +144,7 @@
 
         <!-- ═══ COMPANY ═══ -->
         <MudNavGroup Title="Company"
-                     @bind-Expanded="@ExpandCompany"
-                     IconColor="Color.Tertiary">
+                     @bind-Expanded="@ExpandCompany">
 
             <MudNavLink Href="/about"
                         Icon="@Icons.Material.Filled.Info"
@@ -148,7 +182,6 @@
 
         <!-- ═══ PRICING — standalone ═══ -->
         <MudNavLink Href="/pricing"
-                    IconColor="Color.Success"
                     Match="NavLinkMatch.All">
             <div class="nav-link-content">
                 <span>Pricing</span>
@@ -272,10 +305,17 @@
     private bool _drawerOpen = false;
     private DotNetObjectReference<MobileNav>? _dotNetRef;
 
+    private bool _expandProduct;
     private bool _expandSolutions;
     private bool _expandCompany;
 
-    private void CloseAllGroups() { _expandSolutions = false; _expandCompany = false; }
+    private void CloseAllGroups() { _expandProduct = false; _expandSolutions = false; _expandCompany = false; }
+
+    private bool ExpandProduct
+    {
+        get => _expandProduct;
+        set { if (value) CloseAllGroups(); _expandProduct = value; }
+    }
 
     private bool ExpandSolutions
     {
