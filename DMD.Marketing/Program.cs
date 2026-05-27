@@ -120,13 +120,16 @@ app.Use(async (ctx, next) =>
     ctx.Response.Headers["X-Content-Type-Options"]    = "nosniff";
     ctx.Response.Headers["Referrer-Policy"]           = "strict-origin-when-cross-origin";
     ctx.Response.Headers["Permissions-Policy"]        = "camera=(), microphone=(), geolocation=()";
-    // CSP: allow Blazor SignalR (wss:) + Stripe.js from js.stripe.com
+    // In development allow localhost for VS Browser Link + Hot Reload SignalR
+    var connectSrc = app.Environment.IsDevelopment()
+        ? "connect-src 'self' wss: ws: http://localhost:* https://localhost:* api.stripe.com; "
+        : "connect-src 'self' wss: api.stripe.com; ";
     ctx.Response.Headers["Content-Security-Policy"]   =
         "default-src 'self'; " +
         "script-src 'self' 'unsafe-inline' js.stripe.com; " +
         "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
         "font-src 'self' fonts.gstatic.com; " +
-        "connect-src 'self' wss: api.stripe.com; " +
+        connectSrc +
         "frame-src js.stripe.com hooks.stripe.com; " +
         "img-src 'self' data:;";
     await next();
