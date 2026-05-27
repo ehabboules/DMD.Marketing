@@ -197,8 +197,9 @@
                         </Authorized>
                     </AuthorizeView>
                     <MudButton Variant="Variant.Outlined"
-                               Color="Color.Secondary"
+                               Color="Color.Error"
                                FullWidth="true"
+                               StartIcon="@Icons.Material.Filled.Logout"
                                OnClick='() => Navigation.NavigateTo("/logout", forceLoad: true)'
                                Style="border-radius:10px;">
                         Sign Out
