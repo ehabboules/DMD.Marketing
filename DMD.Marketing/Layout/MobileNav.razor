@@ -16,9 +16,9 @@
     <img src="images/DMD_POS_scalable.svg"
          alt="Cloud Mobil POS"
          style="width:36px;height:36px;margin-left:8px;margin-right:4px;" />
-    <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;color:#1A237E;">
-        Cloud Mobil <span style="color:#00BFA5;">POS</span>
-    </MudText>
+@*     <MudText Typo="Typo.h6" Class="ml-1" Style="font-weight:700;color:#1A237E;">
+        Cloud Mobil <span style="color:#00BFA5;">POS</span> 
+    </MudText>*@
     <MudSpacer />
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
@@ -57,8 +57,7 @@
     <MudNavMenu>
 
         <!-- ═══ SOLUTIONS ═══ -->
-        <MudNavGroup Title="Solutions"
-                     Icon="@Icons.Material.Filled.Lightbulb"
+        <MudNavGroup Title="Solutions"                     
                      @bind-Expanded="@ExpandSolutions"
                      IconColor="Color.Primary">
 
@@ -110,7 +109,6 @@
 
         <!-- ═══ COMPANY ═══ -->
         <MudNavGroup Title="Company"
-                     Icon="@Icons.Material.Filled.Business"
                      @bind-Expanded="@ExpandCompany"
                      IconColor="Color.Tertiary">
 
@@ -150,7 +148,6 @@
 
         <!-- ═══ PRICING — standalone ═══ -->
         <MudNavLink Href="/pricing"
-                    Icon="@Icons.Material.Filled.Sell"
                     IconColor="Color.Success"
                     Match="NavLinkMatch.All">
             <div class="nav-link-content">
