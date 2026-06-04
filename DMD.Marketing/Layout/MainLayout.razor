@@ -41,7 +41,7 @@
     <MudFab Color="Color.Primary"
             StartIcon="@Icons.Material.Filled.KeyboardArrowUp"
             Size="Size.Medium"
-            Style="box-shadow:0 4px 24px rgba(0,191,165,0.45);" />
+            Style="box-shadow:0 4px 24px rgba(25,118,210,0.45);" />
 </MudScrollToTop>
 
 <style>
@@ -59,24 +59,24 @@
 </style>
 
 @code {
-    // ── Brand theme: teal primary / navy secondary / amber tertiary ──
+    // ── Brand theme: corporate blue primary / navy secondary / purple tertiary ──
     private MudTheme _theme = new MudTheme
     {
         PaletteLight = new PaletteLight
         {
-            Primary          = "#00BFA5",
-            PrimaryDarken    = "#00897B",
-            PrimaryLighten   = "#E0F7F4",
+            Primary          = "#1976D2",
+            PrimaryDarken    = "#1565C0",
+            PrimaryLighten   = "#E3F2FD",
             Secondary        = "#1A237E",
             SecondaryDarken  = "#0D1457",
             SecondaryLighten = "#E8EAF6",
-            Tertiary         = "#FF6F00",
-            TertiaryDarken   = "#E65100",
-            TertiaryLighten  = "#FFF3E0",
-            Success          = "#00C853",
-            Info             = "#0288D1",
-            Warning          = "#FF8F00",
-            Error            = "#E53935",
+            Tertiary         = "#9C27B0",
+            TertiaryDarken   = "#7B1FA2",
+            TertiaryLighten  = "#F3E5F5",
+            Success          = "#4CAF50",
+            Info             = "#2196F3",
+            Warning          = "#FF9800",
+            Error            = "#F44336",
             Background       = "#FFFFFF",
             Surface          = "#FFFFFF",
             AppbarBackground = "#FFFFFF",
@@ -93,7 +93,7 @@
         {
             Default = new DefaultTypography
             {
-                FontFamily = new[] { "DM Sans", "sans-serif" },
+                FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif" },
             },
         },
         LayoutProperties = new LayoutProperties

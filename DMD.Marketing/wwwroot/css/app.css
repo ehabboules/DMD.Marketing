@@ -1,24 +1,24 @@
 /* =====================================================
    DMD Inventory Marketing Site — Brand Stylesheet
-   Colors: Teal #00BFA5 | Navy #1A237E | Red #E53935
+   Colors: Blue #0066FF | Navy #1A237E | Red #F44336
    ===================================================== */
 
 :root {
-    --dmd-teal:       #00BFA5;
-    --dmd-teal-light: #E0F7F4;
-    --dmd-teal-dark:  #00897B;
+    --dmd-teal:       #0066FF;
+    --dmd-teal-light: #E8F0FF;
+    --dmd-teal-dark:  #0047CC;
     --dmd-navy:       #1A237E;
     --dmd-navy-light: #3949AB;
     --dmd-navy-dark:  #0D1757;
-    --dmd-red:        #E53935;
+    --dmd-red:        #F44336;
     --dmd-red-light:  #FFEBEE;
     --dmd-white:      #FFFFFF;
     --dmd-gray:       #F5F7FA;
     --dmd-gray-mid:   #E8ECF0;
     --dmd-text:       #1A237E;
     --dmd-text-muted: #607D8B;
-    --font-display:   'Syne', sans-serif;
-    --font-body:      'DM Sans', sans-serif;
+    --font-display:   'Poppins', sans-serif;
+    --font-body:      'Inter', sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -85,7 +85,7 @@ h1, h2, h3, h4 {
 
 .nav-cta {
     background: var(--dmd-teal) !important;
-    color: var(--dmd-navy) !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
     border-radius: 8px !important;
     padding: 0.5rem 1.4rem !important;
@@ -96,14 +96,14 @@ h1, h2, h3, h4 {
 
 .nav-cta:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(0,191,165,0.4) !important;
-    color: var(--dmd-navy) !important;
+    box-shadow: 0 4px 16px rgba(0,102,255,0.4) !important;
+    color: #FFFFFF !important;
 }
 
 /* ── Hero Section ───────────────────────────── */
 .hero-section {
     min-height: 100vh;
-    background: linear-gradient(160deg, #F8FAFF 0%, #EEF2FF 45%, #E8F8F5 100%);
+    background: linear-gradient(160deg, #F8FAFF 0%, #EEF2FF 45%, #E8F0FF 100%);
     display: flex;
     align-items: center;
     position: relative;
@@ -156,8 +156,8 @@ h1, h2, h3, h4 {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(0,191,165,0.15);
-    border: 1px solid rgba(0,191,165,0.3);
+    background: rgba(0,102,255,0.12);
+    border: 1px solid rgba(0,102,255,0.25);
     color: var(--dmd-teal);
     padding: 6px 16px;
     border-radius: 100px;
@@ -202,18 +202,18 @@ h1, h2, h3, h4 {
 
 .btn-primary {
     background: var(--dmd-teal) !important;
-    color: var(--dmd-navy) !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 1rem !important;
     padding: 0.85rem 2rem !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 24px rgba(0,191,165,0.35) !important;
+    box-shadow: 0 4px 24px rgba(0,102,255,0.35) !important;
     transition: transform 0.2s, box-shadow 0.2s !important;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 8px 32px rgba(0,191,165,0.5) !important;
+    box-shadow: 0 8px 32px rgba(0,102,255,0.5) !important;
 }
 
 .btn-outline {
@@ -449,9 +449,9 @@ h1, h2, h3, h4 {
 
 .pricing-card.featured {
     border-color: var(--dmd-teal);
-    background: linear-gradient(160deg, #FAFFFD 0%, #E0F7F4 100%);
+    background: linear-gradient(160deg, #F8FAFF 0%, #E8F0FF 100%);
     transform: scale(1.04);
-    box-shadow: 0 20px 64px rgba(0,191,165,0.2);
+    box-shadow: 0 20px 64px rgba(0,102,255,0.2);
 }
 
 .pricing-card:hover:not(.featured) {
@@ -465,7 +465,7 @@ h1, h2, h3, h4 {
     left: 50%;
     transform: translateX(-50%);
     background: var(--dmd-teal);
-    color: var(--dmd-navy);
+    color: #FFFFFF;
     font-weight: 700;
     font-size: 0.78rem;
     padding: 4px 16px;

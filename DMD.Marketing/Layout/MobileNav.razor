@@ -2,7 +2,7 @@
 @using System.Security.Claims
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
-@implements IDisposable
+@implements IAsyncDisposable
 
 <!-- ═══════════════════════════════════════════════════════════
      APP BAR — mobile only (hidden on md+ via CSS)
@@ -357,9 +357,14 @@
         if (_drawerOpen) { _drawerOpen = false; InvokeAsync(StateHasChanged); }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         Navigation.LocationChanged -= OnLocationChanged;
-        _dotNetRef?.Dispose();
+        if (_dotNetRef != null)
+        {
+            try { await JS.InvokeVoidAsync("unregisterResizeHandler", _dotNetRef); }
+            catch { /* component may be disposed before JS is available */ }
+            _dotNetRef.Dispose();
+        }
     }
 }

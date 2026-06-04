@@ -131,6 +131,7 @@ app.Use(async (ctx, next) =>
         "font-src 'self' fonts.gstatic.com; " +
         connectSrc +
         "frame-src js.stripe.com hooks.stripe.com; " +
+        "frame-ancestors 'self'; " +
         "img-src 'self' data:;";
     await next();
 });

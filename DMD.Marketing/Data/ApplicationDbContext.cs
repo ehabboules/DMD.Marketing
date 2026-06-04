@@ -60,6 +60,13 @@ public class ApplicationDbContext : DbContext
         builder.Entity<AuditLog>(e =>
         {
             e.Property(a => a.Id).UseIdentityColumn();
+            e.HasIndex(a => a.UserId).HasDatabaseName("IX_AuditLogs_UserId");
+            e.HasIndex(a => a.CreatedAt).HasDatabaseName("IX_AuditLogs_CreatedAt");
+            e.HasOne<User>()
+             .WithMany()
+             .HasForeignKey(a => a.UserId)
+             .IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ── OpenIddict entity sets ─────────────────────────────────
