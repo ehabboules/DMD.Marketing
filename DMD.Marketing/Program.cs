@@ -93,10 +93,11 @@ builder.Services.AddOpenIddict()
 
 var app = builder.Build();
 
-// ── Seed roles ──────────────────────────────────────────────────────
+// ── Migrate + Seed roles ─────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
     foreach (var name in new[] { "Admin", "User" })
     {
         if (!db.Roles.Any(r => r.Name == name))

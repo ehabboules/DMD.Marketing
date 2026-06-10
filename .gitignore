@@ -431,3 +431,5 @@ FodyWeavers.xsd
 **/appsettings.Development.json
 **/appsettings.Production.json
 **/secrets.json
+/DMD.Marketing/appsettings.Development.json
+/DMD.Marketing/appsettings.Development.json
