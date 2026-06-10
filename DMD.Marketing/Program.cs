@@ -106,15 +106,13 @@ using (var scope = app.Services.CreateScope())
     db.SaveChanges();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseHttpsRedirection();
 
 // ── Security response headers ──────────────────────────────────────
 app.Use(async (ctx, next) =>
