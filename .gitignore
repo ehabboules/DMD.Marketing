@@ -426,4 +426,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-/DMD.Marketing/appsettings.json
+
+# ASP.NET Core sensitive config files (use environment variables for secrets in production)
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/secrets.json

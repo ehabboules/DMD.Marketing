@@ -146,4 +146,6 @@ app.MapRazorComponents<DMD.Marketing.Components.App>()
 
 app.MapControllers();
 
+app.MapGet("/health", () => Results.Ok("healthy"));
+
 app.Run();
