@@ -9,13 +9,15 @@ public class UserService
     private readonly ApplicationDbContext    _db;
     private readonly IPasswordHasher<User>   _hasher;
     private readonly IHttpContextAccessor    _http;
+    private readonly ILogger<UserService>    _logger;
 
     public UserService(ApplicationDbContext db, IPasswordHasher<User> hasher,
-                       IHttpContextAccessor http)
+                       IHttpContextAccessor http, ILogger<UserService> logger)
     {
         _db     = db;
         _hasher = hasher;
         _http   = http;
+        _logger = logger;
     }
 
     private string? ClientIp =>
@@ -45,11 +47,23 @@ public class UserService
     // ── Validate credentials ──────────────────────────────────────────
     public async Task<User?> ValidateCredentialsAsync(string email, string password)
     {
+        _logger.LogDebug("ValidateCredentials: {Email}", email);
         var user = await FindByEmailAsync(email);
-        if (user is null) return null;
+        if (user is null)
+        {
+            _logger.LogWarning("ValidateCredentials: no account found for {Email}", email);
+            return null;
+        }
 
         var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, password);
-        return result == PasswordVerificationResult.Failed ? null : user;
+        if (result == PasswordVerificationResult.Failed)
+        {
+            _logger.LogWarning("ValidateCredentials: wrong password for {Email}", email);
+            return null;
+        }
+
+        _logger.LogInformation("ValidateCredentials: success for user {UserId}", user.Id);
+        return user;
     }
 
     // ── Register ──────────────────────────────────────────────────────
@@ -57,8 +71,13 @@ public class UserService
         string email, string firstName, string lastName, string password,
         string? termsVersion = null)
     {
+        _logger.LogInformation("CreateUser: {Email}", email);
+
         if (await FindByEmailAsync(email) is not null)
+        {
+            _logger.LogWarning("CreateUser: duplicate email {Email}", email);
             return (null, "An account with this email already exists.");
+        }
 
         var user = new User
         {
@@ -85,6 +104,7 @@ public class UserService
               detail: $"email={user.Email} termsVersion={termsVersion}");
         await _db.SaveChangesAsync();
 
+        _logger.LogInformation("CreateUser: registered user {UserId} ({Email})", user.Id, user.Email);
         return (user, null);
     }
 
@@ -92,9 +112,14 @@ public class UserService
     public async Task<(bool Success, string? Error)> ChangePasswordAsync(
         User user, string currentPassword, string newPassword)
     {
+        _logger.LogInformation("ChangePassword: user {UserId}", user.Id);
+
         var check = _hasher.VerifyHashedPassword(user, user.PasswordHash, currentPassword);
         if (check == PasswordVerificationResult.Failed)
+        {
+            _logger.LogWarning("ChangePassword: wrong current password for user {UserId}", user.Id);
             return (false, "Current password is incorrect.");
+        }
 
         user.PasswordHash = _hasher.HashPassword(user, newPassword);
         user.SecurityStamp = Guid.NewGuid().ToString("N");
@@ -102,14 +127,22 @@ public class UserService
 
         Audit("PasswordChanged", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
+
+        _logger.LogInformation("ChangePassword: success for user {UserId}", user.Id);
         return (true, null);
     }
 
     // ── Forgot password: generate & store token ────────────────────────
     public async Task<(User? User, string? Token)> GeneratePasswordResetTokenAsync(string email)
     {
+        _logger.LogInformation("GeneratePasswordResetToken: {Email}", email);
+
         var user = await FindByEmailAsync(email);
-        if (user is null) return (null, null);   // don't reveal non-existence to callers
+        if (user is null)
+        {
+            _logger.LogWarning("GeneratePasswordResetToken: no account for {Email}", email);
+            return (null, null);   // don't reveal non-existence to callers
+        }
 
         var token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"); // 64 hex chars
         user.PasswordResetToken       = token;
@@ -118,6 +151,8 @@ public class UserService
 
         Audit("PasswordResetRequested", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
+
+        _logger.LogInformation("GeneratePasswordResetToken: token issued for user {UserId}", user.Id);
         return (user, token);
     }
 
@@ -125,12 +160,20 @@ public class UserService
     public async Task<(bool Success, string? Error)> ResetPasswordAsync(
         string email, string token, string newPassword)
     {
+        _logger.LogInformation("ResetPassword: {Email}", email);
+
         var user = await FindByEmailAsync(email);
         if (user is null || user.PasswordResetToken != token)
+        {
+            _logger.LogWarning("ResetPassword: invalid token for {Email}", email);
             return (false, "Invalid or expired reset link.");
+        }
 
         if (user.PasswordResetTokenExpiry < DateTime.UtcNow)
+        {
+            _logger.LogWarning("ResetPassword: expired token for user {UserId}", user.Id);
             return (false, "This reset link has expired. Please request a new one.");
+        }
 
         user.PasswordHash             = _hasher.HashPassword(user, newPassword);
         user.PasswordResetToken       = null;
@@ -141,6 +184,8 @@ public class UserService
 
         Audit("PasswordReset", userId: user.Id, entityType: "User", entityId: user.Id.ToString());
         await _db.SaveChangesAsync();
+
+        _logger.LogInformation("ResetPassword: success for user {UserId}", user.Id);
         return (true, null);
     }
 
@@ -166,6 +211,7 @@ public class UserService
         {
             _db.UserRoles.Add(new UserRole { UserId = userId, RoleId = roleId, CreatedAt = DateTime.UtcNow });
             await _db.SaveChangesAsync();
+            _logger.LogInformation("AssignRole: role {RoleId} assigned to user {UserId}", roleId, userId);
         }
     }
 
@@ -176,6 +222,7 @@ public class UserService
         {
             _db.UserRoles.Remove(ur);
             await _db.SaveChangesAsync();
+            _logger.LogInformation("RemoveRole: role {RoleId} removed from user {UserId}", roleId, userId);
         }
     }
 }
