@@ -127,7 +127,7 @@ app.Use(async (ctx, next) =>
         : "connect-src 'self' wss: api.stripe.com; ";
     ctx.Response.Headers["Content-Security-Policy"]   =
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' js.stripe.com; " +
+        "script-src 'self' 'unsafe-inline' js.stripe.com static.cloudflareinsights.com; " +
         "style-src 'self' 'unsafe-inline' fonts.googleapis.com; " +
         "font-src 'self' fonts.gstatic.com; " +
         connectSrc +
