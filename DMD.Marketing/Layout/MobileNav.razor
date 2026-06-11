@@ -297,7 +297,14 @@
         text-transform: uppercase; color: var(--mud-palette-text-disabled); white-space: nowrap;
     }
 
-    .mud-drawer { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+    .mud-drawer {
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: fixed !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        overflow-y: auto !important;
+        top: 0 !important;
+    }
 </style>
 
 @code {
