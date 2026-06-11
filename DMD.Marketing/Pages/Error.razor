@@ -1,0 +1,28 @@
+@page "/Error"
+@using Microsoft.AspNetCore.Diagnostics
+
+<PageTitle>Error — Cloud Mobil POS</PageTitle>
+
+@{
+    var exceptionFeature = HttpContext?.Features.Get<IExceptionHandlerFeature>();
+}
+
+<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:4rem 1rem;text-align:center;">
+    <div style="max-width:480px;">
+        <div style="font-size:4rem;margin-bottom:1.5rem;">⚠️</div>
+        <h1 style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#1A237E;margin:0 0 1rem;">
+            Something went wrong
+        </h1>
+        <p style="color:#6B7280;font-size:1rem;line-height:1.7;margin:0 0 2rem;">
+            An unexpected error occurred. Please try again or contact us if the problem persists.
+        </p>
+        <a href="/" style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:10px;text-decoration:none;font-size:0.95rem;">
+            Back to Home
+        </a>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+}
