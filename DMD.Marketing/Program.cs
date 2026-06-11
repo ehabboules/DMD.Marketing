@@ -90,7 +90,8 @@ builder.Services.AddOpenIddict()
                .EnableTokenEndpointPassthrough()
                .EnableAuthorizationEndpointPassthrough()
                .EnableUserinfoEndpointPassthrough()
-               .EnableLogoutEndpointPassthrough();
+               .EnableLogoutEndpointPassthrough()
+               .DisableTransportSecurityRequirement(); // Railway/Cloudflare terminate TLS; internal calls are HTTP
     })
     .AddValidation(options =>
     {
