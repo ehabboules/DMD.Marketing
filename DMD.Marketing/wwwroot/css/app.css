@@ -1,12 +1,12 @@
 /* =====================================================
    DMD Inventory Marketing Site — Brand Stylesheet
-   Colors: Blue #0066FF | Navy #1A237E | Red #F44336
+   Colors: Teal #00BFA5 | Navy #1A237E | Red #F44336
    ===================================================== */
 
 :root {
-    --dmd-teal:       #0066FF;
-    --dmd-teal-light: #E8F0FF;
-    --dmd-teal-dark:  #0047CC;
+    --dmd-teal:       #00BFA5;
+    --dmd-teal-light: #E0F7F4;
+    --dmd-teal-dark:  #00897B;
     --dmd-navy:       #1A237E;
     --dmd-navy-light: #3949AB;
     --dmd-navy-dark:  #0D1757;
