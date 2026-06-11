@@ -181,9 +181,8 @@
                 new KeyValuePair<string?, string?>("scope",      "openid email profile offline_access")
             });
 
-            var http     = HttpClientFactory.CreateClient();
-            var tokenUrl = $"{Navigation.BaseUri}connect/token";
-            var response = await http.PostAsync(tokenUrl, content);
+            var http     = HttpClientFactory.CreateClient("local");
+            var response = await http.PostAsync("connect/token", content);
 
             if (!response.IsSuccessStatusCode)
             {

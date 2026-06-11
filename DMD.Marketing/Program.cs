@@ -13,6 +13,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("local", (sp, client) =>
+{
+    var config  = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = config["InternalBaseUrl"] ?? "http://localhost:8080";
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    client.Timeout     = TimeSpan.FromSeconds(15);
+});
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
