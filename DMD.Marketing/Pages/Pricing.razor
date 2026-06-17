@@ -214,128 +214,15 @@
 @code {
     private bool IsAnnual { get; set; } = true;
 
-    private void HandleCta(PricingPlan plan)
+    private IReadOnlyList<PricingData.Plan> Plans => PricingData.Plans;
+
+    private void HandleCta(PricingData.Plan plan)
     {
         if (plan.Name == "Enterprise")
             Navigation.NavigateTo("/contact");
         else
             Navigation.NavigateTo("/contact?plan=" + plan.Name.ToLower());
     }
-
-    private record PricingFeature(string Text, bool Included);
-
-    private record PricingPlan(
-        string Name,
-        string Description,
-        string PreviewTagline,
-        decimal MonthlyPrice,
-        decimal AnnualPrice,
-        bool CustomPrice,
-        bool Featured,
-        string CtaLabel,
-        List<PricingFeature> Features
-    );
-
-    private List<PricingPlan> Plans => new()
-    {
-        new PricingPlan(
-            Name: "Starter",
-            Description: "One location, getting off the ground.",
-            PreviewTagline: "1 register · 1 warehouse",
-            MonthlyPrice: 54.99m,
-            AnnualPrice: 49.99m,
-            CustomPrice: false,
-            Featured: false,
-            CtaLabel: "Start free trial",
-            Features: new()
-            {
-                new("POS terminal (1 register)", true),
-                new("Cash session management", true),
-                new("1 warehouse · unlimited products", true),
-                new("Purchase orders & receiving", true),
-                new("Customers & sales orders", true),
-                new("Sales & inventory reports", true),
-                new("Returns & refunds", true),
-                new("Specials & promotions", true),
-                new("Financial dashboard", true),
-                new("Stripe Terminal", true),
-                new("Role-based access control", true),
-                new("Follow up sales through your phone", false),
-                new("Multi-language (FR / AR)", false)
-            }
-        ),
-        new PricingPlan(
-            Name: "Growth",
-            Description: "Scaling retail with full POS and reporting.",
-            PreviewTagline: "Up to 5 users · 3 warehouses",
-            MonthlyPrice: 99.99m,
-            AnnualPrice: 89.99m,
-            CustomPrice: false,
-            Featured: true,
-            CtaLabel: "Start free trial",
-            Features: new()
-            {
-                new("POS terminal (3 registers per warehouse)", true),
-                new("Cash session management", true),
-                new("Up to 3 warehouses · unlimited products", true),
-                new("Purchase orders & receiving", true),
-                new("Returns & refunds", true),
-                new("Specials & promotions wizard", true),
-                new("Full reports + financial dashboard", true),
-                new("Expenses & categories", true),
-                new("Stripe Terminal support", true),
-                new("Up to 5 users", true),
-                new("Role-based access control", true),                
-                new("Follow up sales through your phone", true),
-                new("Multi-language (FR / AR)", true),
-            }
-        ),
-        new PricingPlan(
-            Name: "Pro",
-            Description: "Multi-location with full control and localization.",
-            PreviewTagline: "Unlimited · multi-language",
-            MonthlyPrice: 199.99m,
-            AnnualPrice: 179.99m,
-            CustomPrice: false,
-            Featured: false,
-            CtaLabel: "Start free trial",
-            Features: new()
-            {
-                new("Unlimited registers", true),
-                new("Cash session management", true),
-                new("Up to 7 warehouses & unlimited products", true),
-                new("Purchase orders & receiving", true),
-                new("Returns & refunds", true),
-                new("Specials & promotions wizard", true),
-                new("Full reports + financial dashboard", true),
-                new("Expenses & categories", true),
-                new("Stripe Terminal support", true),
-                new("Unlimited users", true),
-                new("Role-based access control", true),
-                new("Follow up sales through your phone", true),
-                new("Multi-language (EN / FR / AR)", true),
-            }
-        ),
-        new PricingPlan(
-            Name: "Enterprise",
-            Description: "Custom deployments, SLAs, and dedicated support.",
-            PreviewTagline: "Custom deployment",
-            MonthlyPrice: 0m,
-            AnnualPrice: 0m,
-            CustomPrice: true,
-            Featured: false,
-            CtaLabel: "Contact us →",
-            Features: new()
-            {
-                new("Everything in Pro", true),
-                new("Dedicated tenant infrastructure", true),
-                new("Custom onboarding & data migration", true),
-                new("SLA & priority support", true),
-                new("Custom integrations (Moneris, ERP, etc.)", true),
-                new("Custom reporting", true),
-            }
-        ),
-    };
 
     private record FaqItem(string Question, string Answer);
 

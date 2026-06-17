@@ -399,30 +399,8 @@
     private bool _cancelling        = false;
     private bool _cancelSuccess     = false;
 
-    // ── Plan definitions ─────────────────────────────────────────────
-    private record PlanDef(
-        PlanSlug Slug, string Name, string Description,
-        decimal MonthlyPrice, decimal AnnualPrice, bool CustomPrice, bool Featured,
-        List<string> Highlights);
-
-    private readonly List<PlanDef> _plans = new()
-    {
-        new(PlanSlug.Starter, "Starter", "One location, getting off the ground.",
-            54.99m, 49.99m, false, false,
-            new() { "1 register", "1 warehouse · unlimited products", "1 user", "Sales & inventory reports" }),
-
-        new(PlanSlug.Growth, "Growth", "Scaling retail with full POS and reporting.",
-            99.99m, 89.99m, false, true,
-            new() { "3 registers", "Up to 3 warehouses · unlimited products", "Up to 5 users", "Financial dashboard", "Stripe Terminal" }),
-
-        new(PlanSlug.Pro, "Pro", "Multi-location with full control and localization.",
-            199.99m, 179.99m, false, false,
-            new() { "Unlimited registers", "Up to 7 warehouses · unlimited products", "Unlimited users", "Multi-language (EN/FR/AR)" }),
-
-        new(PlanSlug.Enterprise, "Enterprise", "Custom deployments and dedicated support.",
-            0m, 0m, true, false,
-            new() { "Everything in Pro", "Dedicated infrastructure", "Custom integrations", "SLA & priority support" }),
-    };
+    // ── Plan definitions (shared source of truth with Pricing page) ──
+    private IReadOnlyList<PricingData.Plan> _plans => PricingData.Plans;
 
     // ── Lifecycle ────────────────────────────────────────────────────
     protected override async Task OnInitializedAsync()
