@@ -435,21 +435,33 @@
     {
         if (!firstRender || _authChecked) return;
 
-        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        if (auth.User.Identity?.IsAuthenticated != true)
+        try
         {
-            Nav.NavigateTo("/login?returnUrl=admin/clients", forceLoad: true);
-            return;
-        }
-        if (!auth.User.IsInRole("Admin"))
-        {
-            Nav.NavigateTo("/", forceLoad: false);
-            return;
-        }
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (auth.User.Identity?.IsAuthenticated != true)
+            {
+                Nav.NavigateTo("/login?returnUrl=admin/clients", forceLoad: true);
+                return;
+            }
+            if (!auth.User.IsInRole("Admin"))
+            {
+                Nav.NavigateTo("/", forceLoad: false);
+                return;
+            }
 
-        _authChecked = true;
-        await LoadAsync();
-        StateHasChanged();
+            // Show the container with loading spinner NOW — before the slow HTTP call
+            _authChecked = true;
+            StateHasChanged();
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _loadError   = $"Auth error: {ex.Message}";
+            _loading     = false;
+            _authChecked = true; // show the error state, not a blank page
+            StateHasChanged();
+        }
     }
 
     private string? _loadError;

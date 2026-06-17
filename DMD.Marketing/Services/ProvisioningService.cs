@@ -83,24 +83,34 @@ public class ProvisioningService
         _logger            = logger;
     }
 
-    public async Task<List<ProvisioningRequestInfo>> GetAllRequestsAsync()
+    // ── shared helper — 20 s timeout on every outbound call ───────────
+    private (HttpClient? client, string? baseUrl) GetClient()
     {
         var baseUrl = _config["Provisioning:StockShopBaseUrl"];
         var apiKey  = _config["Provisioning:ApiKey"];
 
         if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
         {
-            _logger.LogWarning("Provisioning config missing.");
-            return new();
+            _logger.LogWarning("Provisioning:StockShopBaseUrl or Provisioning:ApiKey not configured.");
+            return (null, null);
         }
 
         var client = _httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromSeconds(20);
         client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        return (client, baseUrl.TrimEnd('/'));
+    }
+
+    // ── Read ──────────────────────────────────────────────────────────
+    public async Task<List<ProvisioningRequestInfo>> GetAllRequestsAsync()
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return new();
 
         try
         {
             var result = await client.GetFromJsonAsync<List<ProvisioningRequestInfo>>(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/requests");
+                $"{baseUrl}/api/provisioning/requests");
             return result ?? new();
         }
         catch (Exception ex)
@@ -112,31 +122,23 @@ public class ProvisioningService
 
     public async Task<List<ClientInfo>> GetAllClientsAsync()
     {
-        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
-        var apiKey  = _config["Provisioning:ApiKey"];
-
-        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("Provisioning config missing.");
-            return new();
-        }
-
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var (client, baseUrl) = GetClient();
+        if (client is null) return new();
 
         try
         {
             var result = await client.GetFromJsonAsync<List<ClientInfo>>(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/clients");
+                $"{baseUrl}/api/provisioning/clients");
             return result ?? new();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching client history");
+            _logger.LogError(ex, "Error fetching client list");
             return new();
         }
     }
 
+    // ── Write ─────────────────────────────────────────────────────────
     public async Task<bool> RecordPaymentAsync(
         string   email,
         string   planSlug,
@@ -150,14 +152,8 @@ public class ProvisioningService
         string?  invoiceNumber,
         string?  notes = null)
     {
-        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
-        var apiKey  = _config["Provisioning:ApiKey"];
-
-        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
-            return false;
-
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
 
         var payload = new
         {
@@ -170,7 +166,7 @@ public class ProvisioningService
         {
             var encodedEmail = Uri.EscapeDataString(email);
             var response = await client.PostAsJsonAsync(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/payments/{encodedEmail}", payload);
+                $"{baseUrl}/api/provisioning/payments/{encodedEmail}", payload);
 
             if (response.IsSuccessStatusCode) return true;
 
@@ -185,38 +181,26 @@ public class ProvisioningService
         }
     }
 
-    /// <summary>
-    /// Sends a PATCH to StockShopOnline to update an existing provisioning request.
-    /// Only non-null fields are sent — StockShopOnline ignores nulls.
-    /// </summary>
+    /// <summary>PATCH — only non-null fields are sent; StockShopOnline ignores nulls.</summary>
     public async Task<bool> UpdateAsync(
-        string   email,
-        string?  planSlug          = null,
-        string?  billingCycle      = null,
-        string?  storeName         = null,
-        string?  storePhone        = null,
-        string?  storeTimezone     = null,
-        string?  businessType      = null,
-        string?  currency          = null,
-        decimal? federalTaxRate    = null,
-        decimal? provincialTaxRate = null,
-        bool?    taxInclusive      = null,
-        DateTime? expiresAt        = null,
-        string?  appUrl            = null,
-        string?  notes             = null,
-        string?  status            = null)
+        string    email,
+        string?   planSlug          = null,
+        string?   billingCycle      = null,
+        string?   storeName         = null,
+        string?   storePhone        = null,
+        string?   storeTimezone     = null,
+        string?   businessType      = null,
+        string?   currency          = null,
+        decimal?  federalTaxRate    = null,
+        decimal?  provincialTaxRate = null,
+        bool?     taxInclusive      = null,
+        DateTime? expiresAt         = null,
+        string?   appUrl            = null,
+        string?   notes             = null,
+        string?   status            = null)
     {
-        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
-        var apiKey  = _config["Provisioning:ApiKey"];
-
-        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("Provisioning:StockShopBaseUrl or Provisioning:ApiKey not configured.");
-            return false;
-        }
-
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
 
         var payload = new
         {
@@ -230,7 +214,7 @@ public class ProvisioningService
         {
             var encodedEmail = Uri.EscapeDataString(email);
             var response = await client.PatchAsJsonAsync(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/request/{encodedEmail}", payload);
+                $"{baseUrl}/api/provisioning/request/{encodedEmail}", payload);
 
             if (response.IsSuccessStatusCode) return true;
 
@@ -247,24 +231,14 @@ public class ProvisioningService
 
     public async Task<bool> ActivateAsync(string email)
     {
-        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
-        var apiKey  = _config["Provisioning:ApiKey"];
-
-        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("Provisioning config missing.");
-            return false;
-        }
-
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
 
         try
         {
             var encodedEmail = Uri.EscapeDataString(email);
             var response = await client.PostAsJsonAsync(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/activate/{encodedEmail}",
-                new { });
+                $"{baseUrl}/api/provisioning/activate/{encodedEmail}", new { });
 
             if (response.IsSuccessStatusCode) return true;
 
@@ -295,40 +269,22 @@ public class ProvisioningService
         bool    taxInclusive,
         int?    marketingUserId)
     {
-        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
-        var apiKey  = _config["Provisioning:ApiKey"];
-
-        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("Provisioning:StockShopBaseUrl or Provisioning:ApiKey not configured.");
-            return false;
-        }
-
-        var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
 
         var payload = new
         {
-            email,
-            firstName,
-            lastName,
-            planSlug,
-            billingCycle,
-            storeName,
-            storePhone,
-            storeTimezone,
-            businessType,
-            currency,
-            federalTaxRate,
-            provincialTaxRate,
-            taxInclusive,
+            email, firstName, lastName,
+            planSlug, billingCycle,
+            storeName, storePhone, storeTimezone, businessType,
+            currency, federalTaxRate, provincialTaxRate, taxInclusive,
             marketingUserId
         };
 
         try
         {
             var response = await client.PostAsJsonAsync(
-                $"{baseUrl.TrimEnd('/')}/api/provisioning/request", payload);
+                $"{baseUrl}/api/provisioning/request", payload);
 
             if (response.IsSuccessStatusCode) return true;
 
