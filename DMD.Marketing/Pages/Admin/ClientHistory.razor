@@ -9,6 +9,7 @@
 @inject NavigationManager Nav
 @inject DMD.Marketing.Data.ApplicationDbContext Db
 @using Microsoft.EntityFrameworkCore
+@using DMD.Marketing.Components.Admin
 
 @if (_authChecked)
 {
@@ -22,6 +23,11 @@
             <MudText Typo="Typo.body2" Color="Color.Inherit">Provisioning, billing, payments and renewals</MudText>
         </div>
         <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Email" Variant="Variant.Outlined"
+                   Color="Color.Default" OnClick="@(() => OpenNotificationDialogAsync(null))"
+                   Disabled="_loading">
+            Compose
+        </MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Refresh" Variant="Variant.Outlined"
                    Color="Color.Primary" OnClick="LoadAsync" Disabled="_loading">
             Refresh
@@ -55,6 +61,19 @@
                 <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Active</MudText>
+                            <MudText Typo="Typo.h4" Color="Color.Success" Class="font-weight-bold">
+                                @_all.Count(c => c.Status == "Active")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="2">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
                             <MudText Typo="Typo.caption" Color="Color.Inherit">Pending</MudText>
                             <MudText Typo="Typo.h4" Color="Color.Warning" Class="font-weight-bold">
                                 @_all.Count(c => c.Status == "Pending")
@@ -65,23 +84,27 @@
                 </MudPaper>
             </MudItem>
             <MudItem xs="6" sm="2">
-                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                <MudPaper Elevation="2" Class="pa-3"
+                          Style="@($"border-radius:14px;{(_expiredCount > 0 ? "border:2px solid #E53935;" : "")}")">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Inherit">Active</MudText>
-                            <MudText Typo="Typo.h4" Color="Color.Success" Class="font-weight-bold">
-                                @_all.Count(c => c.Status == "Active")
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Expired</MudText>
+                            <MudText Typo="Typo.h4" Color="@(_expiredCount > 0 ? Color.Error : Color.Inherit)"
+                                     Class="font-weight-bold">
+                                @_expiredCount
                             </MudText>
                         </div>
-                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                        <MudIcon Icon="@Icons.Material.Filled.ErrorOutline"
+                                 Color="@(_expiredCount > 0 ? Color.Error : Color.Inherit)"
+                                 Size="Size.Large" />
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Inherit">Revenue This Month</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Revenue / Mo</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Class="font-weight-bold">
                                 $@RevenueThisMonth.ToString("N0")
                             </MudText>
@@ -90,12 +113,12 @@
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3"
                           Style="@($"border-radius:14px;{(_upcomingCount > 0 ? "border:2px solid #FF9800;" : "")}")">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Inherit">Renewals ≤30 Days</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Renewals ≤30d</MudText>
                             <MudText Typo="Typo.h4" Color="@(_upcomingCount > 0 ? Color.Warning : Color.Inherit)"
                                      Class="font-weight-bold">
                                 @_upcomingCount
@@ -314,6 +337,25 @@
                     </MudTd>
                     <!-- Actions -->
                     <MudTd DataLabel="Actions">
+                        @if (context.Status == "Pending")
+                        {
+                            <MudTooltip Text="Activate client">
+                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                               Color="Color.Success" Size="Size.Medium"
+                                               Disabled="@(_activatingEmails.Contains(context.Email))"
+                                               OnClick="@(() => ActivateClientAsync(context))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Reject client">
+                                <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                               Color="Color.Error" Size="Size.Medium"
+                                               OnClick="@(() => RejectClientAsync(context))" />
+                            </MudTooltip>
+                        }
+                        <MudTooltip Text="Send notification">
+                            <MudIconButton Icon="@Icons.Material.Filled.Email"
+                                           Color="Color.Default" Size="Size.Medium"
+                                           OnClick="@(() => OpenNotificationDialogAsync(context))" />
+                        </MudTooltip>
                         <MudTooltip Text="Payment history">
                             <MudIconButton Icon="@Icons.Material.Filled.Receipt"
                                            Color="Color.Primary" Size="Size.Medium"
@@ -358,9 +400,13 @@
     private SubInfo? GetSubscriptionInfo(string email)
         => _subscriptionMap.TryGetValue(email, out var info) ? info : null;
 
-    // ── cached computed values (refreshed in LoadAsync) ──
+    // ── in-flight activate tracking ──────────────────────────────────
+    private HashSet<string> _activatingEmails = new(StringComparer.OrdinalIgnoreCase);
+
+    // ── cached computed values (refreshed in LoadAsync) ──────────────
     private List<ClientInfo> _upcoming      = new();
     private int              _upcomingCount = 0;
+    private int              _expiredCount  = 0;
     private decimal          RevenueThisMonth = 0m;
 
     private void RefreshComputed()
@@ -373,6 +419,11 @@
                 && c.Status != "Rejected")
             .ToList();
         _upcomingCount = _upcoming.Count;
+
+        _expiredCount = _all
+            .Count(c => c.ExpiresAt.HasValue
+                && c.ExpiresAt.Value < now
+                && c.Status != "Rejected");
 
         RevenueThisMonth = _all
             .SelectMany(c => c.Payments)
@@ -496,6 +547,57 @@
         var dialog     = await DialogService.ShowAsync<ProvisioningEditDialog>("Edit Request", parameters, options);
         var result     = await dialog.Result;
         if (result is { Canceled: false }) await LoadAsync();
+    }
+
+    private async Task ActivateClientAsync(ClientInfo client)
+    {
+        if (_activatingEmails.Contains(client.Email)) return;
+        _activatingEmails.Add(client.Email);
+        StateHasChanged();
+
+        try
+        {
+            var ok = await ProvisioningService.ActivateAsync(client.Email);
+            if (ok)
+            {
+                Snackbar.Add($"{client.StoreName} activated successfully.", Severity.Success);
+                await LoadAsync();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to activate {client.StoreName}. Check API configuration.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _activatingEmails.Remove(client.Email);
+            StateHasChanged();
+        }
+    }
+
+    private async Task RejectClientAsync(ClientInfo client)
+    {
+        var ok = await ProvisioningService.UpdateAsync(email: client.Email, status: "Rejected");
+        if (ok)
+        {
+            Snackbar.Add($"{client.StoreName} rejected.", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add($"Failed to reject {client.StoreName}.", Severity.Error);
+        }
+    }
+
+    private async Task OpenNotificationDialogAsync(ClientInfo? client)
+    {
+        var parameters = new DialogParameters<NotificationDialog>
+        {
+            { x => x.AllClients, _all },
+            { x => x.Client,     client },
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        await DialogService.ShowAsync<NotificationDialog>("Send Notification", parameters, options);
     }
 
     private static Color StatusColor(string s) => s switch

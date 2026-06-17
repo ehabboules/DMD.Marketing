@@ -155,6 +155,58 @@ public class EmailService
         }
     }
 
+    public async Task<bool> SendAdminNotificationAsync(
+        string toEmail, string firstName, string subject, string messageBody)
+    {
+        try
+        {
+            var apiKey    = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"];
+            var fromName  = _config["SendGrid:FromName"];
+
+            if (string.IsNullOrEmpty(apiKey)) { _logger.LogWarning("SendGrid API key missing."); return false; }
+
+            var client = new SendGridClient(apiKey);
+            var htmlBody = $"""
+                <div style="font-family:sans-serif;max-width:560px;margin:auto;">
+                  <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
+                    <h2 style="color:#fff;margin:0;font-size:1.2rem;">{subject}</h2>
+                    <p style="color:#90CAF9;margin:4px 0 0;font-size:0.85rem;">Cloud Mobil POS</p>
+                  </div>
+                  <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
+                    <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
+                    <div style="color:#374151;line-height:1.65;white-space:pre-wrap;">{messageBody}</div>
+                    <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">— Cloud Mobil POS Team</p>
+                  </div>
+                </div>
+                """;
+
+            var msg = new SendGridMessage
+            {
+                From             = new EmailAddress(fromEmail, fromName),
+                Subject          = subject,
+                PlainTextContent = $"Hi {firstName},\n\n{messageBody}\n\n— Cloud Mobil POS Team",
+                HtmlContent      = htmlBody,
+            };
+            msg.AddTo(new EmailAddress(toEmail, firstName));
+
+            var response = await client.SendEmailAsync(msg);
+            var success  = (int)response.StatusCode is >= 200 and < 300;
+
+            if (success)
+                _logger.LogInformation("Admin notification '{Subject}' sent to {Email}", subject, toEmail);
+            else
+                _logger.LogWarning("SendGrid returned {StatusCode} for notification to {Email}", response.StatusCode, toEmail);
+
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send admin notification to {Email}", toEmail);
+            return false;
+        }
+    }
+
     private static string BuildPlainText(ContactFormModel model) =>
         $"""
         New Demo Request — Cloud Mobil POS

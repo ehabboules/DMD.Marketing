@@ -245,6 +245,40 @@ public class ProvisioningService
         }
     }
 
+    public async Task<bool> ActivateAsync(string email)
+    {
+        var baseUrl = _config["Provisioning:StockShopBaseUrl"];
+        var apiKey  = _config["Provisioning:ApiKey"];
+
+        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
+        {
+            _logger.LogWarning("Provisioning config missing.");
+            return false;
+        }
+
+        var client = _httpClientFactory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+
+        try
+        {
+            var encodedEmail = Uri.EscapeDataString(email);
+            var response = await client.PostAsJsonAsync(
+                $"{baseUrl.TrimEnd('/')}/api/provisioning/activate/{encodedEmail}",
+                new { });
+
+            if (response.IsSuccessStatusCode) return true;
+
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Activate failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling activate API for {Email}", email);
+            return false;
+        }
+    }
+
     public async Task<bool> RequestActivationAsync(
         string  email,
         string  firstName,
