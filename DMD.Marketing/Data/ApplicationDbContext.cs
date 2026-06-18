@@ -1,17 +1,19 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DMD.Marketing.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IDataProtectionKeyContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
-    public DbSet<User>           Users          => Set<User>();
-    public DbSet<Role>           Roles          => Set<Role>();
-    public DbSet<UserRole>       UserRoles      => Set<UserRole>();
-    public DbSet<PaymentHistory> PaymentHistory => Set<PaymentHistory>();
-    public DbSet<AuditLog>       AuditLogs      => Set<AuditLog>();
+    public DbSet<User>              Users                => Set<User>();
+    public DbSet<Role>              Roles                => Set<Role>();
+    public DbSet<UserRole>          UserRoles            => Set<UserRole>();
+    public DbSet<PaymentHistory>    PaymentHistory       => Set<PaymentHistory>();
+    public DbSet<AuditLog>          AuditLogs            => Set<AuditLog>();
+    public DbSet<DataProtectionKey> DataProtectionKeys   => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

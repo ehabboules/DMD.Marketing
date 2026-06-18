@@ -4,7 +4,7 @@
 
 <MudRTLProvider RightToLeft="false">
     <MudThemeProvider Theme="@_theme" />
-    <MudPopoverProvider />
+    <MudPopoverProvider @rendermode="new InteractiveServerRenderMode(prerender: false)" />
     <MudDialogProvider @rendermode="new InteractiveServerRenderMode(prerender: false)" />
     <MudSnackbarProvider @rendermode="new InteractiveServerRenderMode(prerender: false)" />
 

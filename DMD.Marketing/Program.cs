@@ -11,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// ── DataProtection — persist keys to DB so they survive container restarts ──
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<DMD.Marketing.Data.ApplicationDbContext>()
+    .SetApplicationName("DMD.Marketing");
+
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("local", (sp, client) =>
