@@ -7,7 +7,7 @@
 @{
     var isFr         = Nav.Uri.Contains("/terms/fr", StringComparison.OrdinalIgnoreCase);
     var privacyUrl   = isFr ? "/privacy/fr" : "/privacy/en";
-    var contactEmail = Config["SendGrid:ToEmail"] ?? "hello@dmd-inventory.com";
+    var contactEmail = Config["SendGrid:ToEmail"] ?? "hello@cloudmpos.com";
     var updatedStr   = LastUpdated.ToString(
         isFr ? "d MMMM yyyy" : "MMMM d, yyyy",
         new System.Globalization.CultureInfo(isFr ? "fr-CA" : "en-CA"));

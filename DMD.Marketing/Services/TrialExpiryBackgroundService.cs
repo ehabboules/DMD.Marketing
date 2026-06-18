@@ -66,7 +66,7 @@ public class TrialExpiryBackgroundService : BackgroundService
 
         _logger.LogInformation("Sending trial expiry reminders to {Count} users", usersToNotify.Count);
 
-        var baseUrl = _config["BaseUrl"] ?? "https://dmd-inventory.com";
+        var baseUrl = _config["BaseUrl"] ?? "https://cloudmpos.com";
         var paymentUrl = $"{baseUrl.TrimEnd('/')}/payment";
 
         foreach (var user in usersToNotify)
