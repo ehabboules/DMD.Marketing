@@ -13,8 +13,10 @@ builder.Services.AddRazorComponents()
 
 // ── DataProtection — persist keys to DB so they survive container restarts ──
 builder.Services.AddDataProtection()
-    .PersistKeysToDbContext<DMD.Marketing.Data.ApplicationDbContext>()
     .SetApplicationName("DMD.Marketing");
+builder.Services.AddSingleton<
+    Microsoft.AspNetCore.DataProtection.Repositories.IXmlRepository,
+    DMD.Marketing.Data.DbContextFactoryXmlRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
