@@ -1,0 +1,59 @@
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-4">
+            Activating <strong>@Client.StoreName</strong> (@Client.Email).
+            Enter the tenant slug to build the store URL.
+        </MudText>
+
+        <MudTextField @bind-Value="_slug"
+                      Label="Tenant slug"
+                      Placeholder="e.g. mobileshop"
+                      HelperText="@($"Store URL: {_slug?.Trim().ToLowerInvariant()}.cloudmpos.com")"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Immediate="true"
+                      Class="mb-3" />
+
+        <MudDatePicker @bind-Date="_expiresAt"
+                       Label="License expiry (optional)"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Placeholder="Leave blank to keep existing"
+                       Class="mb-1" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Color="Color.Success"
+                   Variant="Variant.Filled"
+                   Disabled="@(string.IsNullOrWhiteSpace(_slug))">
+            Activate
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public ClientInfo Client { get; set; } = default!;
+
+    private string?   _slug;
+    private DateTime? _expiresAt;
+
+    protected override void OnParametersSet()
+    {
+        // Pre-fill slug from store name: lowercase, letters/digits only
+        if (string.IsNullOrWhiteSpace(_slug) && !string.IsNullOrWhiteSpace(Client.StoreName))
+        {
+            _slug = new string(
+                Client.StoreName.ToLowerInvariant()
+                      .Where(c => char.IsLetterOrDigit(c))
+                      .ToArray());
+        }
+    }
+
+    private void Cancel()  => MudDialog.Cancel();
+    private void Submit()  => MudDialog.Close(DialogResult.Ok((_slug!.Trim().ToLowerInvariant(), _expiresAt)));
+}

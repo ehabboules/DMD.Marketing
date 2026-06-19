@@ -564,20 +564,30 @@
     private async Task ActivateClientAsync(ClientInfo client)
     {
         if (_activatingEmails.Contains(client.Email)) return;
+
+        // Prompt for tenant slug before calling the API
+        var parameters = new DialogParameters<ActivateDialog> { { x => x.Client, client } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<ActivateDialog>("Activate Client", parameters, options);
+        var result     = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var (slug, expiresAt) = ((string, DateTime?))result.Data!;
+
         _activatingEmails.Add(client.Email);
         StateHasChanged();
 
         try
         {
-            var ok = await ProvisioningService.ActivateAsync(client.Email);
+            var ok = await ProvisioningService.ActivateAsync(client.Email, slug, expiresAt);
             if (ok)
             {
-                Snackbar.Add($"{client.StoreName} activated successfully.", Severity.Success);
+                Snackbar.Add($"{client.StoreName} activated — {slug}.cloudmpos.com", Severity.Success);
                 await LoadAsync();
             }
             else
             {
-                Snackbar.Add($"Failed to activate {client.StoreName}. Check API configuration.", Severity.Error);
+                Snackbar.Add($"Failed to activate {client.StoreName}. Check logs.", Severity.Error);
             }
         }
         finally

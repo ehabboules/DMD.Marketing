@@ -229,7 +229,7 @@ public class ProvisioningService
         }
     }
 
-    public async Task<bool> ActivateAsync(string email)
+    public async Task<bool> ActivateAsync(string email, string slug, DateTime? expiresAt = null)
     {
         var (client, baseUrl) = GetClient();
         if (client is null) return false;
@@ -238,7 +238,8 @@ public class ProvisioningService
         {
             var encodedEmail = Uri.EscapeDataString(email);
             var response = await client.PostAsJsonAsync(
-                $"{baseUrl}/api/provisioning/activate/{encodedEmail}", new { });
+                $"{baseUrl}/api/provisioning/activate/{encodedEmail}",
+                new { slug, expiresAt });
 
             if (response.IsSuccessStatusCode) return true;
 
