@@ -2,8 +2,6 @@ using DMD.Marketing.Data;
 using DMD.Marketing.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -15,8 +13,8 @@ builder.Services.AddRazorComponents()
 
 // ── DataProtection — persist keys to DB so they survive container restarts ──
 builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>()
     .SetApplicationName("DMD.Marketing");
-builder.Services.AddSingleton<IXmlRepository, DbContextFactoryXmlRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
