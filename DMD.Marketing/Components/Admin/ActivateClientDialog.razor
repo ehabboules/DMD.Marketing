@@ -1,0 +1,73 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Activating <strong>@User.StoreName</strong> (@User.Email).
+        </MudText>
+
+        @if (User.SelectedPlan != DMD.Marketing.Models.PlanSlug.None)
+        {
+            <MudStack Row="true" Spacing="2" Class="mb-3">
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+                    @User.SelectedPlan
+                </MudChip>
+                <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                    @User.BillingCycle
+                </MudChip>
+            </MudStack>
+        }
+
+        <MudTextField @bind-Value="_slug"
+                      Label="Tenant slug"
+                      Placeholder="e.g. mobileshop"
+                      HelperText="@($"Store URL: {_slug?.Trim().ToLowerInvariant()}.cloudmpos.com")"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Immediate="true"
+                      Class="mb-3" />
+
+        <MudDatePicker @bind-Date="_expiresAt"
+                       Label="License expiry (optional)"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Placeholder="Leave blank → 14 days from now"
+                       Class="mb-1" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Color="Color.Success"
+                   Variant="Variant.Filled"
+                   Disabled="@(string.IsNullOrWhiteSpace(_slug))">
+            Activate
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public User User { get; set; } = default!;
+
+    private string?   _slug;
+    private DateTime? _expiresAt;
+
+    protected override void OnParametersSet()
+    {
+        if (string.IsNullOrWhiteSpace(_slug) && !string.IsNullOrWhiteSpace(User.StoreName))
+        {
+            _slug = new string(
+                User.StoreName.ToLowerInvariant()
+                    .Where(char.IsLetterOrDigit)
+                    .ToArray());
+        }
+
+        if (_expiresAt is null && User.SubscriptionExpiresAt.HasValue)
+            _expiresAt = User.SubscriptionExpiresAt.Value;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+    private void Submit()  => MudDialog.Close(DialogResult.Ok((_slug!.Trim().ToLowerInvariant(), _expiresAt)));
+}

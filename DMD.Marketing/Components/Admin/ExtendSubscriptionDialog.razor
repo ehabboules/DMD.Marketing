@@ -1,0 +1,53 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Extending subscription for <strong>@User.StoreName</strong> (@User.Email).
+        </MudText>
+
+        @if (User.SubscriptionExpiresAt.HasValue)
+        {
+            <MudText Typo="Typo.body2" Color="Color.Inherit" Class="mb-3">
+                Current expiry: <strong>@User.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")</strong>
+            </MudText>
+        }
+
+        <MudDatePicker @bind-Date="_newExpiry"
+                       Label="New expiry date"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       MinDate="DateTime.UtcNow.Date" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit"
+                   Color="Color.Warning"
+                   Variant="Variant.Filled"
+                   Disabled="@(_newExpiry is null)">
+            Extend
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public User User { get; set; } = default!;
+
+    private DateTime? _newExpiry;
+
+    protected override void OnParametersSet()
+    {
+        if (_newExpiry is null)
+        {
+            _newExpiry = User.SubscriptionExpiresAt.HasValue
+                ? User.SubscriptionExpiresAt.Value.AddDays(30)
+                : DateTime.UtcNow.AddDays(30);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+    private void Submit()  => MudDialog.Close(DialogResult.Ok(_newExpiry!.Value.ToUniversalTime()));
+}

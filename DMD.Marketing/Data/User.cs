@@ -57,6 +57,9 @@ public class User
     // ── Subscription expiry ───────────────────────────────────────
     public DateTime? SubscriptionExpiresAt { get; set; }
 
+    // ── App URL ───────────────────────────────────────────────────────
+    public string? AppUrl { get; set; }
+
     // ── Stripe ───────────────────────────────────────────────────────
     public string? StripeCustomerId     { get; set; }
     public string? StripeSubscriptionId { get; set; }

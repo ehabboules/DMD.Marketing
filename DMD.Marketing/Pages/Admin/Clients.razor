@@ -1,0 +1,486 @@
+@page "/admin/clients"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using DMD.Marketing.Services
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using DMD.Marketing.Components.Admin
+@inject AdminClientService AdminService
+@inject EmailService EmailService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+@if (_authChecked)
+{
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 mb-8">
+
+    <!-- ── Header ────────────────────────────────────────────── -->
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h4">Client Management</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Inherit">Direct from Marketing DB — billing, activation, accounts</MudText>
+        </div>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.PersonAdd" Variant="Variant.Filled"
+                   Color="Color.Primary" OnClick="OpenCreateClientAsync" Disabled="_loading">
+            + New Client
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Refresh" Variant="Variant.Outlined"
+                   Color="Color.Primary" OnClick="LoadAsync" Disabled="_loading">
+            Refresh
+        </MudButton>
+    </MudStack>
+
+    @if (_loading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-6" />
+    }
+    else if (_loadError is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="my-4">@_loadError</MudAlert>
+    }
+    else
+    {
+        <!-- ── Stat cards ───────────────────────────────────────── -->
+        <MudGrid Spacing="3" Class="mb-5">
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Total</MudText>
+                            <MudText Typo="Typo.h4" Class="font-weight-bold">@_summary.Total</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Active</MudText>
+                            <MudText Typo="Typo.h4" Color="Color.Success" Class="font-weight-bold">@_summary.Active</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Pending</MudText>
+                            <MudText Typo="Typo.h4" Color="Color.Warning" Class="font-weight-bold">@_summary.Pending</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Color="Color.Warning" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="6" sm="3">
+                <MudPaper Elevation="2" Class="pa-3"
+                          Style="@($"border-radius:14px;{(_summary.ExpiringSoon > 0 ? "border:2px solid #FF9800;" : "")}")">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Expiring Soon</MudText>
+                            <MudText Typo="Typo.h4" Color="@(_summary.ExpiringSoon > 0 ? Color.Warning : Color.Inherit)"
+                                     Class="font-weight-bold">@_summary.ExpiringSoon</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.EventRepeat"
+                                 Color="@(_summary.ExpiringSoon > 0 ? Color.Warning : Color.Inherit)"
+                                 Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <!-- ── Pending Requests ────────────────────────────────── -->
+        <MudPaper Elevation="2" Class="mb-5" Style="border-radius:12px;overflow:hidden;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3" Style="border-bottom:1px solid #e5e7eb;">
+                <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Color="Color.Warning" />
+                <MudText Typo="Typo.h6">Pending Requests</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">
+                    @_pendingUsers.Count
+                </MudChip>
+            </MudStack>
+            <MudTable Items="@_pendingUsers" Hover="true" Dense="false" Elevation="0" Breakpoint="Breakpoint.Md">
+                <HeaderContent>
+                    <MudTh Style="font-weight:600;">Name</MudTh>
+                    <MudTh Style="font-weight:600;">Email</MudTh>
+                    <MudTh Style="font-weight:600;">Store Name</MudTh>
+                    <MudTh Style="font-weight:600;">Plan</MudTh>
+                    <MudTh Style="font-weight:600;">Business Type</MudTh>
+                    <MudTh Style="font-weight:600;">Requested</MudTh>
+                    <MudTh Style="font-weight:600;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">
+                        <MudText Typo="Typo.body2">@context.FirstName @context.LastName</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Email">
+                        <MudText Typo="Typo.caption">@context.Email</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Store Name">
+                        <MudText Typo="Typo.body2">@(context.StoreName ?? "—")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Plan">
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                            @context.SelectedPlan
+                        </MudChip>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Business Type">
+                        <MudText Typo="Typo.caption">@(context.BusinessType ?? "—")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Requested">
+                        <MudText Typo="Typo.caption">@context.CreatedAt.ToString("MMM d, yyyy")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudTooltip Text="Activate client">
+                            <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                           Color="Color.Success" Size="Size.Medium"
+                                           OnClick="@(() => ActivateClientAsync(context))" />
+                        </MudTooltip>
+                        <MudTooltip Text="View details">
+                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
+                                           Color="Color.Primary" Size="Size.Medium"
+                                           OnClick="@(() => ViewDetailsAsync(context))" />
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="py-6">No pending requests.</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudPaper>
+
+        <!-- ── Active Clients ──────────────────────────────────── -->
+        <MudPaper Elevation="2" Class="mb-5" Style="border-radius:12px;overflow:hidden;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3" Style="border-bottom:1px solid #e5e7eb;">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText Typo="Typo.h6">Active Clients</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">
+                    @_activeUsers.Count
+                </MudChip>
+            </MudStack>
+            <MudTable Items="@_activeUsers" Hover="true" Dense="false" Elevation="0" Breakpoint="Breakpoint.Md">
+                <HeaderContent>
+                    <MudTh Style="font-weight:600;">Name</MudTh>
+                    <MudTh Style="font-weight:600;">Email</MudTh>
+                    <MudTh Style="font-weight:600;">Store Name</MudTh>
+                    <MudTh Style="font-weight:600;">Plan</MudTh>
+                    <MudTh Style="font-weight:600;">Expiry</MudTh>
+                    <MudTh Style="font-weight:600;">App URL</MudTh>
+                    <MudTh Style="font-weight:600;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">
+                        <MudText Typo="Typo.body2">@context.FirstName @context.LastName</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Email">
+                        <MudText Typo="Typo.caption">@context.Email</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Store Name">
+                        <MudText Typo="Typo.body2">@(context.StoreName ?? "—")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Plan">
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                            @context.SelectedPlan
+                        </MudChip>
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Expiry">
+                        @if (context.SubscriptionExpiresAt.HasValue)
+                        {
+                            var days = (int)Math.Ceiling((context.SubscriptionExpiresAt.Value - DateTime.UtcNow).TotalDays);
+                            <MudText Typo="Typo.body2"
+                                     Color="@(days <= 0 ? Color.Error : days <= 7 ? Color.Error : days <= 30 ? Color.Warning : Color.Success)">
+                                @context.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
+                            </MudText>
+                            <MudText Typo="Typo.caption"
+                                     Color="@(days <= 0 ? Color.Error : days <= 30 ? Color.Warning : Color.Inherit)">
+                                @(days <= 0 ? "Expired" : $"{days}d remaining")
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">—</MudText>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="App URL">
+                        @if (!string.IsNullOrEmpty(context.AppUrl))
+                        {
+                            <a href="https://@context.AppUrl" target="_blank" style="color:#00BFA5;font-size:0.8rem;">
+                                @context.AppUrl
+                            </a>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">—</MudText>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudTooltip Text="View details">
+                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
+                                           Color="Color.Primary" Size="Size.Medium"
+                                           OnClick="@(() => ViewDetailsAsync(context))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Send email">
+                            <MudIconButton Icon="@Icons.Material.Filled.Email"
+                                           Color="Color.Default" Size="Size.Medium"
+                                           OnClick="@(() => OpenComposeEmailAsync(context))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Extend subscription">
+                            <MudIconButton Icon="@Icons.Material.Filled.EventRepeat"
+                                           Color="Color.Warning" Size="Size.Medium"
+                                           OnClick="@(() => ExtendSubscriptionAsync(context))" />
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="py-6">No active clients.</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudPaper>
+
+        <!-- ── Search All Users ────────────────────────────────── -->
+        <MudPaper Elevation="2" Class="mb-5" Style="border-radius:12px;overflow:hidden;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-3" Style="border-bottom:1px solid #e5e7eb;">
+                <MudIcon Icon="@Icons.Material.Filled.Search" Color="Color.Default" />
+                <MudText Typo="Typo.h6">Search All Users</MudText>
+            </MudStack>
+            <div class="pa-3">
+                <MudTextField @bind-Value="_searchQuery"
+                              Placeholder="Search by name, email or store…"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true"
+                              OnDebounceIntervalElapsed="SearchAsync"
+                              DebounceInterval="350"
+                              Variant="Variant.Outlined"
+                              Dense="true"
+                              Class="mb-3" />
+            </div>
+            @if (_searchResults is not null)
+            {
+                <MudTable Items="@_searchResults" Hover="true" Dense="false" Elevation="0" Breakpoint="Breakpoint.Md">
+                    <HeaderContent>
+                        <MudTh Style="font-weight:600;">Name</MudTh>
+                        <MudTh Style="font-weight:600;">Email</MudTh>
+                        <MudTh Style="font-weight:600;">Plan</MudTh>
+                        <MudTh Style="font-weight:600;">Status</MudTh>
+                        <MudTh Style="font-weight:600;">Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">
+                            <MudText Typo="Typo.body2">@context.FirstName @context.LastName</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Email">
+                            <MudText Typo="Typo.caption">@context.Email</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Plan">
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
+                                @context.SelectedPlan
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled"
+                                     Color="@ActivationStatusColor(context.ActivationStatus)">
+                                @context.ActivationStatus
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Actions">
+                            <MudTooltip Text="View details">
+                                <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
+                                               Color="Color.Primary" Size="Size.Medium"
+                                               OnClick="@(() => ViewDetailsAsync(context))" />
+                            </MudTooltip>
+                        </MudTd>
+                    </RowTemplate>
+                    <NoRecordsContent>
+                        <MudText Typo="Typo.body2" Align="Align.Center" Class="py-6">No users match your search.</MudText>
+                    </NoRecordsContent>
+                </MudTable>
+            }
+        </MudPaper>
+    }
+
+</MudContainer>
+}
+
+@code {
+    private bool         _authChecked  = false;
+    private bool         _loading      = true;
+    private string?      _loadError;
+
+    private AdminSummary _summary       = new(0, 0, 0, 0);
+    private List<User>   _pendingUsers  = new();
+    private List<User>   _activeUsers   = new();
+
+    private string       _searchQuery   = "";
+    private List<User>?  _searchResults;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _authChecked) return;
+
+        try
+        {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (auth.User.Identity?.IsAuthenticated != true)
+            {
+                Nav.NavigateTo("/login?returnUrl=admin/clients", forceLoad: true);
+                return;
+            }
+            if (!auth.User.IsInRole("Admin"))
+            {
+                Nav.NavigateTo("/", forceLoad: false);
+                return;
+            }
+
+            _authChecked = true;
+            StateHasChanged();
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _loadError   = $"Auth error: {ex.Message}";
+            _loading     = false;
+            _authChecked = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading   = true;
+        _loadError = null;
+        StateHasChanged();
+
+        try
+        {
+            var summaryTask  = AdminService.GetSummaryAsync();
+            var pendingTask  = AdminService.GetPendingUsersAsync();
+            var activeTask   = AdminService.GetActiveUsersAsync();
+
+            await Task.WhenAll(summaryTask, pendingTask, activeTask);
+
+            _summary      = summaryTask.Result;
+            _pendingUsers = pendingTask.Result;
+            _activeUsers  = activeTask.Result;
+        }
+        catch (Exception ex)
+        {
+            _loadError = $"Failed to load clients: {ex.Message}";
+            Snackbar.Add(_loadError, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            _searchResults = null;
+            return;
+        }
+
+        try
+        {
+            _searchResults = await AdminService.SearchUsersAsync(_searchQuery);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Search failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ActivateClientAsync(User user)
+    {
+        var parameters = new DialogParameters<ActivateClientDialog> { { x => x.User, user } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<ActivateClientDialog>("Activate Client", parameters, options);
+        var result     = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var (slug, expiresAt) = ((string, DateTime?))result.Data!;
+        var appUrl = $"{slug}.cloudmpos.com";
+
+        var ok = await AdminService.ActivateUserAsync(user.Id, appUrl, expiresAt);
+        if (ok)
+        {
+            Snackbar.Add($"{user.StoreName} activated — {appUrl}", Severity.Success);
+
+            // Refresh user object to get AppUrl set
+            var updated = await AdminService.GetUserByIdAsync(user.Id);
+            if (updated is not null)
+                _ = EmailService.SendWelcomeEmailAsync(updated, appUrl);
+
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add($"Failed to activate {user.StoreName}.", Severity.Error);
+        }
+    }
+
+    private async Task ViewDetailsAsync(User user)
+    {
+        // Reload with full nav props
+        var full = await AdminService.GetUserByIdAsync(user.Id) ?? user;
+        var parameters = new DialogParameters<UserDetailsDialog> { { x => x.User, full } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<UserDetailsDialog>("Client Details", parameters, options);
+        await dialog.Result;
+        await LoadAsync();
+    }
+
+    private async Task OpenComposeEmailAsync(User user)
+    {
+        var parameters = new DialogParameters<ComposeEmailDialog> { { x => x.User, user } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        await DialogService.ShowAsync<ComposeEmailDialog>("Compose Email", parameters, options);
+    }
+
+    private async Task ExtendSubscriptionAsync(User user)
+    {
+        var parameters = new DialogParameters<ExtendSubscriptionDialog> { { x => x.User, user } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<ExtendSubscriptionDialog>("Extend Subscription", parameters, options);
+        var result     = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var newExpiry = (DateTime)result.Data!;
+        var ok = await AdminService.ExtendSubscriptionAsync(user.Id, newExpiry);
+        if (ok)
+        {
+            Snackbar.Add($"Subscription extended to {newExpiry:MMM d, yyyy}", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add("Failed to extend subscription.", Severity.Error);
+        }
+    }
+
+    private async Task OpenCreateClientAsync()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+        var dialog  = await DialogService.ShowAsync<CreateClientDialog>("Create Client", options);
+        var result  = await dialog.Result;
+        if (result is { Canceled: false }) await LoadAsync();
+    }
+
+    private static Color ActivationStatusColor(ActivationStatus s) => s switch
+    {
+        ActivationStatus.Active  => Color.Success,
+        ActivationStatus.Pending => Color.Warning,
+        _                        => Color.Default
+    };
+}

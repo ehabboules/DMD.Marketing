@@ -1,0 +1,408 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@inject AdminClientService AdminService
+@inject ProvisioningService ProvisioningService
+@inject ISnackbar Snackbar
+
+<MudDialog Style="min-width:720px;">
+    <DialogContent>
+        <MudTabs Elevation="0" Rounded="false" ApplyEffectsToContainer="true" PanelClass="pt-4">
+
+            <!-- ── Tab 1: Profile ─────────────────────────────── -->
+            <MudTabPanel Text="Profile" Icon="@Icons.Material.Filled.Person">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Full Name</MudText>
+                        <MudText Typo="Typo.body1">@User.FirstName @User.LastName</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Email</MudText>
+                        <MudText Typo="Typo.body1">@User.Email</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Store Name</MudText>
+                        <MudText Typo="Typo.body1">@(User.StoreName ?? "—")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Store Phone</MudText>
+                        <MudText Typo="Typo.body1">@(User.StorePhone ?? "—")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Business Type</MudText>
+                        <MudText Typo="Typo.body1">@(User.BusinessType ?? "—")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Timezone</MudText>
+                        <MudText Typo="Typo.body1">@(User.StoreTimezone ?? "—")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Currency</MudText>
+                        <MudText Typo="Typo.body1">@(User.Currency ?? "CAD")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Federal Tax</MudText>
+                        <MudText Typo="Typo.body1">@User.FederalTaxRate.ToString("F2")%</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Provincial Tax</MudText>
+                        <MudText Typo="Typo.body1">@User.ProvincialTaxRate.ToString("F2")%</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Account Status</MudText>
+                        <MudStack Row="true" Spacing="1">
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="@(User.IsActive ? Color.Success : Color.Error)"
+                                     Variant="Variant.Filled">
+                                @(User.IsActive ? "Active" : "Inactive")
+                            </MudChip>
+                            @if (User.MustChangePassword)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">
+                                    Must Change PW
+                                </MudChip>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Created</MudText>
+                        <MudText Typo="Typo.body2">@User.CreatedAt.ToString("MMM d, yyyy HH:mm") UTC</MudText>
+                    </MudItem>
+                    @if (User.ModifiedAt.HasValue)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Last Modified</MudText>
+                            <MudText Typo="Typo.body2">@User.ModifiedAt.Value.ToString("MMM d, yyyy HH:mm") UTC</MudText>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- ── Tab 2: Subscription ────────────────────────── -->
+            <MudTabPanel Text="Subscription" Icon="@Icons.Material.Filled.CreditCard">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Plan</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+                            @User.SelectedPlan
+                        </MudChip>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Billing Cycle</MudText>
+                        <MudText Typo="Typo.body1">@User.BillingCycle</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Activation Status</MudText>
+                        <MudChip T="string" Size="Size.Small"
+                                 Color="@(User.ActivationStatus == ActivationStatus.Active ? Color.Success : Color.Warning)"
+                                 Variant="Variant.Filled">
+                            @User.ActivationStatus
+                        </MudChip>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.caption" Color="Color.Inherit">Plan Selected</MudText>
+                        <MudText Typo="Typo.body2">@(User.PlanSelectedAt?.ToString("MMM d, yyyy") ?? "—")</MudText>
+                    </MudItem>
+                    @if (User.SubscriptionExpiresAt.HasValue)
+                    {
+                        var days = (int)Math.Ceiling((User.SubscriptionExpiresAt.Value - DateTime.UtcNow).TotalDays);
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Expires At</MudText>
+                            <MudText Typo="Typo.body1"
+                                     Color="@(days <= 0 ? Color.Error : days <= 7 ? Color.Error : days <= 30 ? Color.Warning : Color.Success)">
+                                @User.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
+                            </MudText>
+                            <MudText Typo="Typo.caption"
+                                     Color="@(days <= 0 ? Color.Error : days <= 30 ? Color.Warning : Color.Inherit)">
+                                @(days <= 0 ? "Expired" : $"{days} days remaining")
+                            </MudText>
+                        </MudItem>
+                    }
+                    @if (!string.IsNullOrEmpty(User.AppUrl))
+                    {
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">App URL</MudText>
+                            <a href="https://@User.AppUrl" target="_blank" style="color:#00BFA5;">@User.AppUrl</a>
+                        </MudItem>
+                    }
+                    @if (!string.IsNullOrEmpty(User.StripeCustomerId))
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Stripe Customer</MudText>
+                            <MudText Typo="Typo.body2" Style="font-family:monospace;">
+                                …@User.StripeCustomerId[^Math.Min(8, User.StripeCustomerId.Length)..]
+                            </MudText>
+                        </MudItem>
+                    }
+                    @if (!string.IsNullOrEmpty(User.StripeSubscriptionId))
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Stripe Subscription</MudText>
+                            <MudText Typo="Typo.body2" Style="font-family:monospace;">
+                                …@User.StripeSubscriptionId[^Math.Min(8, User.StripeSubscriptionId.Length)..]
+                            </MudText>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- ── Tab 3: Payment History ─────────────────────── -->
+            <MudTabPanel Text="Payments" Icon="@Icons.Material.Filled.Receipt">
+                @if (_payments is null)
+                {
+                    <MudProgressCircular Indeterminate="true" />
+                }
+                else if (_payments.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Inherit">No payment records found.</MudText>
+                }
+                else
+                {
+                    <MudTable Items="@_payments" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Plan</MudTh>
+                            <MudTh>Cycle</MudTh>
+                            <MudTh>Amount</MudTh>
+                            <MudTh>Status</MudTh>
+                            <MudTh>Card</MudTh>
+                            <MudTh>Date</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.PlanName</MudTd>
+                            <MudTd>@context.BillingCycle</MudTd>
+                            <MudTd><strong>$@context.Amount.ToString("N2")</strong></MudTd>
+                            <MudTd>
+                                <MudChip T="string" Size="Size.Small"
+                                         Color="@(context.Status == "Paid" ? Color.Success : Color.Warning)"
+                                         Variant="Variant.Filled">
+                                    @context.Status
+                                </MudChip>
+                            </MudTd>
+                            <MudTd>@(context.PaymentMethodLast4 is not null ? $"•••• {context.PaymentMethodLast4}" : "—")</MudTd>
+                            <MudTd>@context.CreatedAt.ToString("MMM d, yyyy")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        Total paid: <strong>$@_payments.Sum(p => p.Amount).ToString("N2")</strong>
+                    </MudText>
+                }
+            </MudTabPanel>
+
+            <!-- ── Tab 4: Marketing Roles ─────────────────────── -->
+            <MudTabPanel Text="Roles" Icon="@Icons.Material.Filled.AdminPanelSettings"
+                         OnClick="LoadRolesAsync">
+                @if (_allRoles is null)
+                {
+                    <MudProgressCircular Indeterminate="true" />
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Inherit" Class="mb-2">Current roles:</MudText>
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1" Class="mb-3">
+                        @foreach (var ur in _userRoles)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled"
+                                     OnClose="@(() => RemoveRoleAsync(ur.RoleId))"
+                                     CloseIcon="@Icons.Material.Filled.Close">
+                                @ur.Role.Name
+                            </MudChip>
+                        }
+                        @if (!_userRoles.Any())
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">No roles assigned.</MudText>
+                        }
+                    </MudStack>
+
+                    <MudSelect @bind-Value="_selectedRoleId" Label="Add role" T="Guid"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2">
+                        @foreach (var role in _allRoles.Where(r => _userRoles.All(ur => ur.RoleId != r.Id)))
+                        {
+                            <MudSelectItem Value="@role.Id">@role.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton OnClick="AssignRoleAsync"
+                               Disabled="@(_selectedRoleId == Guid.Empty)"
+                               Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                        + Add Role
+                    </MudButton>
+                }
+            </MudTabPanel>
+
+            <!-- ── Tab 5: POS App Roles ───────────────────────── -->
+            <MudTabPanel Text="POS Roles" Icon="@Icons.Material.Filled.Store"
+                         OnClick="LoadPosRolesAsync">
+                @if (string.IsNullOrEmpty(User.AppUrl))
+                {
+                    <MudAlert Severity="Severity.Info">
+                        Client not yet provisioned — no POS app URL set.
+                    </MudAlert>
+                }
+                else if (_posRolesLoading)
+                {
+                    <MudProgressCircular Indeterminate="true" />
+                }
+                else if (_posRoles is null)
+                {
+                    <MudAlert Severity="Severity.Warning">
+                        Could not load POS roles. Check that @User.AppUrl is reachable.
+                        <br />
+                        <a href="https://@User.AppUrl/admin/users" target="_blank" style="color:#00BFA5;">
+                            Open tenant admin →
+                        </a>
+                    </MudAlert>
+                }
+                else if (_posRoles.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Inherit">No roles found in POS for this user.</MudText>
+                }
+                else
+                {
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1">
+                        @foreach (var role in _posRoles)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled">
+                                @role
+                            </MudChip>
+                        }
+                    </MudStack>
+                }
+            </MudTabPanel>
+
+            <!-- ── Tab 6: Activity Log ────────────────────────── -->
+            <MudTabPanel Text="Activity" Icon="@Icons.Material.Filled.History">
+                @if (_auditLogs is null)
+                {
+                    <MudProgressCircular Indeterminate="true" />
+                }
+                else if (_auditLogs.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Inherit">No activity logged.</MudText>
+                }
+                else
+                {
+                    <MudTable Items="@_auditLogs" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Action</MudTh>
+                            <MudTh>Detail</MudTh>
+                            <MudTh>IP</MudTh>
+                            <MudTh>Date</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd><MudText Typo="Typo.body2" Style="font-weight:500;">@context.Action</MudText></MudTd>
+                            <MudTd><MudText Typo="Typo.caption">@(context.Detail ?? "—")</MudText></MudTd>
+                            <MudTd><MudText Typo="Typo.caption">@(context.IpAddress ?? "—")</MudText></MudTd>
+                            <MudTd><MudText Typo="Typo.caption">@context.CreatedAt.ToString("MMM d, yyyy HH:mm")</MudText></MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    @if (!string.IsNullOrEmpty(User.AppUrl))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Inherit" Class="mt-2">
+                            For POS activity, visit
+                            <a href="https://@User.AppUrl/admin/audit-logs" target="_blank" style="color:#00BFA5;">
+                                @User.AppUrl/admin/audit-logs
+                            </a>
+                        </MudText>
+                    }
+                }
+            </MudTabPanel>
+
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" Variant="Variant.Text">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public User User { get; set; } = default!;
+
+    private List<PaymentHistory>? _payments;
+    private List<AuditLog>?       _auditLogs;
+    private List<Role>?           _allRoles;
+    private List<UserRole>        _userRoles  = new();
+    private Guid                  _selectedRoleId;
+
+    // POS tab
+    private bool         _posRolesLoading = false;
+    private List<string>? _posRoles;
+    private bool         _posRolesLoaded  = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Load payments and audit logs immediately on open
+        var paymentsTask = AdminService.GetPaymentHistoryAsync(User.Id);
+        var logsTask     = AdminService.GetUserAuditLogsAsync(User.Id);
+
+        await Task.WhenAll(paymentsTask, logsTask);
+
+        _payments  = paymentsTask.Result;
+        _auditLogs = logsTask.Result;
+
+        // Populate _userRoles from the already-loaded User nav props
+        _userRoles = User.UserRoles?.ToList() ?? new();
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        if (_allRoles is not null) return;
+        _allRoles = await AdminService.GetAllRolesAsync();
+    }
+
+    private async Task LoadPosRolesAsync()
+    {
+        if (_posRolesLoaded || string.IsNullOrEmpty(User.AppUrl)) return;
+
+        _posRolesLoading = true;
+        _posRolesLoaded  = true;
+
+        var slug = ExtractSlug(User.AppUrl);
+        _posRoles = await ProvisioningService.GetUserPosRolesAsync(slug, User.Email);
+
+        _posRolesLoading = false;
+    }
+
+    private static string ExtractSlug(string appUrl)
+    {
+        // "mobileshop.cloudmpos.com" → "mobileshop"
+        var dot = appUrl.IndexOf('.');
+        return dot > 0 ? appUrl[..dot] : appUrl;
+    }
+
+    private async Task AssignRoleAsync()
+    {
+        if (_selectedRoleId == Guid.Empty) return;
+
+        var ok = await AdminService.AssignRoleAsync(User.Id, _selectedRoleId);
+        if (ok)
+        {
+            var role = _allRoles!.First(r => r.Id == _selectedRoleId);
+            _userRoles.Add(new UserRole { UserId = User.Id, RoleId = role.Id, Role = role, CreatedAt = DateTime.UtcNow });
+            _selectedRoleId = Guid.Empty;
+            Snackbar.Add($"Role '{role.Name}' assigned.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to assign role.", Severity.Error);
+        }
+    }
+
+    private async Task RemoveRoleAsync(Guid roleId)
+    {
+        var ok = await AdminService.RemoveRoleAsync(User.Id, roleId);
+        if (ok)
+        {
+            var ur = _userRoles.FirstOrDefault(r => r.RoleId == roleId);
+            if (ur is not null) _userRoles.Remove(ur);
+            Snackbar.Add("Role removed.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to remove role.", Severity.Error);
+        }
+    }
+
+    private void Close() => MudDialog.Close();
+}

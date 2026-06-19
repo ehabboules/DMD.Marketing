@@ -2,6 +2,7 @@ using DMD.Marketing.Data;
 using DMD.Marketing.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -34,6 +35,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ProvisioningService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<StripeService>();
+builder.Services.AddScoped<AdminClientService>();
 builder.Services.AddHostedService<TrialExpiryBackgroundService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 

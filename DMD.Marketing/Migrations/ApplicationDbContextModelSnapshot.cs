@@ -180,6 +180,9 @@ namespace DMD.Marketing.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AppUrl")
+                        .HasColumnType("text");
+
                     b.Property<int>("ActivationStatus")
                         .HasColumnType("integer");
 

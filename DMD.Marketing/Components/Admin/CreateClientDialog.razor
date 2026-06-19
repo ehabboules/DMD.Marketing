@@ -1,0 +1,152 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@inject AdminClientService AdminService
+@inject EmailService EmailService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_model.FirstName" Label="First Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_model.LastName" Label="Last Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_model.Email" Label="Email" InputType="InputType.Email"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_model.Password" Label="Temporary Password" InputType="InputType.Password"
+                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                              HelperText="User will be prompted to change on first login" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_model.StoreName" Label="Store Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_model.StorePhone" Label="Store Phone" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_model.BusinessType" Label="Business Type" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("Retail")">Retail</MudSelectItem>
+                    <MudSelectItem Value="@("Grocery")">Grocery</MudSelectItem>
+                    <MudSelectItem Value="@("Restaurant")">Restaurant</MudSelectItem>
+                    <MudSelectItem Value="@("Other")">Other</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_model.StoreTimezone" Label="Timezone" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Placeholder="e.g. America/Toronto" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_model.SelectedPlan" Label="Plan" T="PlanSlug" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var plan in PricingData.Plans)
+                    {
+                        <MudSelectItem Value="@plan.Slug">@plan.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_model.BillingCycle" Label="Billing Cycle" T="BillingCycle" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="BillingCycle.Monthly">Monthly</MudSelectItem>
+                    <MudSelectItem Value="BillingCycle.Annual">Annual</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudTextField @bind-Value="_model.Currency" Label="Currency" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="_model.FederalTaxRate" Label="Federal Tax %" Variant="Variant.Outlined"
+                                 Margin="Margin.Dense" Format="F2" Step="0.5m" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="_model.ProvincialTaxRate" Label="Provincial Tax %" Variant="Variant.Outlined"
+                                 Margin="Margin.Dense" Format="F2" Step="0.5m" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_model.ActivationStatus" Label="Status" T="ActivationStatus"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="ActivationStatus.Active">Active</MudSelectItem>
+                    <MudSelectItem Value="ActivationStatus.Pending">Pending</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_expiresAt" Label="Subscription Expiry"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            @if (_model.ActivationStatus == ActivationStatus.Active)
+            {
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_slug" Label="Tenant Slug (for App URL)"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                                  HelperText="@($"App URL: {_slug?.Trim().ToLowerInvariant()}.cloudmpos.com")" />
+                </MudItem>
+            }
+        </MudGrid>
+
+        @if (_errorMessage is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3">@_errorMessage</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="SubmitAsync"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_submitting || !IsValid())">
+            @if (_submitting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Create Client
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private CreateUserModel _model       = new();
+    private DateTime?       _expiresAt   = DateTime.UtcNow.AddDays(14);
+    private string          _slug        = "";
+    private bool            _submitting  = false;
+    private string?         _errorMessage;
+
+    private bool IsValid() =>
+        !string.IsNullOrWhiteSpace(_model.Email) &&
+        !string.IsNullOrWhiteSpace(_model.FirstName) &&
+        !string.IsNullOrWhiteSpace(_model.Password);
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitAsync()
+    {
+        _submitting   = true;
+        _errorMessage = null;
+
+        _model.SubscriptionExpiresAt = _expiresAt?.ToUniversalTime();
+
+        if (_model.ActivationStatus == ActivationStatus.Active && !string.IsNullOrWhiteSpace(_slug))
+            _model.AppUrl = $"{_slug.Trim().ToLowerInvariant()}.cloudmpos.com";
+
+        var (user, error) = await AdminService.CreateUserAsync(_model);
+        _submitting = false;
+
+        if (user is not null)
+        {
+            Snackbar.Add($"Client {user.Email} created.", Severity.Success);
+            if (user.ActivationStatus == ActivationStatus.Active && !string.IsNullOrEmpty(user.AppUrl))
+                _ = EmailService.SendWelcomeEmailAsync(user, user.AppUrl);
+            MudDialog.Close(DialogResult.Ok(user));
+        }
+        else
+        {
+            _errorMessage = error ?? "Unknown error.";
+        }
+    }
+}

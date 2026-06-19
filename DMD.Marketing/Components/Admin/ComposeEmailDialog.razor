@@ -1,0 +1,74 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+@using DMD.Marketing.Services
+@inject EmailService EmailService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (User is not null)
+        {
+            <MudText Typo="Typo.body2" Class="mb-3">
+                To: <strong>@User.FirstName @User.LastName</strong> &lt;@User.Email&gt;
+            </MudText>
+        }
+
+        <MudTextField @bind-Value="_subject"
+                      Label="Subject"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="_body"
+                      Label="Message"
+                      Variant="Variant.Outlined"
+                      Lines="6"
+                      Class="mb-1" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="SendAsync"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="@(_sending || User is null || string.IsNullOrWhiteSpace(_subject) || string.IsNullOrWhiteSpace(_body))">
+            @if (_sending)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Send
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public User? User { get; set; }
+
+    private string _subject = "";
+    private string _body    = "";
+    private bool   _sending = false;
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SendAsync()
+    {
+        if (User is null) return;
+
+        _sending = true;
+        var ok = await EmailService.SendAdminNotificationAsync(
+            User.Email, User.FirstName ?? User.Email, _subject, _body);
+
+        _sending = false;
+
+        if (ok)
+        {
+            Snackbar.Add("Email sent successfully.", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add("Failed to send email.", Severity.Error);
+        }
+    }
+}

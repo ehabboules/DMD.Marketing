@@ -67,6 +67,8 @@ public record ProvisioningRequestInfo(
     int?      MarketingUserId
 );
 
+public record PosAuditEntry(string Action, string? Detail, DateTime CreatedAt);
+
 public class ProvisioningService
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -251,6 +253,59 @@ public class ProvisioningService
         {
             _logger.LogError(ex, "Error calling activate API for {Email}", email);
             return false;
+        }
+    }
+
+    // ── POS app roles / logs ─────────────────────────────────────────
+    public async Task<List<string>?> GetUserPosRolesAsync(string slug, string email)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return null;
+
+        try
+        {
+            var encodedEmail = Uri.EscapeDataString(email);
+            var response = await client.GetAsync(
+                $"{baseUrl}/api/admin/{slug}/user/{encodedEmail}/roles");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("GetUserPosRoles: {Status} for slug={Slug} email={Email}", response.StatusCode, slug, email);
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<string>>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching POS roles for {Email} at {Slug}", email, slug);
+            return null;
+        }
+    }
+
+    public async Task<List<PosAuditEntry>?> GetUserPosLogsAsync(string slug, string email)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return null;
+
+        try
+        {
+            var encodedEmail = Uri.EscapeDataString(email);
+            var response = await client.GetAsync(
+                $"{baseUrl}/api/admin/{slug}/user/{encodedEmail}/logs");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("GetUserPosLogs: {Status} for slug={Slug} email={Email}", response.StatusCode, slug, email);
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<PosAuditEntry>>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching POS logs for {Email} at {Slug}", email, slug);
+            return null;
         }
     }
 
