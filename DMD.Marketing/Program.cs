@@ -113,6 +113,19 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    // Guard against EF migration-history drift (table/column recorded as applied but DDL never ran).
+    // IF NOT EXISTS / ADD COLUMN IF NOT EXISTS are idempotent — safe on every startup.
+    db.Database.ExecuteSqlRaw("""
+        CREATE TABLE IF NOT EXISTS "DataProtectionKeys" (
+            "Id"           serial NOT NULL,
+            "FriendlyName" text,
+            "Xml"          text,
+            CONSTRAINT "PK_DataProtectionKeys" PRIMARY KEY ("Id")
+        );
+        ALTER TABLE public."Users" ADD COLUMN IF NOT EXISTS "AppUrl" text;
+        """);
+
     foreach (var name in new[] { "Admin", "User" })
     {
         if (!db.Roles.Any(r => r.Name == name))
