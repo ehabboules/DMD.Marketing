@@ -5,6 +5,7 @@
 @using DMD.Marketing.Models
 @using DMD.Marketing.Components.Admin
 @inject AdminClientService AdminService
+@inject ProvisioningService ProvisioningService
 @inject EmailService EmailService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -20,7 +21,7 @@
         <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Size="Size.Large" />
         <div>
             <MudText Typo="Typo.h4">Client Management</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Inherit">Direct from Marketing DB — billing, activation, accounts</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Inherit">Billing, activation, renewals and demo tenants</MudText>
         </div>
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.PersonAdd" Variant="Variant.Filled"
@@ -45,7 +46,7 @@
     {
         <!-- ── Stat cards ───────────────────────────────────────── -->
         <MudGrid Spacing="3" Class="mb-5">
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
@@ -56,7 +57,7 @@
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
@@ -67,7 +68,7 @@
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <div>
@@ -78,7 +79,7 @@
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="6" sm="3">
+            <MudItem xs="6" sm="2">
                 <MudPaper Elevation="2" Class="pa-3"
                           Style="@($"border-radius:14px;{(_summary.ExpiringSoon > 0 ? "border:2px solid #FF9800;" : "")}")">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
@@ -93,7 +94,116 @@
                     </MudStack>
                 </MudPaper>
             </MudItem>
+            <MudItem xs="6" sm="2">
+                <MudPaper Elevation="2" Class="pa-3" Style="border-radius:14px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">Revenue / Mo</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Class="font-weight-bold">
+                                $@_revenueThisMonth.ToString("N0")
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
         </MudGrid>
+
+        <!-- ── Demo Tenants ────────────────────────────────────── -->
+        <MudPaper Elevation="2" Class="pa-4 mb-5" Style="border-radius:14px;border-left:4px solid #00BFA5;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.Science" Color="Color.Primary" />
+                <MudText Typo="Typo.h6">Demo Tenants</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Live</MudChip>
+            </MudStack>
+            <MudGrid Spacing="3">
+                @foreach (var demo in _demoTenants)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Elevation="1" Class="pa-3" Style="border-radius:10px;background:#F9FAFB;border:1px solid #E5E7EB;">
+                            <MudStack Spacing="1" Class="mb-2">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                                    <MudText Typo="Typo.body1" Class="font-weight-bold">@demo.StoreName</MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Live</MudChip>
+                                </MudStack>
+                                <MudText Typo="Typo.caption" Color="Color.Inherit">
+                                    slug: <strong>@demo.Slug</strong> · @demo.Plan · @demo.Type
+                                </MudText>
+                            </MudStack>
+                            <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap">
+                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary"
+                                           EndIcon="@Icons.Material.Filled.OpenInNew"
+                                           Href="@($"https://{demo.Slug}.cloudmpos.com")" Target="_blank">
+                                    Visit Demo
+                                </MudButton>
+                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning"
+                                           StartIcon="@(_seeding.Contains(demo.Slug) ? null : Icons.Material.Filled.Refresh)"
+                                           Disabled="_seeding.Contains(demo.Slug)"
+                                           OnClick="@(() => SeedTenantAsync(demo.Slug))">
+                                    @if (_seeding.Contains(demo.Slug))
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                                    }
+                                    Re-seed
+                                </MudButton>
+                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Secondary"
+                                           StartIcon="@(_migrating ? null : Icons.Material.Filled.Storage)"
+                                           Disabled="_migrating"
+                                           OnClick="RunMigrationsAsync">
+                                    @if (_migrating)
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                                    }
+                                    Run Migrations
+                                </MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+
+        <!-- ── Upcoming Renewals ───────────────────────────────── -->
+        @if (_upcomingRenewals.Count > 0)
+        {
+            <MudPaper Elevation="2" Class="pa-4 mb-5" Style="border-radius:14px;border-left:4px solid #FF9800;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.EventRepeat" Color="Color.Warning" />
+                    <MudText Typo="Typo.h6">Upcoming Renewals</MudText>
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">
+                        @_upcomingRenewals.Count client@(_upcomingRenewals.Count == 1 ? "" : "s")
+                    </MudChip>
+                </MudStack>
+                <MudGrid Spacing="2">
+                    @foreach (var u in _upcomingRenewals.OrderBy(u => u.SubscriptionExpiresAt))
+                    {
+                        var days = (int)Math.Ceiling((u.SubscriptionExpiresAt!.Value - DateTime.UtcNow).TotalDays);
+                        var urgent = days <= 7;
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudPaper Elevation="0" Class="pa-3"
+                                      Style="@($"border-radius:10px;background:{(urgent ? "#FFF3E0" : "#FAFAFA")};border:1px solid {(urgent ? "#FFB74D" : "#E5E7EB")};")">
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <div>
+                                        <MudText Typo="Typo.body2" Class="font-weight-bold">@(u.StoreName ?? u.Email)</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Inherit">@u.Email</MudText>
+                                        <MudText Typo="Typo.caption">@u.SelectedPlan · @u.BillingCycle</MudText>
+                                    </div>
+                                    <MudStack AlignItems="AlignItems.End">
+                                        <MudText Typo="Typo.body2" Color="@(urgent ? Color.Error : Color.Warning)"
+                                                 Class="font-weight-bold">
+                                            @days day@(days == 1 ? "" : "s")
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Inherit">
+                                            @u.SubscriptionExpiresAt!.Value.ToString("MMM d")
+                                        </MudText>
+                                    </MudStack>
+                                </MudStack>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudPaper>
+        }
 
         <!-- ── Pending Requests ────────────────────────────────── -->
         <MudPaper Elevation="2" Class="mb-5" Style="border-radius:12px;overflow:hidden;">
@@ -236,6 +346,11 @@
                                            Color="Color.Warning" Size="Size.Medium"
                                            OnClick="@(() => ExtendSubscriptionAsync(context))" />
                         </MudTooltip>
+                        <MudTooltip Text="Record payment">
+                            <MudIconButton Icon="@Icons.Material.Filled.AddCard"
+                                           Color="Color.Success" Size="Size.Medium"
+                                           OnClick="@(() => RecordPaymentAsync(context))" />
+                        </MudTooltip>
                     </MudTd>
                 </RowTemplate>
                 <NoRecordsContent>
@@ -314,12 +429,27 @@
     private bool         _loading      = true;
     private string?      _loadError;
 
-    private AdminSummary _summary       = new(0, 0, 0, 0);
-    private List<User>   _pendingUsers  = new();
-    private List<User>   _activeUsers   = new();
+    private AdminSummary _summary          = new(0, 0, 0, 0);
+    private List<User>   _pendingUsers     = new();
+    private List<User>   _activeUsers      = new();
+    private List<User>   _upcomingRenewals = new();
+    private decimal      _revenueThisMonth = 0m;
 
     private string       _searchQuery   = "";
     private List<User>?  _searchResults;
+
+    // ── Demo tenants ──────────────────────────────────────────────────
+    private record DemoTenant(string Slug, string StoreName, string Plan, string Type);
+
+    private static readonly DemoTenant[] _demoTenants =
+    [
+        new("mobileshop", "TechZone Mobile",  "Growth", "MobileShop"),
+        new("restaurant", "The Grand Bistro", "Pro",    "Restaurant"),
+        new("grocery",    "Nature's Harvest", "Growth", "GroceryNuts"),
+    ];
+
+    private HashSet<string> _seeding  = new(StringComparer.OrdinalIgnoreCase);
+    private bool            _migrating;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -364,12 +494,21 @@
             var summaryTask  = AdminService.GetSummaryAsync();
             var pendingTask  = AdminService.GetPendingUsersAsync();
             var activeTask   = AdminService.GetActiveUsersAsync();
+            var revenueTask  = AdminService.GetRevenueThisMonthAsync();
 
-            await Task.WhenAll(summaryTask, pendingTask, activeTask);
+            await Task.WhenAll(summaryTask, pendingTask, activeTask, revenueTask);
 
-            _summary      = summaryTask.Result;
-            _pendingUsers = pendingTask.Result;
-            _activeUsers  = activeTask.Result;
+            _summary          = summaryTask.Result;
+            _pendingUsers     = pendingTask.Result;
+            _activeUsers      = activeTask.Result;
+            _revenueThisMonth = revenueTask.Result;
+
+            var now = DateTime.UtcNow;
+            _upcomingRenewals = _activeUsers
+                .Where(u => u.SubscriptionExpiresAt.HasValue
+                         && u.SubscriptionExpiresAt.Value > now
+                         && u.SubscriptionExpiresAt.Value <= now.AddDays(30))
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -401,6 +540,50 @@
         }
     }
 
+    // ── Demo tenant actions ────────────────────────────────────────────
+    private async Task SeedTenantAsync(string slug)
+    {
+        if (_seeding.Contains(slug)) return;
+        _seeding.Add(slug);
+        StateHasChanged();
+
+        try
+        {
+            var ok = await ProvisioningService.SeedTenantAsync(slug);
+            Snackbar.Add(ok
+                ? $"{slug} re-seeded successfully."
+                : $"Re-seed failed for {slug} — check logs.",
+                ok ? Severity.Success : Severity.Error);
+        }
+        finally
+        {
+            _seeding.Remove(slug);
+            StateHasChanged();
+        }
+    }
+
+    private async Task RunMigrationsAsync()
+    {
+        if (_migrating) return;
+        _migrating = true;
+        StateHasChanged();
+
+        try
+        {
+            var ok = await ProvisioningService.RunMigrationsAsync();
+            Snackbar.Add(ok
+                ? "Migrations completed successfully."
+                : "Migration run failed — check logs.",
+                ok ? Severity.Success : Severity.Error);
+        }
+        finally
+        {
+            _migrating = false;
+            StateHasChanged();
+        }
+    }
+
+    // ── Client actions ────────────────────────────────────────────────
     private async Task ActivateClientAsync(User user)
     {
         var parameters = new DialogParameters<ActivateClientDialog> { { x => x.User, user } };
@@ -416,12 +599,9 @@
         if (ok)
         {
             Snackbar.Add($"{user.StoreName} activated — {appUrl}", Severity.Success);
-
-            // Refresh user object to get AppUrl set
             var updated = await AdminService.GetUserByIdAsync(user.Id);
             if (updated is not null)
                 _ = EmailService.SendWelcomeEmailAsync(updated, appUrl);
-
             await LoadAsync();
         }
         else
@@ -432,7 +612,6 @@
 
     private async Task ViewDetailsAsync(User user)
     {
-        // Reload with full nav props
         var full = await AdminService.GetUserByIdAsync(user.Id) ?? user;
         var parameters = new DialogParameters<UserDetailsDialog> { { x => x.User, full } };
         var options    = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = true };
@@ -467,6 +646,15 @@
         {
             Snackbar.Add("Failed to extend subscription.", Severity.Error);
         }
+    }
+
+    private async Task RecordPaymentAsync(User user)
+    {
+        var parameters = new DialogParameters<RecordPaymentAdminDialog> { { x => x.User, user } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog     = await DialogService.ShowAsync<RecordPaymentAdminDialog>("Record Payment", parameters, options);
+        var result     = await dialog.Result;
+        if (result is { Canceled: false }) await LoadAsync();
     }
 
     private async Task OpenCreateClientAsync()

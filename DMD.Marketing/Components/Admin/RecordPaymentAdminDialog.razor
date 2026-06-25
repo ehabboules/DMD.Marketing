@@ -1,0 +1,120 @@
+@using MudBlazor
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using DMD.Marketing.Services
+@inject AdminClientService AdminService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Record Payment</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Inherit">@User.StoreName · @User.Email</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_planName" Label="Plan" Variant="Variant.Outlined">
+                    <MudSelectItem Value="@("Starter")">Starter</MudSelectItem>
+                    <MudSelectItem Value="@("Growth")">Growth</MudSelectItem>
+                    <MudSelectItem Value="@("Pro")">Pro</MudSelectItem>
+                    <MudSelectItem Value="@("Enterprise")">Enterprise</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="BillingCycleValue" Label="Billing Cycle" Variant="Variant.Outlined">
+                    <MudSelectItem Value="@("Monthly")">Monthly</MudSelectItem>
+                    <MudSelectItem Value="@("Annual")">Annual</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="_amount" Label="Amount (CAD)" Variant="Variant.Outlined"
+                                 Format="F2" Min="0" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_paymentMethodLast4" Label="Card Last 4 (optional)"
+                              Variant="Variant.Outlined" MaxLength="4" Placeholder="e.g. 4242" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudDatePicker @bind-Date="_newExpiresAt" Label="New Subscription Expiry"
+                               Variant="Variant.Outlined"
+                               HelperText="SubscriptionExpiresAt will be set to this date" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="SaveAsync" Variant="Variant.Filled" Color="Color.Success"
+                   Disabled="_saving" StartIcon="@Icons.Material.Filled.AddCard">
+            @(_saving ? "Saving…" : "Record Payment")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public User User { get; set; } = null!;
+
+    private string    _planName           = "Growth";
+    private string    _billingCycle       = "Monthly";
+    private decimal   _amount             = 0m;
+    private string?   _paymentMethodLast4;
+    private DateTime? _newExpiresAt;
+    private bool      _saving;
+
+    private string BillingCycleValue
+    {
+        get => _billingCycle;
+        set { _billingCycle = value; RecalcExpiry(value); }
+    }
+
+    protected override void OnParametersSet()
+    {
+        _planName     = User.SelectedPlan.ToString();
+        _billingCycle = User.BillingCycle.ToString();
+        RecalcExpiry(_billingCycle);
+    }
+
+    private void RecalcExpiry(string cycle)
+    {
+        _billingCycle = cycle;
+        var baseDate = User.SubscriptionExpiresAt ?? DateTime.UtcNow;
+        _newExpiresAt = cycle == "Annual"
+            ? baseDate.AddYears(1)
+            : baseDate.AddMonths(1);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_newExpiresAt is null)
+        {
+            Snackbar.Add("Please set the new expiry date.", Severity.Warning);
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var ok = await AdminService.RecordManualPaymentAsync(
+                userId:             User.Id,
+                planName:           _planName,
+                billingCycle:       _billingCycle,
+                amount:             _amount,
+                newExpiresAt:       _newExpiresAt.Value.ToUniversalTime(),
+                paymentMethodLast4: string.IsNullOrWhiteSpace(_paymentMethodLast4) ? null : _paymentMethodLast4.Trim());
+
+            if (ok)
+            {
+                Snackbar.Add("Payment recorded and expiry updated.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                Snackbar.Add("Failed to record payment.", Severity.Error);
+            }
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

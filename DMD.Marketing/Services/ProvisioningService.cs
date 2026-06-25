@@ -103,40 +103,45 @@ public class ProvisioningService
         return (client, baseUrl.TrimEnd('/'));
     }
 
-    // ── Read ──────────────────────────────────────────────────────────
-    public async Task<List<ProvisioningRequestInfo>> GetAllRequestsAsync()
+    // ── Demo tenant tools ─────────────────────────────────────────────
+    public async Task<bool> SeedTenantAsync(string slug)
     {
         var (client, baseUrl) = GetClient();
-        if (client is null) return new();
+        if (client is null) return false;
 
         try
         {
-            var result = await client.GetFromJsonAsync<List<ProvisioningRequestInfo>>(
-                $"{baseUrl}/api/provisioning/requests");
-            return result ?? new();
+            var response = await client.PostAsync(
+                $"{baseUrl}/admin/seed?tenant={Uri.EscapeDataString(slug)}", null);
+            if (response.IsSuccessStatusCode) return true;
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("SeedTenant failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching provisioning requests");
-            return new();
+            _logger.LogError(ex, "Error seeding tenant {Slug}", slug);
+            return false;
         }
     }
 
-    public async Task<List<ClientInfo>> GetAllClientsAsync()
+    public async Task<bool> RunMigrationsAsync()
     {
         var (client, baseUrl) = GetClient();
-        if (client is null) return new();
+        if (client is null) return false;
 
         try
         {
-            var result = await client.GetFromJsonAsync<List<ClientInfo>>(
-                $"{baseUrl}/api/provisioning/clients");
-            return result ?? new();
+            var response = await client.PostAsync($"{baseUrl}/admin/onboard", null);
+            if (response.IsSuccessStatusCode) return true;
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("RunMigrations failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching client list");
-            return new();
+            _logger.LogError(ex, "Error running migrations");
+            return false;
         }
     }
 

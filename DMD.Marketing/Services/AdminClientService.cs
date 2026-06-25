@@ -300,4 +300,61 @@ public class AdminClientService
             return false;
         }
     }
+
+    public async Task<decimal> GetRevenueThisMonthAsync()
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var now = DateTime.UtcNow;
+        return await db.PaymentHistory
+            .Where(p => p.CreatedAt.Year == now.Year && p.CreatedAt.Month == now.Month)
+            .SumAsync(p => p.Amount);
+    }
+
+    public async Task<bool> RecordManualPaymentAsync(
+        int userId,
+        string planName,
+        string billingCycle,
+        decimal amount,
+        DateTime newExpiresAt,
+        string? paymentMethodLast4 = null)
+    {
+        try
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+            var user = await db.Users.FindAsync(userId);
+            if (user is null) return false;
+
+            db.PaymentHistory.Add(new PaymentHistory
+            {
+                UserId             = userId,
+                PlanName           = planName,
+                BillingCycle       = billingCycle,
+                Amount             = amount,
+                Status             = "Paid",
+                PaymentMethodLast4 = paymentMethodLast4,
+                CreatedAt          = DateTime.UtcNow,
+            });
+
+            user.SubscriptionExpiresAt = newExpiresAt;
+            user.ModifiedAt            = DateTime.UtcNow;
+
+            db.AuditLogs.Add(new AuditLog
+            {
+                UserId     = userId,
+                Action     = "ManualPaymentRecorded",
+                EntityType = "User",
+                EntityId   = userId.ToString(),
+                Detail     = $"plan={planName} cycle={billingCycle} amount={amount} newExpiry={newExpiresAt:O}",
+                CreatedAt  = DateTime.UtcNow,
+            });
+
+            await db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error recording manual payment for user {UserId}", userId);
+            return false;
+        }
+    }
 }
