@@ -198,27 +198,20 @@
                 if (AuthStateProvider is CustomAuthStateProvider provider)
                     provider.NotifyAuthenticationStateChanged();
 
-                await Task.Delay(100);
-
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var user      = authState.User;
 
-                if (user.Identity?.IsAuthenticated == true)
+                if (user.Identity?.IsAuthenticated == true &&
+                    user.FindFirst("must_change_password")?.Value == "true")
                 {
-                    if (user.FindFirst("must_change_password")?.Value == "true")
-                    {
-                        Navigation.NavigateTo("/changepassword?forced=true", forceLoad: true);
-                        return;
-                    }
+                    Navigation.NavigateTo("/changepassword?forced=true", forceLoad: false);
+                    return;
                 }
-
-                Snackbar.Add("Login successful! Redirecting…", Severity.Success);
-                await Task.Delay(400);
 
                 var destination = !string.IsNullOrEmpty(ReturnUrl)
                     ? Uri.UnescapeDataString(ReturnUrl)
-                    : "/";
-                Navigation.NavigateTo(destination, forceLoad: true);
+                    : "/profile";
+                Navigation.NavigateTo(destination, forceLoad: false);
             }
             else
             {
