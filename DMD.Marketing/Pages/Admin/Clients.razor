@@ -235,10 +235,21 @@
                         <MudText Typo="Typo.body2">@(context.StoreName ?? "—")</MudText>
                     </MudTd>
                     <MudTd DataLabel="Plan">
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
-                            @context.SelectedPlan
-                        </MudChip>
-                        <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                        @if (context.SelectedPlan == PlanSlug.None)
+                        {
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="Color.Default" Variant="Variant.Outlined">
+                                No plan selected
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Size="Size.Small"
+                                     Color="Color.Primary" Variant="Variant.Outlined">
+                                @context.SelectedPlan
+                            </MudChip>
+                            <MudText Typo="Typo.caption" Color="Color.Inherit">@context.BillingCycle</MudText>
+                        }
                     </MudTd>
                     <MudTd DataLabel="Business Type">
                         <MudText Typo="Typo.caption">@(context.BusinessType ?? "—")</MudText>
@@ -247,11 +258,22 @@
                         <MudText Typo="Typo.caption">@context.CreatedAt.ToString("MMM d, yyyy")</MudText>
                     </MudTd>
                     <MudTd DataLabel="Actions">
-                        <MudTooltip Text="Activate client">
-                            <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
-                                           Color="Color.Success" Size="Size.Medium"
-                                           OnClick="@(() => ActivateClientAsync(context))" />
-                        </MudTooltip>
+                        @if (context.SelectedPlan == PlanSlug.None)
+                        {
+                            <MudTooltip Text="No plan selected yet — assign a plan before activating">
+                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                               Color="Color.Default" Size="Size.Medium"
+                                               Disabled="true" />
+                            </MudTooltip>
+                        }
+                        else
+                        {
+                            <MudTooltip Text="Activate client">
+                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                               Color="Color.Success" Size="Size.Medium"
+                                               OnClick="@(() => ActivateClientAsync(context))" />
+                            </MudTooltip>
+                        }
                         <MudTooltip Text="View details">
                             <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
                                            Color="Color.Primary" Size="Size.Medium"

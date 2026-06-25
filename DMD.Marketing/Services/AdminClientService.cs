@@ -54,8 +54,7 @@ public class AdminClientService
         return new AdminSummary(
             Total:       users.Count,
             Active:      users.Count(u => u.ActivationStatus == ActivationStatus.Active),
-            Pending:     users.Count(u => u.ActivationStatus == ActivationStatus.Pending
-                                      || (u.ActivationStatus == ActivationStatus.None && u.SelectedPlan != PlanSlug.None)),
+            Pending:     users.Count(u => u.ActivationStatus != ActivationStatus.Active),
             ExpiringSoon: users.Count(u => u.SubscriptionExpiresAt.HasValue
                                        && u.SubscriptionExpiresAt.Value > now
                                        && u.SubscriptionExpiresAt.Value <= now.AddDays(7))
@@ -68,8 +67,7 @@ public class AdminClientService
         await using var db = await _dbFactory.CreateDbContextAsync();
         return await db.Users
             .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-            .Where(u => u.ActivationStatus == ActivationStatus.Pending
-                     || (u.ActivationStatus == ActivationStatus.None && u.SelectedPlan != PlanSlug.None))
+            .Where(u => u.ActivationStatus != ActivationStatus.Active)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
     }
