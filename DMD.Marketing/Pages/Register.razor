@@ -10,6 +10,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject EmailService EmailSvc
 @inject ILogger<Register> Logger
 
 <PageTitle>Create Account – Cloud Mobil POS</PageTitle>
@@ -346,6 +347,7 @@
             }
 
             Logger.LogInformation("Registration successful for {Email}, proceeding to auto-login", _model.Email);
+            _ = EmailSvc.SendRegistrationWelcomeAsync(user.Email, user.FirstName ?? _model.FirstName, Navigation.BaseUri);
             Snackbar.Add("Account created successfully! Logging you in…", Severity.Success);
 
             await Task.Delay(400);

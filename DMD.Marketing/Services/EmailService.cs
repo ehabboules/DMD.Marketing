@@ -207,6 +207,66 @@ public class EmailService
         }
     }
 
+    public async Task<bool> SendRegistrationWelcomeAsync(string toEmail, string firstName, string baseUrl)
+    {
+        try
+        {
+            var apiKey    = _config["SendGrid:ApiKey"];
+            var fromEmail = _config["SendGrid:FromEmail"];
+            var fromName  = _config["SendGrid:FromName"];
+
+            if (string.IsNullOrEmpty(apiKey)) { _logger.LogWarning("SendGrid API key missing."); return false; }
+
+            var profileUrl = $"{baseUrl.TrimEnd('/')}/profile";
+            var client = new SendGridClient(apiKey);
+            var msg = new SendGridMessage
+            {
+                From             = new EmailAddress(fromEmail, fromName),
+                Subject          = $"Welcome to Cloud Mobil POS, {firstName}!",
+                PlainTextContent = $"Hi {firstName},\n\nWelcome to Cloud Mobil POS! Your 14-day free trial has started.\n\nLog in to your account and set up your store:\n{profileUrl}\n\nIf you have any questions, just reply to this email — we're happy to help.\n\n— The Cloud Mobil POS Team",
+                HtmlContent      = $"""
+                    <div style="font-family:sans-serif;max-width:560px;margin:auto;">
+                      <div style="background:#1A237E;padding:24px 32px;border-radius:12px 12px 0 0;">
+                        <h2 style="color:#fff;margin:0;font-size:1.2rem;">Welcome to Cloud Mobil POS!</h2>
+                        <p style="color:#90CAF9;margin:4px 0 0;font-size:0.85rem;">Your 14-day free trial has started</p>
+                      </div>
+                      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
+                        <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
+                        <p style="color:#374151;margin:0 0 8px;">Thanks for signing up! Your account is ready and your <strong>14-day free trial</strong> has started.</p>
+                        <p style="color:#374151;margin:0 0 24px;">Head to your profile to pick a plan and set up your store details.</p>
+                        <a href="{profileUrl}"
+                           style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:0.95rem;">
+                          Set up my store →
+                        </a>
+                        <hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0;" />
+                        <p style="color:#6b7280;font-size:0.85rem;margin:0 0 4px;"><strong>What happens next?</strong></p>
+                        <p style="color:#6b7280;font-size:0.85rem;margin:0 0 4px;">1. Choose a plan on your profile page</p>
+                        <p style="color:#6b7280;font-size:0.85rem;margin:0 0 4px;">2. Our team will activate your POS store within 24 hours</p>
+                        <p style="color:#6b7280;font-size:0.85rem;margin:0;">3. You'll receive a second email with your store link</p>
+                        <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">Questions? Reply to this email — we're here to help.</p>
+                      </div>
+                    </div>
+                    """
+            };
+            msg.AddTo(new EmailAddress(toEmail, firstName));
+
+            var response = await client.SendEmailAsync(msg);
+            var success  = (int)response.StatusCode is >= 200 and < 300;
+
+            if (success)
+                _logger.LogInformation("Registration welcome email sent to {Email}", toEmail);
+            else
+                _logger.LogWarning("SendGrid returned {StatusCode} for registration welcome to {Email}", response.StatusCode, toEmail);
+
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send registration welcome email to {Email}", toEmail);
+            return false;
+        }
+    }
+
     public async Task<bool> SendWelcomeEmailAsync(DMD.Marketing.Data.User user, string appUrl)
     {
         try
