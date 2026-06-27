@@ -347,10 +347,9 @@
             }
 
             Logger.LogInformation("Registration successful for {Email}, proceeding to auto-login", _model.Email);
-            _ = EmailSvc.SendRegistrationWelcomeAsync(user.Email, user.FirstName ?? _model.FirstName, Navigation.BaseUri);
-            Snackbar.Add("Account created successfully! Logging you in…", Severity.Success);
 
-            await Task.Delay(400);
+            // Await the email so the circuit doesn't tear it down mid-flight
+            await EmailSvc.SendRegistrationWelcomeAsync(user.Email, user.FirstName ?? _model.FirstName, Navigation.BaseUri);
 
             // Auto-login via /connect/token
             var loginContent = new FormUrlEncodedContent(new[]
@@ -367,8 +366,7 @@
             if (!tokenResponse.IsSuccessStatusCode)
             {
                 Snackbar.Add("Account created but auto-login failed. Please log in manually.", Severity.Warning);
-                await Task.Delay(2000);
-                Navigation.NavigateTo("/login", forceLoad: true);
+                Navigation.NavigateTo("/login", forceLoad: false);
                 return;
             }
 
@@ -380,18 +378,12 @@
                 if (AuthStateProvider is CustomAuthStateProvider provider)
                     provider.NotifyAuthenticationStateChanged();
 
-                await Task.Delay(100);
-
-                _successMessage = "Account created and logged in! Redirecting…";
-                Snackbar.Add(_successMessage, Severity.Success);
-                await Task.Delay(400);
-                Navigation.NavigateTo("/profile", forceLoad: true);
+                Navigation.NavigateTo("/profile", forceLoad: false);
             }
             else
             {
                 Snackbar.Add("Account created but auto-login failed. Please log in manually.", Severity.Warning);
-                await Task.Delay(2000);
-                Navigation.NavigateTo("/login", forceLoad: true);
+                Navigation.NavigateTo("/login", forceLoad: false);
             }
         }
         catch (Exception ex)
