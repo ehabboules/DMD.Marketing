@@ -76,6 +76,13 @@
         </div>
 
         <div class="login-body">
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Dense="true" Class="mb-4">
+                    @_errorMessage
+                </MudAlert>
+            }
+
             <EditForm Model="@_model" OnValidSubmit="OnSubmitAsync">
                 <DataAnnotationsValidator />
 
@@ -155,6 +162,7 @@
     private LoginModel _model = new();
     private bool _isLoading = false;
     private bool _hasRendered = false;
+    private string? _errorMessage;
 
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
@@ -168,6 +176,7 @@
     {
         if (!_hasRendered) return;
 
+        _errorMessage = null;
         _isLoading = true;
         try
         {
@@ -186,7 +195,7 @@
 
             if (!response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Login failed: Invalid email or password", Severity.Error);
+                _errorMessage = "Invalid email or password. Please try again.";
                 return;
             }
 
@@ -215,13 +224,13 @@
             }
             else
             {
-                Snackbar.Add("Login failed: No access token received", Severity.Error);
+                _errorMessage = "Sign-in failed. Please try again.";
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Login error");
-            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            _errorMessage = "An unexpected error occurred. Please try again.";
         }
         finally
         {
