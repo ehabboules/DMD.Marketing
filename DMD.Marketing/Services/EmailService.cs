@@ -209,30 +209,15 @@ public class EmailService
 
     public async Task<bool> SendRegistrationWelcomeAsync(string toEmail, string firstName, string baseUrl)
     {
-        _logger.LogInformation("[RegWelcome] Called for {Email}, baseUrl={BaseUrl}", toEmail, baseUrl);
         try
         {
             var apiKey    = _config["SendGrid:ApiKey"];
             var fromEmail = _config["SendGrid:FromEmail"];
             var fromName  = _config["SendGrid:FromName"];
 
-            _logger.LogInformation("[RegWelcome] ApiKey present={HasKey}, From={FromEmail}, FromName={FromName}",
-                !string.IsNullOrEmpty(apiKey), fromEmail, fromName);
-
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                _logger.LogError("[RegWelcome] SendGrid:ApiKey is missing or empty — email NOT sent");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(fromEmail))
-            {
-                _logger.LogError("[RegWelcome] SendGrid:FromEmail is missing — email NOT sent");
-                return false;
-            }
+            if (string.IsNullOrEmpty(apiKey)) { _logger.LogWarning("SendGrid API key missing."); return false; }
 
             var profileUrl = $"{baseUrl.TrimEnd('/')}/profile";
-            _logger.LogInformation("[RegWelcome] Sending to {To}, profileUrl={ProfileUrl}", toEmail, profileUrl);
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage
             {
@@ -265,16 +250,17 @@ public class EmailService
             };
             msg.AddTo(new EmailAddress(toEmail, firstName));
 
-            _logger.LogInformation("[RegWelcome] Calling SendGrid...");
             var response = await client.SendEmailAsync(msg);
-            var statusCode = (int)response.StatusCode;
-            var body       = await response.Body.ReadAsStringAsync();
-            var success    = statusCode is >= 200 and < 300;
+            var success  = (int)response.StatusCode is >= 200 and < 300;
 
             if (success)
-                _logger.LogInformation("[RegWelcome] Sent OK — status={Status}", statusCode);
+                _logger.LogInformation("Registration welcome email sent to {Email}", toEmail);
             else
-                _logger.LogError("[RegWelcome] SendGrid rejected — status={Status}, body={Body}", statusCode, body);
+            {
+                var body = await response.Body.ReadAsStringAsync();
+                _logger.LogWarning("SendGrid returned {StatusCode} for registration welcome to {Email}: {Body}",
+                    response.StatusCode, toEmail, body);
+            }
 
             return success;
         }
