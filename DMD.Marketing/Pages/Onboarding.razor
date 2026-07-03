@@ -417,7 +417,32 @@
 
         try
         {
-            var success = await ProvisioningService.RequestActivationAsync(
+            // 1. Save to Marketing DB — this always succeeds regardless of StockShopOnline
+            await using var db = await DbFactory.CreateDbContextAsync();
+            var user = await db.Users.FindAsync(_userId);
+            if (user is null)
+            {
+                _activationError = "User not found. Please refresh and try again.";
+                _activating = false;
+                return;
+            }
+
+            user.StoreName             = _storeName?.Trim();
+            user.StorePhone            = _storePhone?.Trim();
+            user.StoreTimezone         = _storeTimezone;
+            user.BusinessType          = _businessType;
+            user.Currency              = _currency;
+            user.FederalTaxRate        = _federalTaxRate;
+            user.ProvincialTaxRate     = _provincialTaxRate;
+            user.TaxInclusive          = _taxInclusive;
+            user.ActivationStatus      = ActivationStatus.Pending;
+            user.SubscriptionExpiresAt = _trialExpiresAt;
+            user.ModifiedAt            = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+
+            // 2. Notify StockShopOnline — best-effort, failure doesn't block the user.
+            //    Admin can see and activate the request from /admin/clients.
+            _ = ProvisioningService.RequestActivationAsync(
                 email:             _userEmail,
                 firstName:         _userFirstName,
                 lastName:          _userLastName,
@@ -433,36 +458,12 @@
                 taxInclusive:      _taxInclusive,
                 marketingUserId:   _userId);
 
-            if (success)
-            {
-                await using var db = await DbFactory.CreateDbContextAsync();
-                var user = await db.Users.FindAsync(_userId);
-                if (user is not null)
-                {
-                    user.StoreName             = _storeName?.Trim();
-                    user.StorePhone            = _storePhone?.Trim();
-                    user.StoreTimezone         = _storeTimezone;
-                    user.BusinessType          = _businessType;
-                    user.Currency              = _currency;
-                    user.FederalTaxRate        = _federalTaxRate;
-                    user.ProvincialTaxRate     = _provincialTaxRate;
-                    user.TaxInclusive          = _taxInclusive;
-                    user.ActivationStatus      = ActivationStatus.Pending;
-                    user.SubscriptionExpiresAt = _trialExpiresAt;
-                    user.ModifiedAt            = DateTime.UtcNow;
-                    await db.SaveChangesAsync();
-                }
-
-                _submitted = true;
-            }
-            else
-            {
-                _activationError = "Could not submit your request. Please try again or contact support.";
-            }
+            _submitted = true;
         }
-        catch
+        catch (Exception ex)
         {
-            _activationError = "Something went wrong. Please try again or contact support.";
+            _activationError = "Something went wrong saving your details. Please try again.";
+            _ = ex; // already logged by EF Core
         }
 
         _activating = false;
