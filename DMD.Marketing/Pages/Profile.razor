@@ -184,13 +184,13 @@
                             {
                                 @:Trial ends
                             }
-                            else if (_user.PlanSelectedAt is null)
+                            else if (_user.ActivationStatus == ActivationStatus.Active)
                             {
-                                @:First payment
+                                @:Next payment
                             }
                             else
                             {
-                                @:Next payment
+                                @:First payment
                             }
                         </span>
                         <span class="sub-item-value sub-item-value--accent">
@@ -198,15 +198,15 @@
                             {
                                 @_user.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
                             }
-                            else if (_user.PlanSelectedAt is null)
+                            else if (_user.ActivationStatus == ActivationStatus.Active)
+                            {
+                                @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
+                            }
+                            else
                             {
                                 var trialEnd = GetTrialEndDate();
                                 @trialEnd.ToString("MMM d, yyyy")
                                 <span class="sub-billed-note">&nbsp;· after 14-day trial</span>
-                            }
-                            else
-                            {
-                                @(nextDate.HasValue ? nextDate.Value.ToString("MMM d, yyyy") : "—")
                             }
                         </span>
                     </div>
