@@ -352,6 +352,94 @@
             </div>
         </div>
 
+        <!-- ── Store settings ── -->
+        @if (_user.ActivationStatus != ActivationStatus.None)
+        {
+            <div class="profile-section">
+                <h2 class="section-title">Store settings</h2>
+                <div class="fields-grid">
+                    <div class="field-group">
+                        <label class="field-label">Store name</label>
+                        <input class="field-input" @bind="_storeName" placeholder="e.g. Maple Leaf Groceries" />
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Business type</label>
+                        <select class="field-input" @bind="_businessType">
+                            <option value="">Select type…</option>
+                            <option value="Retail">Retail / Phone Shop</option>
+                            <option value="Grocery">Grocery / Supermarket</option>
+                            <option value="Restaurant">Restaurant / Café</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Phone</label>
+                        <input class="field-input" @bind="_storePhone" placeholder="+1 (416) 555-0100" />
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Timezone</label>
+                        <select class="field-input" @bind="_storeTimezone">
+                            <option value="">Select timezone…</option>
+                            <option value="Newfoundland Standard Time">Newfoundland (UTC-3:30)</option>
+                            <option value="Atlantic Standard Time">Atlantic (UTC-4)</option>
+                            <option value="Eastern Standard Time">Eastern (UTC-5)</option>
+                            <option value="Central Standard Time">Central (UTC-6)</option>
+                            <option value="Mountain Standard Time">Mountain (UTC-7)</option>
+                            <option value="Pacific Standard Time">Pacific (UTC-8)</option>
+                            <option value="GMT Standard Time">London / Dublin (UTC+0)</option>
+                            <option value="Central European Standard Time">Central Europe (UTC+1)</option>
+                            <option value="Egypt Standard Time">Cairo (UTC+2)</option>
+                            <option value="Arab Standard Time">Kuwait / Riyadh (UTC+3)</option>
+                            <option value="Arabian Standard Time">Dubai / Abu Dhabi (UTC+4)</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Currency</label>
+                        <select class="field-input" @bind="_currency">
+                            <optgroup label="North America">
+                                <option value="CAD">CAD – Canadian Dollar</option>
+                                <option value="USD">USD – US Dollar</option>
+                            </optgroup>
+                            <optgroup label="Europe">
+                                <option value="EUR">EUR – Euro</option>
+                                <option value="GBP">GBP – British Pound</option>
+                            </optgroup>
+                            <optgroup label="Middle East &amp; Egypt">
+                                <option value="EGP">EGP – Egyptian Pound</option>
+                                <option value="SAR">SAR – Saudi Riyal</option>
+                                <option value="AED">AED – UAE Dirham</option>
+                                <option value="KWD">KWD – Kuwaiti Dinar</option>
+                                <option value="QAR">QAR – Qatari Riyal</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Tax inclusive pricing</label>
+                        <div class="store-toggle-row">
+                            <button class="store-toggle @(_taxInclusive ? "on" : "")"
+                                    type="button"
+                                    @onclick="() => _taxInclusive = !_taxInclusive">
+                                <span class="store-toggle-knob"></span>
+                            </button>
+                            <span class="store-toggle-label">
+                                @(_taxInclusive ? "Prices include tax" : "Tax added on top")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Federal tax rate (%)</label>
+                        <input class="field-input" type="number" min="0" max="100" step="0.01"
+                               @bind="_federalTaxRate" placeholder="e.g. 5" />
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Provincial tax rate (%)</label>
+                        <input class="field-input" type="number" min="0" max="100" step="0.01"
+                               @bind="_provincialTaxRate" placeholder="e.g. 9.975" />
+                    </div>
+                </div>
+            </div>
+        }
+
         <!-- ── Save button ── -->
         <div class="save-row">
             @if (_saveSuccess)
@@ -391,6 +479,16 @@
     private bool     _annual       = false;
     private PlanSlug _selectedPlan = PlanSlug.None;
 
+    // store settings
+    private string? _storeName;
+    private string? _businessType;
+    private string? _storePhone;
+    private string? _storeTimezone;
+    private string  _currency          = "CAD";
+    private decimal _federalTaxRate    = 5m;
+    private decimal _provincialTaxRate = 0m;
+    private bool    _taxInclusive      = false;
+
     // payment history
     private List<PaymentHistory>? _payments;
 
@@ -420,10 +518,18 @@
             _user = await Db.Users.FindAsync(userId);
             if (_user is not null)
             {
-                _firstName    = _user.FirstName;
-                _lastName     = _user.LastName;
-                _selectedPlan = _user.SelectedPlan;
-                _annual       = _user.BillingCycle == BillingCycle.Annual;
+                _firstName        = _user.FirstName;
+                _lastName         = _user.LastName;
+                _selectedPlan     = _user.SelectedPlan;
+                _annual           = _user.BillingCycle == BillingCycle.Annual;
+                _storeName        = _user.StoreName;
+                _businessType     = _user.BusinessType;
+                _storePhone       = _user.StorePhone;
+                _storeTimezone    = _user.StoreTimezone;
+                _currency         = _user.Currency ?? "CAD";
+                _federalTaxRate   = _user.FederalTaxRate;
+                _provincialTaxRate = _user.ProvincialTaxRate;
+                _taxInclusive     = _user.TaxInclusive;
 
                 _payments = await Db.PaymentHistory
                     .Where(p => p.UserId == userId)
@@ -524,12 +630,20 @@
             var hadNoPlan      = _user.SelectedPlan == PlanSlug.None;
             var isSelectingNew = _selectedPlan != PlanSlug.None;
 
-            _user.FirstName      = _firstName?.Trim();
-            _user.LastName       = _lastName?.Trim();
-            _user.SelectedPlan   = _selectedPlan;
-            _user.BillingCycle   = _annual ? BillingCycle.Annual : BillingCycle.Monthly;
-            _user.PlanSelectedAt = _selectedPlan != PlanSlug.None ? (_user.PlanSelectedAt ?? DateTime.UtcNow) : null;
-            _user.ModifiedAt     = DateTime.UtcNow;
+            _user.FirstName        = _firstName?.Trim();
+            _user.LastName         = _lastName?.Trim();
+            _user.SelectedPlan     = _selectedPlan;
+            _user.BillingCycle     = _annual ? BillingCycle.Annual : BillingCycle.Monthly;
+            _user.PlanSelectedAt   = _selectedPlan != PlanSlug.None ? (_user.PlanSelectedAt ?? DateTime.UtcNow) : null;
+            _user.StoreName        = _storeName?.Trim();
+            _user.BusinessType     = _businessType;
+            _user.StorePhone       = _storePhone?.Trim();
+            _user.StoreTimezone    = _storeTimezone;
+            _user.Currency         = _currency;
+            _user.FederalTaxRate   = _federalTaxRate;
+            _user.ProvincialTaxRate = _provincialTaxRate;
+            _user.TaxInclusive     = _taxInclusive;
+            _user.ModifiedAt       = DateTime.UtcNow;
 
             await Db.SaveChangesAsync();
             _saveSuccess   = true;
@@ -809,6 +923,28 @@
         background: #fff;
     }
     .field-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Store settings toggle ── */
+    .store-toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+    .store-toggle {
+        position: relative; width: 44px; height: 24px;
+        background: #E5E7EB; border: 1px solid #D1D5DB;
+        border-radius: 12px; cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        padding: 0; flex-shrink: 0;
+    }
+    .store-toggle.on { background: #00BFA5; border-color: #00BFA5; }
+    .store-toggle-knob {
+        position: absolute; top: 3px; left: 3px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #fff; transition: left 0.2s; display: block;
+        box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+    .store-toggle.on .store-toggle-knob { left: 23px; }
+    .store-toggle-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem; color: #374151;
+    }
 
     /* ── Billing toggle ── */
     .billing-toggle { display: flex; align-items: center; gap: 8px; }
