@@ -258,27 +258,19 @@
                         <MudText Typo="Typo.caption">@context.CreatedAt.ToString("MMM d, yyyy")</MudText>
                     </MudTd>
                     <MudTd DataLabel="Actions">
-                        @if (context.SelectedPlan == PlanSlug.None)
-                        {
-                            <MudTooltip Text="No plan selected yet — assign a plan before activating">
-                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
-                                               Color="Color.Default" Size="Size.Medium"
-                                               Disabled="true" />
-                            </MudTooltip>
-                        }
-                        else
+                        @if (string.IsNullOrEmpty(context.TenantSlug))
                         {
                             <MudTooltip Text="Provision database">
                                 <MudIconButton Icon="@Icons.Material.Filled.Storage"
                                                Color="Color.Primary" Size="Size.Medium"
                                                OnClick="@(() => OpenProvisionWizardAsync(context))" />
                             </MudTooltip>
-                            <MudTooltip Text="Activate client (manual)">
-                                <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
-                                               Color="Color.Success" Size="Size.Medium"
-                                               OnClick="@(() => ActivateClientAsync(context))" />
-                            </MudTooltip>
                         }
+                        <MudTooltip Text="Activate client (manual)">
+                            <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
+                                           Color="Color.Success" Size="Size.Medium"
+                                           OnClick="@(() => ActivateClientAsync(context))" />
+                        </MudTooltip>
                         <MudTooltip Text="View details">
                             <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
                                            Color="Color.Primary" Size="Size.Medium"
@@ -358,6 +350,14 @@
                         }
                     </MudTd>
                     <MudTd DataLabel="Actions">
+                        @if (string.IsNullOrEmpty(context.TenantSlug))
+                        {
+                            <MudTooltip Text="Provision database">
+                                <MudIconButton Icon="@Icons.Material.Filled.Storage"
+                                               Color="Color.Primary" Size="Size.Medium"
+                                               OnClick="@(() => OpenProvisionWizardAsync(context))" />
+                            </MudTooltip>
+                        }
                         <MudTooltip Text="View details">
                             <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
                                            Color="Color.Primary" Size="Size.Medium"
