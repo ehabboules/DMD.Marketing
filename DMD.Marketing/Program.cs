@@ -35,7 +35,7 @@ builder.Services.AddHttpClient("Railway", (sp, client) =>
     var railwayConfig = new RailwayApiConfig();
     config.GetSection("Railway").Bind(railwayConfig);
 
-    client.BaseAddress = new Uri("https://backboard.railway.com/graphql/v2");
+    client.BaseAddress = new Uri("https://backboard.railway.app/graphql/v2");
     client.Timeout     = TimeSpan.FromSeconds(30);
 
     if (!string.IsNullOrWhiteSpace(railwayConfig.ApiToken))
