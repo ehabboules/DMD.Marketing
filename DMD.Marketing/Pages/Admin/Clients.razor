@@ -258,14 +258,11 @@
                         <MudText Typo="Typo.caption">@context.CreatedAt.ToString("MMM d, yyyy")</MudText>
                     </MudTd>
                     <MudTd DataLabel="Actions">
-                        @if (string.IsNullOrEmpty(context.TenantSlug))
-                        {
-                            <MudTooltip Text="Provision database">
-                                <MudIconButton Icon="@Icons.Material.Filled.Storage"
-                                               Color="Color.Primary" Size="Size.Medium"
-                                               OnClick="@(() => OpenProvisionWizardAsync(context))" />
-                            </MudTooltip>
-                        }
+                        <MudTooltip Text="@(string.IsNullOrEmpty(context.TenantSlug) ? "Provision database" : "Re-provision / Fix slug")">
+                            <MudIconButton Icon="@Icons.Material.Filled.Storage"
+                                           Color="Color.Primary" Size="Size.Medium"
+                                           OnClick="@(() => OpenProvisionWizardAsync(context))" />
+                        </MudTooltip>
                         <MudTooltip Text="Activate client (manual)">
                             <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
                                            Color="Color.Success" Size="Size.Medium"
@@ -350,14 +347,11 @@
                         }
                     </MudTd>
                     <MudTd DataLabel="Actions">
-                        @if (string.IsNullOrEmpty(context.TenantSlug))
-                        {
-                            <MudTooltip Text="Provision database">
-                                <MudIconButton Icon="@Icons.Material.Filled.Storage"
-                                               Color="Color.Primary" Size="Size.Medium"
-                                               OnClick="@(() => OpenProvisionWizardAsync(context))" />
-                            </MudTooltip>
-                        }
+                        <MudTooltip Text="@(string.IsNullOrEmpty(context.TenantSlug) ? "Provision database" : "Re-provision / Fix slug")">
+                            <MudIconButton Icon="@Icons.Material.Filled.Storage"
+                                           Color="Color.Primary" Size="Size.Medium"
+                                           OnClick="@(() => OpenProvisionWizardAsync(context))" />
+                        </MudTooltip>
                         <MudTooltip Text="View details">
                             <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
                                            Color="Color.Primary" Size="Size.Medium"

@@ -33,18 +33,10 @@
                                   Immediate="true" Margin="Margin.Dense" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudSelect @bind-Value="_seedProfile" Label="Seed Profile" Variant="Variant.Outlined" Margin="Margin.Dense">
-                        <MudSelectItem Value="SeedProfile.GenericStore">Generic Store</MudSelectItem>
-                        <MudSelectItem Value="SeedProfile.Restaurant">Restaurant</MudSelectItem>
-                        <MudSelectItem Value="SeedProfile.MobileShop">Mobile Shop</MudSelectItem>
-                        <MudSelectItem Value="SeedProfile.GroceryNuts">Grocery / Nuts</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12">
                     <MudTextField @bind-Value="_tenantName"
                                   Label="Tenant Display Name"
                                   Variant="Variant.Outlined"
-                                  HelperText="Used as Tenants__{slug}__Name in Railway. E.g. ShiryMobileShop"
+                                  HelperText="Used as Tenants__{slug}__Name in Railway."
                                   Margin="Margin.Dense"
                                   Immediate="true" />
                 </MudItem>
@@ -115,7 +107,7 @@
             <MudText Typo="Typo.subtitle1" Class="mb-3">Step 3 of 6 — Add Railway Variables</MudText>
 
             <MudAlert Severity="Severity.Warning" Class="mb-3" Dense="true">
-                Add these 3 variables to your <strong>StockShopOnline</strong> Railway service, then redeploy it before clicking Next.
+                Add these 2 variables to your <strong>StockShopOnline</strong> Railway service, then redeploy it before clicking Next.
             </MudAlert>
 
             @* Variable rows *@
@@ -208,10 +200,12 @@
                     <MudText><strong>Tenant slug:</strong> @_slug</MudText>
                     <MudText><strong>App URL:</strong> @_activationResult?.AppUrl</MudText>
                     <MudText><strong>Expires:</strong> @_activationResult?.ExpiresAt.ToString("yyyy-MM-dd")</MudText>
-                    <MudText><strong>Welcome email:</strong> @(_activationResult?.WelcomeEmailSent == true ? "Sent" : "Not sent")</MudText>
+                    <MudText><strong>POS admin login:</strong> @User.Email</MudText>
+                    <MudText><strong>Temp password:</strong> <code>@_tempPassword</code></MudText>
+                    <MudText><strong>Welcome email:</strong> @(_activationResult?.WelcomeEmailSent == true ? "Sent (includes temp password)" : "Not sent")</MudText>
                     <MudDivider Class="my-1" />
                     <MudText Typo="Typo.caption" Color="Color.Warning">
-                        The admin user's temporary password was set by the seeder. The client should log in and change it.
+                        Client will receive the temp password by email. Remind them to change it on first login.
                     </MudText>
                 </MudStack>
             </MudPaper>
@@ -279,7 +273,7 @@
     private string? _slugError;
     private string  _connectionString = "";
     private string? _connectionStringError;
-    private SeedProfile _seedProfile  = SeedProfile.GenericStore;
+    private string  _tempPassword     = "";
     private bool    _confirmedVarsAdded = false;
     private string? _copiedKey;
 
@@ -305,7 +299,6 @@
     {
         [$"Tenants__{_slug}__ConnectionString"] = _connectionString,
         [$"Tenants__{_slug}__Name"]             = string.IsNullOrWhiteSpace(_tenantName) ? _slug : _tenantName,
-        [$"Tenants__{_slug}__SeedProfile"]      = _seedProfile.ToString(),
     };
 
     protected override void OnParametersSet()
@@ -320,12 +313,8 @@
         if (string.IsNullOrEmpty(_tenantName))
             _tenantName = User.StoreName ?? _slug;
 
-        _seedProfile = (User.BusinessType?.ToLowerInvariant()) switch
-        {
-            "restaurant" => SeedProfile.Restaurant,
-            "grocery"    => SeedProfile.GroceryNuts,
-            _            => SeedProfile.GenericStore
-        };
+        if (string.IsNullOrEmpty(_tempPassword))
+            _tempPassword = "Tmp@" + Guid.NewGuid().ToString("N")[..8].ToUpper();
     }
 
     // ── Navigation ───────────────────────────────────────────────────
@@ -480,19 +469,21 @@
             if (_seedResult is null || !_seedResult.Succeeded)
             {
                 _steps[2].Status = StepStatus.Running;
-                _steps[2].Detail = $"Seeding with profile '{_seedProfile}'…";
+                _steps[2].Detail = "Seeding: screen roles, warehouse, admin account…";
                 _steps[2].Error  = null;
                 StateHasChanged();
 
                 try
                 {
                     _seedResult = await SeederService.SeedAsync(
-                        _slug, _connectionString, _seedProfile, CancellationToken.None);
+                        _slug, _connectionString,
+                        User.Email, User.FirstName ?? "", User.LastName ?? "", _tempPassword,
+                        CancellationToken.None);
 
                     if (_seedResult.Succeeded)
                     {
                         _steps[2].Status = StepStatus.Done;
-                        _steps[2].Detail = $"Seeded ({_seedProfile})";
+                        _steps[2].Detail = "Screen roles, warehouse and admin account created";
                     }
                     else
                     {
@@ -522,7 +513,7 @@
                 try
                 {
                     _activationResult = await ActivationService.ActivateAsync(
-                        User.Id, _slug, CancellationToken.None);
+                        User.Id, _slug, _tempPassword, CancellationToken.None);
 
                     if (_activationResult.Succeeded)
                     {

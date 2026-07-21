@@ -238,13 +238,22 @@ public class EmailService
         }
     }
 
-    public async Task<bool> SendWelcomeEmailAsync(DMD.Marketing.Data.User user, string appUrl)
+    public async Task<bool> SendWelcomeEmailAsync(DMD.Marketing.Data.User user, string appUrl, string tempPassword = "")
     {
         try
         {
-            var firstName = user.FirstName ?? user.Email;
-            var planName  = user.SelectedPlan.ToString();
-            var loginUrl  = $"https://{appUrl}";
+            var firstName    = user.FirstName ?? user.Email;
+            var planName     = user.SelectedPlan.ToString();
+            var loginUrl     = $"https://{appUrl}";
+            var passwordBlock = !string.IsNullOrWhiteSpace(tempPassword)
+                ? $"""
+                  <div style="margin:24px 0;padding:16px;background:#F3F4F6;border-radius:8px;border-left:4px solid #00BFA5;">
+                    <p style="margin:0 0 4px;color:#374151;font-weight:600;">Your temporary password:</p>
+                    <p style="font-family:monospace;font-size:1.1rem;color:#1A237E;margin:0 0 4px;">{tempPassword}</p>
+                    <p style="color:#6B7280;font-size:0.8rem;margin:0;">You will be prompted to change this on first login.</p>
+                  </div>
+                  """
+                : "";
 
             var html = $"""
                 <div style="font-family:sans-serif;max-width:560px;margin:auto;">
@@ -256,13 +265,17 @@ public class EmailService
                     <p style="color:#374151;margin:0 0 16px;">Hi {firstName},</p>
                     <p style="color:#374151;margin:0 0 8px;">Your <strong>{user.StoreName}</strong> store is now live on Cloud Mobil POS.</p>
                     <p style="color:#374151;margin:0 0 24px;">Plan: <strong>{planName}</strong> · {user.BillingCycle}</p>
+                    {passwordBlock}
                     <a href="{loginUrl}" style="display:inline-block;background:#00BFA5;color:#fff;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:0.95rem;">Open my store →</a>
                     <p style="color:#9ca3af;font-size:0.8rem;margin:24px 0 0;">If you have questions, reply to this email or contact our support team.</p>
                   </div>
                 </div>
                 """;
 
-            var text = $"Hi {firstName},\n\nYour Cloud Mobil POS store is ready! Log in at: {loginUrl}\n\nPlan: {planName}\n\n— Cloud Mobil POS";
+            var passwordLine = !string.IsNullOrWhiteSpace(tempPassword)
+                ? $"\nTemporary password: {tempPassword}\n(Change this after first login)\n"
+                : "";
+            var text = $"Hi {firstName},\n\nYour Cloud Mobil POS store is ready! Log in at: {loginUrl}\n\nPlan: {planName}{passwordLine}\n— Cloud Mobil POS";
 
             var ok = await SendAsync(user.Email, firstName, $"Your Cloud Mobil POS store is ready — {user.StoreName}", html, text);
             if (ok) _logger.LogInformation("Welcome email sent to {Email}", user.Email);

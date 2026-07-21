@@ -1,14 +1,6 @@
 namespace DMD.Marketing.Services;
 
-// ── Enum & Result model ─────────────────────────────────────────────────────
-
-public enum SeedProfile
-{
-    GenericStore,
-    Restaurant,
-    MobileShop,
-    GroceryNuts
-}
+// ── Result model ─────────────────────────────────────────────────────────────
 
 public record SeedStep(string Slug, string Profile, string Status, string? Error = null)
 {
@@ -36,42 +28,44 @@ public class TenantSeederService
         _logger       = logger;
     }
 
+    /// <summary>Production seed — creates only screen roles, warehouse, and the client's admin account.</summary>
     public async Task<SeedStep> SeedAsync(
-        string slug, string connectionString, SeedProfile profile, CancellationToken ct)
+        string slug, string connectionString,
+        string email, string firstName, string lastName, string tempPassword,
+        CancellationToken ct)
     {
-        var profileName = profile.ToString(); // "GenericStore", "Restaurant", etc.
+        _logger.LogInformation("Production-seeding tenant '{Slug}' for {Email}…", slug, email);
 
-        _logger.LogInformation("Seeding tenant '{Slug}' with profile '{Profile}'…", slug, profileName);
-
-        // The tenant must already be registered (TenantMigrationService does this).
-        // If not, registration is idempotent — register again just in case.
         var (registered, registerError) = await _provisioning.RegisterTenantAsync(slug, connectionString);
         if (!registered)
         {
             var err = $"Registration failed before seeding: {registerError}";
             _logger.LogError("{Error}", err);
-            return new SeedStep(slug, profileName, "RegistrationFailed", err);
+            return new SeedStep(slug, "Production", "RegistrationFailed", err);
         }
 
         ct.ThrowIfCancellationRequested();
 
         try
         {
-            var ok = await _provisioning.SeedTenantAsync(slug, profileName);
+            var ok = await _provisioning.SeedTenantAsync(
+                slug, profile: null,
+                email: email, firstName: firstName, lastName: lastName, tempPassword: tempPassword);
+
             if (ok)
             {
-                _logger.LogInformation("Tenant '{Slug}' seeded with profile '{Profile}'", slug, profileName);
-                return new SeedStep(slug, profileName, "Seeded");
+                _logger.LogInformation("Tenant '{Slug}' production-seeded for {Email}", slug, email);
+                return new SeedStep(slug, "Production", "Seeded");
             }
 
-            var error = $"SeedTenantAsync returned false for '{slug}' with profile '{profileName}'.";
+            var error = $"Production seed returned false for '{slug}'.";
             _logger.LogError("{Error}", error);
-            return new SeedStep(slug, profileName, "Failed", error);
+            return new SeedStep(slug, "Production", "Failed", error);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Seeding failed for tenant '{Slug}'", slug);
-            return new SeedStep(slug, profileName, "Failed", ex.Message);
+            _logger.LogError(ex, "Production seed failed for tenant '{Slug}'", slug);
+            return new SeedStep(slug, "Production", "Failed", ex.Message);
         }
     }
 }

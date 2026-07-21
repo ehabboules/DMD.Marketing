@@ -320,26 +320,52 @@ public class ProvisioningService
         }
     }
 
-    /// <summary>Seeds a single tenant database with initial data.</summary>
-    public async Task<bool> SeedTenantAsync(string slug, string? profile = null)
+    /// <summary>
+    /// Seeds a single tenant database.
+    /// When client details are provided → production seed (structural data + client admin only).
+    /// Otherwise → demo seed (backward compat for dev/admin use).
+    /// </summary>
+    public async Task<bool> SeedTenantAsync(
+        string slug,
+        string? profile = null,
+        string? email = null,
+        string? firstName = null,
+        string? lastName = null,
+        string? tempPassword = null)
     {
         var (client, baseUrl) = GetClient();
         if (client is null) return false;
 
+        var encodedSlug = Uri.EscapeDataString(slug);
+
         try
         {
-            var encodedSlug = Uri.EscapeDataString(slug);
-            var query = !string.IsNullOrWhiteSpace(profile)
-                ? $"?profile={Uri.EscapeDataString(profile)}"
-                : "";
-            var response = await client.PostAsync(
-                $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/seed{query}", null);
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                // Production seed — POST client details as JSON body
+                var payload  = new { email, firstName, lastName, temporaryPassword = tempPassword };
+                var response = await client.PostAsJsonAsync(
+                    $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/seed", payload);
 
-            if (response.IsSuccessStatusCode) return true;
+                if (response.IsSuccessStatusCode) return true;
 
-            var body = await response.Content.ReadAsStringAsync();
-            _logger.LogError("SeedTenant (single) failed: {Status} — {Body}", response.StatusCode, body);
-            return false;
+                var body = await response.Content.ReadAsStringAsync();
+                _logger.LogError("SeedTenant (production) failed: {Status} — {Body}", response.StatusCode, body);
+                return false;
+            }
+            else
+            {
+                // Demo seed — no body
+                var query    = !string.IsNullOrWhiteSpace(profile) ? $"?profile={Uri.EscapeDataString(profile)}" : "";
+                var response = await client.PostAsync(
+                    $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/seed{query}", null);
+
+                if (response.IsSuccessStatusCode) return true;
+
+                var body = await response.Content.ReadAsStringAsync();
+                _logger.LogError("SeedTenant (demo) failed: {Status} — {Body}", response.StatusCode, body);
+                return false;
+            }
         }
         catch (Exception ex)
         {

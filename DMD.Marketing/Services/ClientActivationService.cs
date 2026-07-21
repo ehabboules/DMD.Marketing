@@ -44,7 +44,7 @@ public class ClientActivationService
     }
 
     public async Task<ActivationResult> ActivateAsync(
-        int userId, string slug, CancellationToken ct)
+        int userId, string slug, string tempPassword, CancellationToken ct)
     {
         await using var db = await _dbFactory.CreateDbContextAsync(ct);
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
@@ -105,7 +105,7 @@ public class ClientActivationService
         var emailSent = false;
         try
         {
-            emailSent = await _email.SendWelcomeEmailAsync(user, appUrl);
+            emailSent = await _email.SendWelcomeEmailAsync(user, appUrl, tempPassword);
             if (!emailSent)
                 _logger.LogWarning("Welcome email returned false for user {UserId} — check Resend config", userId);
         }
