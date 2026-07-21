@@ -1,0 +1,437 @@
+@using DMD.Marketing.Services
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@inject IRailwayService RailwayService
+@inject TenantMigrationService MigrationService
+@inject TenantSeederService SeederService
+@inject ClientActivationService ActivationService
+@inject ILogger<ProvisionDbWizard> Logger
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">Provision Database — @User.StoreName</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Style="min-height:360px;max-height:70vh;overflow-y:auto;">
+
+        @* ── Step 1: Confirm client + slug ─────────────────────────── *@
+        @if (_step == 1)
+        {
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 1 of 6 — Confirm details</MudText>
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="_slug" Label="Tenant Slug" Variant="Variant.Outlined"
+                                  HelperText="Lowercase, alphanumeric + dashes. Becomes subdomain."
+                                  Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect @bind-Value="_seedProfile" Label="Seed Profile" Variant="Variant.Outlined" Margin="Margin.Dense">
+                        <MudSelectItem Value="SeedProfile.GenericStore">Generic Store</MudSelectItem>
+                        <MudSelectItem Value="SeedProfile.Restaurant">Restaurant</MudSelectItem>
+                        <MudSelectItem Value="SeedProfile.MobileShop">Mobile Shop</MudSelectItem>
+                        <MudSelectItem Value="SeedProfile.GroceryNuts">Grocery / Nuts</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudPaper Elevation="0" Class="pa-3 mt-3" Style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body2"><strong>Store:</strong> @User.StoreName</MudText>
+                    <MudText Typo="Typo.body2"><strong>Email:</strong> @User.Email</MudText>
+                    <MudText Typo="Typo.body2"><strong>Plan:</strong> @User.SelectedPlan · @User.BillingCycle</MudText>
+                    <MudText Typo="Typo.body2"><strong>Business type:</strong> @(User.BusinessType ?? "—")</MudText>
+                </MudStack>
+            </MudPaper>
+
+            @if (!string.IsNullOrEmpty(_slugError))
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">@_slugError</MudAlert>
+            }
+        }
+
+        @* ── Steps 2-5: Execution steps ────────────────────────────── *@
+        @if (_step >= 2 && _step <= 5)
+        {
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step @_step of 6 — @StepTitle(_step)</MudText>
+            <MudTimeline TimelinePosition="TimelinePosition.Start">
+                @foreach (var s in _steps)
+                {
+                    <MudTimelineItem Color="@StepColor(s.Status)" Size="Size.Small">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (s.Status == StepStatus.Running)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Color="Color.Primary" />
+                            }
+                            else if (s.Status == StepStatus.Done)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                            }
+                            else if (s.Status == StepStatus.Failed)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Small" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Default" Size="Size.Small" />
+                            }
+                            <MudText Typo="Typo.body1">@s.Title</MudText>
+                        </MudStack>
+                        @if (!string.IsNullOrEmpty(s.Detail))
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Inherit" Class="ml-8">@s.Detail</MudText>
+                        }
+                        @if (!string.IsNullOrEmpty(s.Error))
+                        {
+                            <MudAlert Severity="Severity.Error" Dense="true" Class="mt-1 ml-8">@s.Error</MudAlert>
+                        }
+                    </MudTimelineItem>
+                }
+            </MudTimeline>
+        }
+
+        @* ── Step 6: Summary ───────────────────────────────────────── *@
+        @if (_step == 6)
+        {
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 6 of 6 — Complete</MudText>
+            <MudAlert Severity="Severity.Success" Class="mb-3">
+                Database provisioned and client activated successfully.
+            </MudAlert>
+            <MudPaper Elevation="0" Class="pa-4" Style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
+                <MudStack Spacing="2">
+                    <MudText><strong>App URL:</strong> @_activationResult?.AppUrl</MudText>
+                    <MudText><strong>Expires:</strong> @_activationResult?.ExpiresAt.ToString("yyyy-MM-dd")</MudText>
+                    <MudText><strong>Welcome email:</strong> @(_activationResult?.WelcomeEmailSent == true ? "Sent" : "Not sent")</MudText>
+                    <MudText><strong>Railway service ID:</strong> @_railwayResult?.ServiceId</MudText>
+                    <MudText><strong>DB host:</strong> @_railwayResult?.Host:@_railwayResult?.Port</MudText>
+                    <MudDivider Class="my-1" />
+                    <MudText Typo="Typo.caption" Color="Color.Warning">
+                        The admin user's temporary password was set by the seeder. The client should log in and change it.
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        }
+
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        @if (_step == 1)
+        {
+            <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+            <MudButton OnClick="StartProvisioning" Color="Color.Primary" Variant="Variant.Filled"
+                       Disabled="@(string.IsNullOrWhiteSpace(_slug) || _running)">
+                Start Provisioning
+            </MudButton>
+        }
+        else if (_step >= 2 && _step <= 5)
+        {
+            @if (_failed)
+            {
+                <MudButton OnClick="RetryCurrentStep" Color="Color.Warning" Variant="Variant.Filled"
+                           Disabled="_running" StartIcon="@Icons.Material.Filled.Replay">
+                    Retry
+                </MudButton>
+                @if (_railwayResult is not null)
+                {
+                    <MudButton OnClick="RollbackAsync" Color="Color.Error" Variant="Variant.Outlined"
+                               Disabled="_running" StartIcon="@Icons.Material.Filled.Delete">
+                        Rollback
+                    </MudButton>
+                }
+                <MudButton OnClick="Cancel" Color="Color.Default">Close</MudButton>
+            }
+            else
+            {
+                <MudButton OnClick="Cancel" Color="Color.Default" Disabled="_running">Cancel</MudButton>
+            }
+        }
+        else if (_step == 6)
+        {
+            <MudButton OnClick="Done" Color="Color.Primary" Variant="Variant.Filled">Done</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public User User { get; set; } = null!;
+
+    // ── State ────────────────────────────────────────────────────────
+    private string _slug = "";
+    private string? _slugError;
+    private SeedProfile _seedProfile = SeedProfile.GenericStore;
+
+    private int  _step    = 1;
+    private bool _running = false;
+    private bool _failed  = false;
+
+    private RailwayDbResult?   _railwayResult;
+    private MigrationStep?     _migrationResult;
+    private SeedStep?          _seedResult;
+    private ActivationResult?  _activationResult;
+
+    private readonly List<WizardStep> _steps = new()
+    {
+        new("Create Railway Database") { Status = StepStatus.Pending },
+        new("Register Tenant")         { Status = StepStatus.Pending },
+        new("Run Migrations")          { Status = StepStatus.Pending },
+        new("Activate Client")         { Status = StepStatus.Pending },
+    };
+
+    protected override void OnParametersSet()
+    {
+        // Pre-fill slug from store name
+        if (string.IsNullOrEmpty(_slug) && !string.IsNullOrEmpty(User.StoreName))
+        {
+            _slug = System.Text.RegularExpressions.Regex
+                .Replace(User.StoreName.Trim().ToLowerInvariant(), @"[^a-z0-9\-]", "-")
+                .Trim('-');
+        }
+
+        // Map business type to seed profile
+        _seedProfile = (User.BusinessType?.ToLowerInvariant()) switch
+        {
+            "restaurant" => SeedProfile.Restaurant,
+            "grocery"    => SeedProfile.GroceryNuts,
+            _            => SeedProfile.GenericStore
+        };
+    }
+
+    // ── Navigation ──────────────────────────────────────────────────
+    private void Cancel() => MudDialog.Cancel();
+    private void Done()   => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task StartProvisioning()
+    {
+        _slug = _slug.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(_slug) || _slug.Length < 2)
+        {
+            _slugError = "Slug must be at least 2 characters.";
+            return;
+        }
+        _slugError = null;
+        _step = 2;
+        await RunProvisioningAsync();
+    }
+
+    private async Task RetryCurrentStep()
+    {
+        _failed = false;
+        await RunProvisioningAsync();
+    }
+
+    private async Task RollbackAsync()
+    {
+        if (_railwayResult is null) return;
+        _running = true;
+        StateHasChanged();
+
+        try
+        {
+            await RailwayService.DeleteServiceAsync(_railwayResult.ServiceId, CancellationToken.None);
+            _railwayResult = null;
+            foreach (var s in _steps) { s.Status = StepStatus.Pending; s.Error = null; s.Detail = null; }
+            _step = 1;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Rollback failed for service {ServiceId}", _railwayResult?.ServiceId);
+        }
+        finally
+        {
+            _running = false;
+            StateHasChanged();
+        }
+    }
+
+    // ── Main provisioning flow ──────────────────────────────────────
+    private async Task RunProvisioningAsync()
+    {
+        _running = true;
+        StateHasChanged();
+
+        try
+        {
+            // Step 2: Create Railway DB
+            if (_railwayResult is null)
+            {
+                _step = 2;
+                var stepIdx = 0;
+                _steps[stepIdx].Status = StepStatus.Running;
+                _steps[stepIdx].Detail = $"Creating Postgres service '{_slug}'…";
+                StateHasChanged();
+
+                try
+                {
+                    _railwayResult = await RailwayService.CreateDatabaseAsync(_slug, CancellationToken.None);
+                    _steps[stepIdx].Status = StepStatus.Done;
+                    _steps[stepIdx].Detail = $"Service {_railwayResult.ServiceId} — {_railwayResult.Host}:{_railwayResult.Port}";
+                }
+                catch (Exception ex)
+                {
+                    _steps[stepIdx].Status = StepStatus.Failed;
+                    _steps[stepIdx].Error  = ex.Message;
+                    _failed = true;
+                    return;
+                }
+                finally { StateHasChanged(); }
+            }
+
+            // Step 3: Register tenant + Run migrations (combined)
+            if (_migrationResult is null || !_migrationResult.Succeeded)
+            {
+                _step = 3;
+                var stepIdx = 1;
+                _steps[stepIdx].Status = StepStatus.Running;
+                _steps[stepIdx].Detail = "Registering tenant in StockShopOnline…";
+                StateHasChanged();
+
+                // MigrationService handles registration + migration with retries
+                _steps[stepIdx].Status = StepStatus.Done;
+                _steps[stepIdx].Detail = "Tenant registered";
+                stepIdx = 2;
+                _steps[stepIdx].Status = StepStatus.Running;
+                _steps[stepIdx].Detail = "Running EF Core migrations (with retry)…";
+                _step = 4;
+                StateHasChanged();
+
+                try
+                {
+                    _migrationResult = await MigrationService.MigrateAsync(
+                        _slug, _railwayResult!.ConnectionString, CancellationToken.None);
+
+                    if (_migrationResult.Succeeded)
+                    {
+                        _steps[stepIdx].Status = StepStatus.Done;
+                        _steps[stepIdx].Detail = "Migrations applied";
+                    }
+                    else
+                    {
+                        _steps[stepIdx].Status = StepStatus.Failed;
+                        _steps[stepIdx].Error  = _migrationResult.Error;
+                        _failed = true;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _steps[stepIdx].Status = StepStatus.Failed;
+                    _steps[stepIdx].Error  = ex.Message;
+                    _failed = true;
+                    return;
+                }
+                finally { StateHasChanged(); }
+            }
+
+            // Step 5: Seed + Activate
+            _step = 5;
+            var seedStepIdx = 3;
+
+            if (_activationResult is null || !_activationResult.Succeeded)
+            {
+                // Seed
+                _steps[seedStepIdx].Status = StepStatus.Running;
+                _steps[seedStepIdx].Detail = $"Seeding with profile '{_seedProfile}'…";
+                StateHasChanged();
+
+                try
+                {
+                    _seedResult = await SeederService.SeedAsync(
+                        _slug, _railwayResult!.ConnectionString, _seedProfile, CancellationToken.None);
+
+                    if (!_seedResult.Succeeded)
+                    {
+                        _steps[seedStepIdx].Status = StepStatus.Failed;
+                        _steps[seedStepIdx].Error  = _seedResult.Error;
+                        _failed = true;
+                        return;
+                    }
+
+                    _steps[seedStepIdx].Detail = $"Seeded with {_seedProfile}";
+                }
+                catch (Exception ex)
+                {
+                    _steps[seedStepIdx].Status = StepStatus.Failed;
+                    _steps[seedStepIdx].Error  = ex.Message;
+                    _failed = true;
+                    return;
+                }
+                finally { StateHasChanged(); }
+
+                // Activate
+                _steps[seedStepIdx].Detail = "Activating client…";
+                StateHasChanged();
+
+                try
+                {
+                    _activationResult = await ActivationService.ActivateAsync(
+                        User.Id, _slug, CancellationToken.None);
+
+                    if (_activationResult.Succeeded)
+                    {
+                        _steps[seedStepIdx].Status = StepStatus.Done;
+                        _steps[seedStepIdx].Detail = $"Active — {_activationResult.AppUrl}";
+                    }
+                    else
+                    {
+                        _steps[seedStepIdx].Status = StepStatus.Failed;
+                        _steps[seedStepIdx].Error  = _activationResult.Error;
+                        _failed = true;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _steps[seedStepIdx].Status = StepStatus.Failed;
+                    _steps[seedStepIdx].Error  = ex.Message;
+                    _failed = true;
+                    return;
+                }
+                finally { StateHasChanged(); }
+            }
+
+            // All done — show summary
+            _step = 6;
+        }
+        finally
+        {
+            _running = false;
+            StateHasChanged();
+        }
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────
+    private static string StepTitle(int step) => step switch
+    {
+        2 => "Create Railway Database",
+        3 => "Register Tenant",
+        4 => "Run Migrations",
+        5 => "Seed & Activate",
+        _ => ""
+    };
+
+    private static Color StepColor(StepStatus status) => status switch
+    {
+        StepStatus.Running => Color.Primary,
+        StepStatus.Done    => Color.Success,
+        StepStatus.Failed  => Color.Error,
+        _                  => Color.Default
+    };
+
+    private enum StepStatus { Pending, Running, Done, Failed }
+
+    private class WizardStep
+    {
+        public string Title  { get; }
+        public StepStatus Status { get; set; }
+        public string? Detail { get; set; }
+        public string? Error  { get; set; }
+
+        public WizardStep(string title) => Title = title;
+    }
+}

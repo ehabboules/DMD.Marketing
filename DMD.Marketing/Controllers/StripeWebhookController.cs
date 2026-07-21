@@ -1,5 +1,6 @@
 using DMD.Marketing.Data;
 using DMD.Marketing.Models;
+using DMD.Marketing.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
@@ -12,16 +13,19 @@ public class StripeWebhookController : ControllerBase
 {
     private readonly IConfiguration _config;
     private readonly ApplicationDbContext _db;
+    private readonly ProvisioningService _provisioning;
     private readonly ILogger<StripeWebhookController> _logger;
 
     public StripeWebhookController(
         IConfiguration config,
         ApplicationDbContext db,
+        ProvisioningService provisioning,
         ILogger<StripeWebhookController> logger)
     {
-        _config = config;
-        _db = db;
-        _logger = logger;
+        _config       = config;
+        _db           = db;
+        _provisioning = provisioning;
+        _logger       = logger;
         // Ensure Stripe API key is set for any Stripe SDK calls made in this controller
         StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
     }
@@ -155,6 +159,26 @@ public class StripeWebhookController : ControllerBase
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("Subscription renewed for user {UserId} via invoice.paid", user.Id);
+
+        // Push updated license snapshot into the tenant DB (best-effort)
+        if (!string.IsNullOrWhiteSpace(user.TenantSlug))
+        {
+            try
+            {
+                await _provisioning.PushLicenseAsync(
+                    slug:         user.TenantSlug,
+                    planSlug:     user.SelectedPlan.ToString().ToLowerInvariant(),
+                    billingCycle: user.BillingCycle.ToString(),
+                    status:       "Active",
+                    activatedAt:  null,
+                    expiresAt:    user.SubscriptionExpiresAt,
+                    appUrl:       user.AppUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to push license after invoice.paid for user {UserId}", user.Id);
+            }
+        }
     }
 
     internal async Task HandleSubscriptionDeleted(Event stripeEvent)
@@ -170,5 +194,25 @@ public class StripeWebhookController : ControllerBase
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("Subscription cancelled for user {UserId}", user.Id);
+
+        // Push suspended license into the tenant DB (best-effort)
+        if (!string.IsNullOrWhiteSpace(user.TenantSlug))
+        {
+            try
+            {
+                await _provisioning.PushLicenseAsync(
+                    slug:         user.TenantSlug,
+                    planSlug:     user.SelectedPlan.ToString().ToLowerInvariant(),
+                    billingCycle: user.BillingCycle.ToString(),
+                    status:       "Suspended",
+                    activatedAt:  null,
+                    expiresAt:    user.SubscriptionExpiresAt,
+                    appUrl:       user.AppUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to push license after subscription.deleted for user {UserId}", user.Id);
+            }
+        }
     }
 }

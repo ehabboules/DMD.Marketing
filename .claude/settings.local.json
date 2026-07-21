@@ -10,7 +10,12 @@
       "Bash(xargs sed:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.railway.com)",
+      "WebFetch(domain:station.railway.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

@@ -1,5 +1,8 @@
+using DMD.Marketing.Services;
 using DMD.Marketing.Tests.Helpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Newtonsoft.Json;
 using Stripe;
 
@@ -21,7 +24,10 @@ public class StripeWebhookControllerTests
                 ["Stripe:WebhookSecret"] = "whsec_fake",
             })
             .Build();
-        return new StripeWebhookController(config, db, NullLogger<StripeWebhookController>.Instance);
+        // ProvisioningService is best-effort; supply a no-op instance (no config → all calls return false)
+        var httpFactory = new Mock<IHttpClientFactory>().Object;
+        var provisioning = new ProvisioningService(httpFactory, config, NullLogger<ProvisioningService>.Instance);
+        return new StripeWebhookController(config, db, provisioning, NullLogger<StripeWebhookController>.Instance);
     }
 
     // ── Stripe object factory helpers ────────────────────────────────────────

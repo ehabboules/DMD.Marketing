@@ -60,6 +60,10 @@ public class User
     // ── App URL ───────────────────────────────────────────────────────
     public string? AppUrl { get; set; }
 
+    // ── Tenant slug (set on activation, used to push license snapshots) ──
+    [MaxLength(64)]
+    public string? TenantSlug { get; set; }
+
     // ── Stripe ───────────────────────────────────────────────────────
     public string? StripeCustomerId     { get; set; }
     public string? StripeSubscriptionId { get; set; }

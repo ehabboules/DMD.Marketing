@@ -32,16 +32,19 @@ public class AdminClientService
 {
     private readonly IDbContextFactory<ApplicationDbContext> _dbFactory;
     private readonly IPasswordHasher<User> _hasher;
+    private readonly ProvisioningService _provisioning;
     private readonly ILogger<AdminClientService> _logger;
 
     public AdminClientService(
         IDbContextFactory<ApplicationDbContext> dbFactory,
         IPasswordHasher<User> hasher,
+        ProvisioningService provisioning,
         ILogger<AdminClientService> logger)
     {
-        _dbFactory = dbFactory;
-        _hasher    = hasher;
-        _logger    = logger;
+        _dbFactory    = dbFactory;
+        _hasher       = hasher;
+        _provisioning = provisioning;
+        _logger       = logger;
     }
 
     // ── Summary ──────────────────────────────────────────────────────
@@ -252,6 +255,27 @@ public class AdminClientService
             });
 
             await db.SaveChangesAsync();
+
+            // Push updated license into tenant DB (best-effort)
+            if (!string.IsNullOrWhiteSpace(user.TenantSlug))
+            {
+                try
+                {
+                    await _provisioning.PushLicenseAsync(
+                        slug:         user.TenantSlug,
+                        planSlug:     user.SelectedPlan.ToString().ToLowerInvariant(),
+                        billingCycle: user.BillingCycle.ToString(),
+                        status:       "Active",
+                        activatedAt:  null,
+                        expiresAt:    newExpiry,
+                        appUrl:       user.AppUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to push license after ExtendSubscription for user {UserId}", userId);
+                }
+            }
+
             return true;
         }
         catch (Exception ex)
@@ -347,6 +371,27 @@ public class AdminClientService
             });
 
             await db.SaveChangesAsync();
+
+            // Push updated license into tenant DB (best-effort)
+            if (!string.IsNullOrWhiteSpace(user.TenantSlug))
+            {
+                try
+                {
+                    await _provisioning.PushLicenseAsync(
+                        slug:         user.TenantSlug,
+                        planSlug:     user.SelectedPlan.ToString().ToLowerInvariant(),
+                        billingCycle: billingCycle,
+                        status:       "Active",
+                        activatedAt:  null,
+                        expiresAt:    newExpiresAt,
+                        appUrl:       user.AppUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to push license after RecordManualPayment for user {UserId}", userId);
+                }
+            }
+
             return true;
         }
         catch (Exception ex)

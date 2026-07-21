@@ -1,0 +1,309 @@
+@page "/portal"
+@using DMD.Marketing.Data
+@using DMD.Marketing.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthState
+@inject NavigationManager Nav
+
+<PageTitle>My Portal — Cloud Mobile POS</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6 mb-10">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.Dashboard" Color="Color.Primary" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h4" Style="font-weight:700;">My Portal</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Default">Your store status, subscription, and payments</MudText>
+        </div>
+    </MudStack>
+
+    @if (_loading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-6" />
+    }
+    else if (_user is null)
+    {
+        <MudAlert Severity="Severity.Error">Could not load your account. Please try again.</MudAlert>
+    }
+    else
+    {
+        <!-- 1. Status Timeline -->
+        <MudPaper Elevation="2" Class="pa-6 mb-5" Style="border-radius:16px;">
+            <MudText Typo="Typo.h6" Style="font-weight:700;margin-bottom:16px;">
+                <MudIcon Icon="@Icons.Material.Filled.Timeline" Class="mr-2" Style="vertical-align:middle;" />
+                Setup Progress
+            </MudText>
+
+            <MudTimeline TimelinePosition="TimelinePosition.Start">
+
+                <!-- Step 1: Registered -->
+                <MudTimelineItem Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small">
+                    <ItemContent>
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:600;">Account Created</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Default">
+                            @_user.CreatedAt.ToString("MMM d, yyyy")
+                        </MudText>
+                    </ItemContent>
+                </MudTimelineItem>
+
+                <!-- Step 2: Plan Selected -->
+                <MudTimelineItem Color="@(_user.SelectedPlan != PlanSlug.None ? Color.Success : Color.Default)"
+                                 Icon="@(_user.SelectedPlan != PlanSlug.None ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
+                                 Size="Size.Small">
+                    <ItemContent>
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:600;">Plan Selected</MudText>
+                        @if (_user.SelectedPlan != PlanSlug.None)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">
+                                @_user.SelectedPlan — @_user.BillingCycle
+                                @if (_user.PlanSelectedAt.HasValue)
+                                {
+                                    <text> · @_user.PlanSelectedAt.Value.ToString("MMM d, yyyy")</text>
+                                }
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">
+                                Not yet selected.
+                                <MudLink Href="/pricing">Choose a plan →</MudLink>
+                            </MudText>
+                        }
+                    </ItemContent>
+                </MudTimelineItem>
+
+                <!-- Step 3: Provisioning Requested (Pending) -->
+                <MudTimelineItem Color="@(_user.ActivationStatus != ActivationStatus.None ? Color.Success : Color.Default)"
+                                 Icon="@(_user.ActivationStatus != ActivationStatus.None ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
+                                 Size="Size.Small">
+                    <ItemContent>
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:600;">Store Setup Submitted</MudText>
+                        @if (_user.ActivationStatus == ActivationStatus.None)
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">
+                                Complete the onboarding form to submit.
+                                <MudLink Href="/onboarding">Get started →</MudLink>
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">Submitted — our team is reviewing your request.</MudText>
+                        }
+                    </ItemContent>
+                </MudTimelineItem>
+
+                <!-- Step 4: Active -->
+                <MudTimelineItem Color="@(_user.ActivationStatus == ActivationStatus.Active ? Color.Success : Color.Default)"
+                                 Icon="@(_user.ActivationStatus == ActivationStatus.Active ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
+                                 Size="Size.Small">
+                    <ItemContent>
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:600;">Store Active</MudText>
+                        @if (_user.ActivationStatus == ActivationStatus.Active && !string.IsNullOrWhiteSpace(_user.AppUrl))
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">
+                                Your store is live at <MudLink Href="@($"https://{_user.AppUrl}")" Target="_blank">@_user.AppUrl</MudLink>
+                            </MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Default">Awaiting activation by our team.</MudText>
+                        }
+                    </ItemContent>
+                </MudTimelineItem>
+
+            </MudTimeline>
+        </MudPaper>
+
+        <!-- 2. Subscription Card -->
+        <MudPaper Elevation="2" Class="pa-6 mb-5" Style="border-radius:16px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+                <MudText Typo="Typo.h6" Style="font-weight:700;">
+                    <MudIcon Icon="@Icons.Material.Filled.CreditCard" Class="mr-2" Style="vertical-align:middle;" />
+                    Subscription
+                </MudText>
+                <MudChip T="string"
+                         Color="@_statusColor"
+                         Icon="@_statusIcon"
+                         Variant="Variant.Filled"
+                         Size="Size.Small">
+                    @_statusLabel
+                </MudChip>
+            </MudStack>
+
+            <MudGrid Spacing="3">
+                <MudItem xs="12" sm="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Default" Style="text-transform:uppercase;letter-spacing:.05rem;">Plan</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight:600;">
+                        @(_user.SelectedPlan == PlanSlug.None ? "None" : _user.SelectedPlan.ToString())
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Default" Style="text-transform:uppercase;letter-spacing:.05rem;">Billing</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight:600;">@_user.BillingCycle</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Default" Style="text-transform:uppercase;letter-spacing:.05rem;">Expires</MudText>
+                    @if (_user.SubscriptionExpiresAt.HasValue)
+                    {
+                        var d = (int)Math.Ceiling((_user.SubscriptionExpiresAt.Value - DateTime.UtcNow).TotalDays);
+                        <MudText Typo="Typo.body1" Style="font-weight:600;" Color="@(d <= 7 ? Color.Warning : Color.Default)">
+                            @_user.SubscriptionExpiresAt.Value.ToString("MMM d, yyyy")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="@(d <= 0 ? Color.Error : d <= 7 ? Color.Warning : Color.Success)">
+                            @(d <= 0 ? "Expired" : $"{d} days remaining")
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body1">—</MudText>
+                    }
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Default" Style="text-transform:uppercase;letter-spacing:.05rem;">Currency</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight:600;">@(_user.Currency ?? "CAD")</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <!-- 3. Store Access -->
+        @if (_user.ActivationStatus == ActivationStatus.Active && !string.IsNullOrWhiteSpace(_user.AppUrl))
+        {
+            <MudPaper Elevation="2" Class="pa-6 mb-5" Style="border-radius:16px;background:linear-gradient(135deg,#f0fdf4 0%,#d1fae5 100%);">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap">
+                    <div>
+                        <MudText Typo="Typo.h6" Style="font-weight:700;">
+                            <MudIcon Icon="@Icons.Material.Filled.Store" Class="mr-2" Style="vertical-align:middle;color:#059669;" />
+                            Your Store
+                        </MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Default">@_user.AppUrl</MudText>
+                    </div>
+                    <MudButton Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.OpenInNew"
+                               Href="@($"https://{_user.AppUrl}")"
+                               Target="_blank"
+                               Style="background:#059669;color:#fff;">
+                        Go to my store
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
+        }
+
+        <!-- 4. Payment History -->
+        <MudPaper Elevation="2" Class="pa-6 mb-5" Style="border-radius:16px;">
+            <MudText Typo="Typo.h6" Style="font-weight:700;margin-bottom:16px;">
+                <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" Style="vertical-align:middle;" />
+                Payment History
+            </MudText>
+
+            @if (!_payments.Any())
+            {
+                <MudText Typo="Typo.body2" Color="Color.Default">No payments recorded yet.</MudText>
+            }
+            else
+            {
+                <MudSimpleTable Dense="true" Hover="true" Style="border-radius:8px;overflow:hidden;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Plan</th>
+                            <th>Billing</th>
+                            <th style="text-align:right">Amount</th>
+                            <th>Status</th>
+                            <th>Card</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in _payments)
+                        {
+                            <tr>
+                                <td>@p.CreatedAt.ToString("MMM d, yyyy")</td>
+                                <td>@p.PlanName</td>
+                                <td>@p.BillingCycle</td>
+                                <td style="text-align:right;font-weight:600;">$@p.Amount.ToString("N2")</td>
+                                <td>
+                                    <MudChip T="string" Size="Size.Small"
+                                             Color="@(p.Status == "Paid" ? Color.Success : Color.Default)">
+                                        @p.Status
+                                    </MudChip>
+                                </td>
+                                <td>@(p.PaymentMethodLast4 is not null ? $"••••{p.PaymentMethodLast4}" : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </MudPaper>
+
+        <!-- 5. Support -->
+        <MudPaper Elevation="1" Class="pa-5" Style="border-radius:12px;background:#f9fafb;">
+            <MudText Typo="Typo.h6" Style="font-weight:700;margin-bottom:8px;">
+                <MudIcon Icon="@Icons.Material.Filled.Support" Class="mr-2" Style="vertical-align:middle;" />
+                Need Help?
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-3">
+                Our support team is here to help you get the most out of Cloud Mobile POS.
+            </MudText>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Email"
+                       Href="/contact">
+                Contact Support
+            </MudButton>
+        </MudPaper>
+    }
+
+</MudContainer>
+
+@code {
+    private User?               _user;
+    private List<PaymentHistory> _payments = new();
+    private bool _loading = true;
+
+    private Color  _statusColor = Color.Default;
+    private string _statusIcon  = Icons.Material.Outlined.Circle;
+    private string _statusLabel = "None";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        var emailClaim = auth.User.FindFirst(System.Security.Claims.ClaimTypes.Email)
+                      ?? auth.User.FindFirst("email");
+
+        if (emailClaim is null)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _user = await db.Users.FirstOrDefaultAsync(u => u.Email == emailClaim.Value);
+
+        if (_user is not null)
+        {
+            _payments = await db.PaymentHistory
+                .Where(p => p.UserId == _user.Id)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            SetStatusBadge();
+        }
+
+        _loading = false;
+    }
+
+    private void SetStatusBadge()
+    {
+        (_statusColor, _statusIcon, _statusLabel) = _user!.ActivationStatus switch
+        {
+            ActivationStatus.Active  => (Color.Success, Icons.Material.Filled.CheckCircle, "Active"),
+            ActivationStatus.Pending => (Color.Warning, Icons.Material.Filled.HourglassTop, "Pending"),
+            _                        => (Color.Default, Icons.Material.Outlined.Circle,     "Not Started")
+        };
+    }
+}

@@ -268,7 +268,12 @@
                         }
                         else
                         {
-                            <MudTooltip Text="Activate client">
+                            <MudTooltip Text="Provision database">
+                                <MudIconButton Icon="@Icons.Material.Filled.Storage"
+                                               Color="Color.Primary" Size="Size.Medium"
+                                               OnClick="@(() => OpenProvisionWizardAsync(context))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Activate client (manual)">
                                 <MudIconButton Icon="@Icons.Material.Filled.CheckCircle"
                                                Color="Color.Success" Size="Size.Medium"
                                                OnClick="@(() => ActivateClientAsync(context))" />
@@ -571,7 +576,7 @@
 
         try
         {
-            var ok = await ProvisioningService.SeedTenantAsync(slug);
+            var ok = await ProvisioningService.SeedDemoTenantAsync(slug);
             Snackbar.Add(ok
                 ? $"{slug} re-seeded successfully."
                 : $"Re-seed failed for {slug} — check logs.",
@@ -603,6 +608,17 @@
             _migrating = false;
             StateHasChanged();
         }
+    }
+
+    // ── Provisioning wizard ──────────────────────────────────────────
+    private async Task OpenProvisionWizardAsync(User user)
+    {
+        var parameters = new DialogParameters<ProvisionDbWizard> { { x => x.User, user } };
+        var options    = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true, CloseOnEscapeKey = false };
+        var dialog     = await DialogService.ShowAsync<ProvisionDbWizard>("Provision Database", parameters, options);
+        var result     = await dialog.Result;
+        if (result is not null && !result.Canceled)
+            await LoadAsync(); // Refresh the clients grid
     }
 
     // ── Client actions ────────────────────────────────────────────────

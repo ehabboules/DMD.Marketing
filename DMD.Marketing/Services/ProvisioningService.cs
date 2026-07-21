@@ -104,7 +104,7 @@ public class ProvisioningService
     }
 
     // ── Demo tenant tools ─────────────────────────────────────────────
-    public async Task<bool> SeedTenantAsync(string slug)
+    public async Task<bool> SeedDemoTenantAsync(string slug)
     {
         var (client, baseUrl) = GetClient();
         if (client is null) return false;
@@ -261,6 +261,91 @@ public class ProvisioningService
         }
     }
 
+    // ── Tenant registration ──────────────────────────────────────────
+
+    /// <summary>
+    /// Registers a tenant's connection string in StockShopOnline so it can serve requests for that subdomain.
+    /// </summary>
+    public async Task<bool> RegisterTenantAsync(
+        string slug, string connectionString, string? storeName = null,
+        string? businessType = null, string? seedProfile = null)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
+
+        var payload = new { slug, connectionString, storeName, businessType, seedProfile };
+
+        try
+        {
+            var response = await client.PostAsJsonAsync(
+                $"{baseUrl}/api/provisioning/tenants", payload);
+
+            if (response.IsSuccessStatusCode) return true;
+
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("RegisterTenant failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling RegisterTenant API for {Slug}", slug);
+            return false;
+        }
+    }
+
+    /// <summary>Runs EF Core migrations on a single tenant database.</summary>
+    public async Task<bool> OnboardTenantAsync(string slug)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
+
+        try
+        {
+            var encodedSlug = Uri.EscapeDataString(slug);
+            var response = await client.PostAsync(
+                $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/onboard", null);
+
+            if (response.IsSuccessStatusCode) return true;
+
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("OnboardTenant failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling OnboardTenant API for {Slug}", slug);
+            return false;
+        }
+    }
+
+    /// <summary>Seeds a single tenant database with initial data.</summary>
+    public async Task<bool> SeedTenantAsync(string slug, string? profile = null)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
+
+        try
+        {
+            var encodedSlug = Uri.EscapeDataString(slug);
+            var query = !string.IsNullOrWhiteSpace(profile)
+                ? $"?profile={Uri.EscapeDataString(profile)}"
+                : "";
+            var response = await client.PostAsync(
+                $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/seed{query}", null);
+
+            if (response.IsSuccessStatusCode) return true;
+
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("SeedTenant (single) failed: {Status} — {Body}", response.StatusCode, body);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling SeedTenant API for {Slug}", slug);
+            return false;
+        }
+    }
+
     // ── POS app roles / logs ─────────────────────────────────────────
     public async Task<List<string>?> GetUserPosRolesAsync(string slug, string email)
     {
@@ -311,6 +396,43 @@ public class ProvisioningService
         {
             _logger.LogError(ex, "Error fetching POS logs for {Email} at {Slug}", email, slug);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Pushes a license snapshot into the tenant's own ProvisioningRequests table via StockShopOnline.
+    /// Best-effort — callers should not fail if this errors.
+    /// </summary>
+    public async Task<bool> PushLicenseAsync(
+        string    slug,
+        string    planSlug,
+        string    billingCycle,
+        string    status,
+        DateTime? activatedAt,
+        DateTime? expiresAt,
+        string?   appUrl)
+    {
+        var (client, baseUrl) = GetClient();
+        if (client is null) return false;
+
+        var payload = new { planSlug, billingCycle, status, activatedAt, expiresAt, appUrl };
+
+        try
+        {
+            var encodedSlug = Uri.EscapeDataString(slug);
+            var response = await client.PutAsJsonAsync(
+                $"{baseUrl}/api/provisioning/tenants/{encodedSlug}/license", payload);
+
+            if (response.IsSuccessStatusCode) return true;
+
+            var body = await response.Content.ReadAsStringAsync();
+            _logger.LogError("PushLicense failed for {Slug}: {Status} — {Body}", slug, response.StatusCode, body);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error pushing license to tenant {Slug}", slug);
+            return false;
         }
     }
 

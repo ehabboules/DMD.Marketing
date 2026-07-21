@@ -1,3 +1,4 @@
+using DMD.Marketing.Config;
 using DMD.Marketing.Data;
 using DMD.Marketing.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -27,6 +28,24 @@ builder.Services.AddHttpClient("local", (sp, client) =>
     client.Timeout     = TimeSpan.FromSeconds(15);
 });
 
+// ── Railway GraphQL API HttpClient ──────────────────────────────────
+builder.Services.AddHttpClient("Railway", (sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var railwayConfig = new RailwayApiConfig();
+    config.GetSection("Railway").Bind(railwayConfig);
+
+    client.BaseAddress = new Uri("https://backboard.railway.com/graphql/v2");
+    client.Timeout     = TimeSpan.FromSeconds(30);
+
+    if (!string.IsNullOrWhiteSpace(railwayConfig.ApiToken))
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", railwayConfig.ApiToken);
+});
+
+// ── Configuration binding ───────────────────────────────────────────
+builder.Services.Configure<RailwayApiConfig>(builder.Configuration.GetSection("Railway"));
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMudServices();
@@ -36,6 +55,10 @@ builder.Services.AddScoped<ProvisioningService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<AdminClientService>();
+builder.Services.AddScoped<IRailwayService, RailwayService>();
+builder.Services.AddScoped<TenantMigrationService>();
+builder.Services.AddScoped<TenantSeederService>();
+builder.Services.AddScoped<ClientActivationService>();
 builder.Services.AddHostedService<TrialExpiryBackgroundService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
@@ -124,6 +147,7 @@ using (var scope = app.Services.CreateScope())
             CONSTRAINT "PK_DataProtectionKeys" PRIMARY KEY ("Id")
         );
         ALTER TABLE public."Users" ADD COLUMN IF NOT EXISTS "AppUrl" text;
+        ALTER TABLE public."Users" ADD COLUMN IF NOT EXISTS "TenantSlug" varchar(64);
         """);
 
     foreach (var name in new[] { "Admin", "User" })
