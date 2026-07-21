@@ -291,9 +291,10 @@
     };
 
     // ── Railway variables computed from current slug/connection string ─
+    // _connectionString is already normalized to Npgsql format by GoToStep3()
     private Dictionary<string, string> RailwayVariables => new()
     {
-        [$"Tenants__{_slug}__ConnectionString"] = _connectionString.Trim(),
+        [$"Tenants__{_slug}__ConnectionString"] = _connectionString,
         [$"Tenants__{_slug}__Name"]             = User.StoreName ?? _slug,
         [$"Tenants__{_slug}__SeedProfile"]      = _seedProfile.ToString(),
     };
@@ -339,9 +340,45 @@
             _connectionStringError = "Please paste the Postgres connection string.";
             return;
         }
+
+        // Convert postgresql:// URI → Npgsql keyword=value format with SSL (required for Railway)
+        try
+        {
+            _connectionString = NormalizeConnectionString(_connectionString);
+        }
+        catch (Exception ex)
+        {
+            _connectionStringError = $"Invalid connection string: {ex.Message}";
+            return;
+        }
+
         _connectionStringError = null;
         _confirmedVarsAdded = false; // reset checkbox if user goes back and changes values
         _step = 3;
+    }
+
+    private static string NormalizeConnectionString(string cs)
+    {
+        // Already in keyword=value format
+        if (!cs.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase) &&
+            !cs.StartsWith("postgres://",   StringComparison.OrdinalIgnoreCase))
+        {
+            // Ensure SSL params are present for Railway
+            if (!cs.Contains("SSL Mode=", StringComparison.OrdinalIgnoreCase))
+                cs += ";SSL Mode=Require;Trust Server Certificate=true";
+            return cs;
+        }
+
+        // Parse postgresql://user:password@host:port/database[?params]
+        var uri      = new Uri(cs);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(0) ?? "");
+        var password = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(1) ?? "");
+        var host     = uri.Host;
+        var port     = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
     }
 
     private async Task StartProvisioning()
