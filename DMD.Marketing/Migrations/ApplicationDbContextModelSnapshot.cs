@@ -274,6 +274,10 @@ namespace DMD.Marketing.Migrations
                     b.Property<bool>("TaxInclusive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("TenantSlug")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<DateTime?>("TermsAcceptedAt")
                         .HasColumnType("timestamp with time zone");
 
