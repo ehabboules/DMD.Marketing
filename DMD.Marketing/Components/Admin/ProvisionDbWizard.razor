@@ -26,7 +26,9 @@
             <MudText Typo="Typo.subtitle1" Class="mb-3">Step 1 of 6 — Confirm details</MudText>
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_slug" Label="Tenant Slug" Variant="Variant.Outlined"
+                    <MudTextField Value="@_slug"
+                                  ValueChanged="@((string v) => { _slug = v; InvokeAsync(StateHasChanged); })"
+                                  Label="Tenant Slug" Variant="Variant.Outlined"
                                   HelperText="Lowercase, alphanumeric + dashes. Becomes subdomain."
                                   Immediate="true" Margin="Margin.Dense" />
                 </MudItem>
@@ -53,6 +55,17 @@
             {
                 <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">@_slugError</MudAlert>
             }
+        }
+
+        @* ── Slug breadcrumb — visible on steps 2–6 ────────────────── *@
+        @if (_step > 1 && !string.IsNullOrWhiteSpace(_slug))
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.Storage" Size="Size.Small" Style="color:#00BFA5;" />
+                <MudText Typo="Typo.caption" Style="color:#6B7280;">Tenant slug:</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined"
+                         Style="font-family:monospace;font-size:0.8rem;">@_slug</MudChip>
+            </MudStack>
         }
 
         @* ── Step 2: Paste connection string ────────────────────────── *@
