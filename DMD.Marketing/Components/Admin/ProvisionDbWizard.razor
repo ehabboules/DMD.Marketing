@@ -5,21 +5,25 @@
 @inject TenantSeederService SeederService
 @inject ClientActivationService ActivationService
 @inject ILogger<ProvisionDbWizard> Logger
+@inject IJSRuntime JS
 
 <MudDialog>
     <TitleContent>
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             <MudIcon Icon="@Icons.Material.Filled.Storage" Color="Color.Primary" />
-            <MudText Typo="Typo.h6">Provision Database — @User.StoreName</MudText>
+            <MudText Typo="Typo.h6">
+                Provision Database —
+                @(string.IsNullOrWhiteSpace(_slug) ? User.StoreName : _slug)
+            </MudText>
         </MudStack>
     </TitleContent>
     <DialogContent>
         <MudContainer Style="min-height:380px;max-height:70vh;overflow-y:auto;">
 
-        @* ── Step 1: Confirm client + slug ─────────────────────────── *@
+        @* ── Step 1: Confirm slug + profile ─────────────────────────── *@
         @if (_step == 1)
         {
-            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 1 of 5 — Confirm details</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 1 of 6 — Confirm details</MudText>
             <MudGrid Spacing="2">
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="_slug" Label="Tenant Slug" Variant="Variant.Outlined"
@@ -54,20 +58,17 @@
         @* ── Step 2: Paste connection string ────────────────────────── *@
         @if (_step == 2)
         {
-            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 2 of 5 — Create Postgres Database</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 2 of 6 — Create Postgres Database</MudText>
 
             <MudPaper Elevation="0" Class="pa-3 mb-3" Style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;">
-                <MudText Typo="Typo.subtitle2" Class="mb-2">
-                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Style="color:#2E7D32;" />
-                    Railway — Create a Postgres database manually:
-                </MudText>
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Railway — Create a Postgres database manually:</MudText>
                 <MudStack Spacing="0">
                     <MudText Typo="Typo.body2">1. Open your Railway project dashboard</MudText>
-                    <MudText Typo="Typo.body2">2. Click <strong>+ New</strong> → <strong>Database</strong> → <strong>Add PostgreSQL</strong></MudText>
+                    <MudText Typo="Typo.body2">2. Click <strong>+ New → Database → Add PostgreSQL</strong></MudText>
                     <MudText Typo="Typo.body2">3. Wait ~60 seconds for the green ✓ (deployed)</MudText>
                     <MudText Typo="Typo.body2">4. Click the Postgres service → <strong>Connect</strong> tab</MudText>
-                    <MudText Typo="Typo.body2">5. Under <strong>Available Variables</strong> copy <strong>DATABASE_URL</strong></MudText>
-                    <MudText Typo="Typo.body2">6. Paste it in the field below</MudText>
+                    <MudText Typo="Typo.body2">5. Click <strong>Public Network</strong> → copy <strong>DATABASE_URL</strong></MudText>
+                    <MudText Typo="Typo.body2">6. Paste it below</MudText>
                 </MudStack>
             </MudPaper>
 
@@ -77,7 +78,7 @@
                           Variant="Variant.Outlined"
                           Lines="2"
                           InputType="InputType.Password"
-                          HelperText="Paste the DATABASE_URL from Railway's Connect tab (External)"
+                          HelperText="Paste the DATABASE_URL from Railway's Connect tab → Public Network"
                           Margin="Margin.Dense"
                           Immediate="true" />
 
@@ -87,10 +88,57 @@
             }
         }
 
-        @* ── Steps 3–4: Execution steps ─────────────────────────────── *@
-        @if (_step is >= 3 and <= 4)
+        @* ── Step 3: Add Railway variables ──────────────────────────── *@
+        @if (_step == 3)
         {
-            <MudText Typo="Typo.subtitle1" Class="mb-3">Step @_step of 5 — @StepTitle(_step)</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 3 of 6 — Add Railway Variables</MudText>
+
+            <MudAlert Severity="Severity.Warning" Class="mb-3" Dense="true">
+                Add these 3 variables to your <strong>StockShopOnline</strong> Railway service, then redeploy it before clicking Next.
+            </MudAlert>
+
+            @* Variable rows *@
+            @foreach (var kv in RailwayVariables)
+            {
+                <MudPaper Elevation="0" Class="pa-2 mb-2" Style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <div style="overflow:hidden;">
+                            <MudText Typo="Typo.caption" Style="color:#6B7280;font-size:0.7rem;">VARIABLE NAME</MudText>
+                            <MudText Typo="Typo.body2" Class="font-weight-bold" Style="word-break:break-all;">@kv.Key</MudText>
+                            <MudText Typo="Typo.caption" Style="color:#6B7280;font-size:0.7rem;margin-top:4px;">VALUE</MudText>
+                            <MudText Typo="Typo.body2" Style="word-break:break-all;font-family:monospace;font-size:0.78rem;">
+                                @(kv.Key.EndsWith("ConnectionString") ? MaskConnectionString(kv.Value) : kv.Value)
+                            </MudText>
+                        </div>
+                        <MudTooltip Text="@(_copiedKey == kv.Key ? "Copied!" : "Copy value")">
+                            <MudIconButton Icon="@(_copiedKey == kv.Key ? Icons.Material.Filled.Check : Icons.Material.Filled.ContentCopy)"
+                                           Color="@(_copiedKey == kv.Key ? Color.Success : Color.Default)"
+                                           Size="Size.Small"
+                                           OnClick="@(() => CopyAsync(kv.Key, kv.Value))" />
+                        </MudTooltip>
+                    </MudStack>
+                </MudPaper>
+            }
+
+            <MudPaper Elevation="0" Class="pa-3 mt-3 mb-3" Style="background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;">
+                <MudText Typo="Typo.subtitle2" Class="mb-1">Redeploy steps:</MudText>
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.body2">1. Railway → open your <strong>StockShopOnline</strong> service</MudText>
+                    <MudText Typo="Typo.body2">2. Go to <strong>Variables</strong> → add the 3 variables above</MudText>
+                    <MudText Typo="Typo.body2">3. Click <strong>Deploy</strong> (Railway redeploys automatically on variable change)</MudText>
+                    <MudText Typo="Typo.body2">4. Wait for the green ✓ then come back here</MudText>
+                </MudStack>
+            </MudPaper>
+
+            <MudCheckBox @bind-Value="_confirmedVarsAdded" Color="Color.Primary">
+                <MudText Typo="Typo.body2">I have added the variables and StockShopOnline is back online</MudText>
+            </MudCheckBox>
+        }
+
+        @* ── Steps 4–5: Execution ────────────────────────────────────── *@
+        @if (_step is >= 4 and <= 5)
+        {
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step @_step of 6 — @StepTitle(_step)</MudText>
             <MudTimeline TimelinePosition="TimelinePosition.Start">
                 @foreach (var s in _steps)
                 {
@@ -127,15 +175,16 @@
             </MudTimeline>
         }
 
-        @* ── Step 5: Summary ────────────────────────────────────────── *@
-        @if (_step == 5)
+        @* ── Step 6: Summary ────────────────────────────────────────── *@
+        @if (_step == 6)
         {
-            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 5 of 5 — Complete</MudText>
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Step 6 of 6 — Complete</MudText>
             <MudAlert Severity="Severity.Success" Class="mb-3">
                 Database provisioned and client activated successfully.
             </MudAlert>
             <MudPaper Elevation="0" Class="pa-4" Style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
                 <MudStack Spacing="2">
+                    <MudText><strong>Tenant slug:</strong> @_slug</MudText>
                     <MudText><strong>App URL:</strong> @_activationResult?.AppUrl</MudText>
                     <MudText><strong>Expires:</strong> @_activationResult?.ExpiresAt.ToString("yyyy-MM-dd")</MudText>
                     <MudText><strong>Welcome email:</strong> @(_activationResult?.WelcomeEmailSent == true ? "Sent" : "Not sent")</MudText>
@@ -153,7 +202,7 @@
         @if (_step == 1)
         {
             <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
-            <MudButton OnClick="GoToConnectionString" Color="Color.Primary" Variant="Variant.Filled"
+            <MudButton OnClick="GoToStep2" Color="Color.Primary" Variant="Variant.Filled"
                        Disabled="@(string.IsNullOrWhiteSpace(_slug))">
                 Next →
             </MudButton>
@@ -161,12 +210,20 @@
         else if (_step == 2)
         {
             <MudButton OnClick="@(() => _step = 1)" Color="Color.Default">← Back</MudButton>
+            <MudButton OnClick="GoToStep3" Color="Color.Primary" Variant="Variant.Filled"
+                       Disabled="@(string.IsNullOrWhiteSpace(_connectionString))">
+                Next →
+            </MudButton>
+        }
+        else if (_step == 3)
+        {
+            <MudButton OnClick="@(() => _step = 2)" Color="Color.Default">← Back</MudButton>
             <MudButton OnClick="StartProvisioning" Color="Color.Primary" Variant="Variant.Filled"
-                       Disabled="@(string.IsNullOrWhiteSpace(_connectionString) || _running)">
+                       Disabled="@(!_confirmedVarsAdded || _running)">
                 Start Provisioning
             </MudButton>
         }
-        else if (_step is >= 3 and <= 4)
+        else if (_step is >= 4 and <= 5)
         {
             @if (_failed)
             {
@@ -181,7 +238,7 @@
                 <MudButton OnClick="Cancel" Color="Color.Default" Disabled="_running">Cancel</MudButton>
             }
         }
-        else if (_step == 5)
+        else if (_step == 6)
         {
             <MudButton OnClick="Done" Color="Color.Primary" Variant="Variant.Filled">Done</MudButton>
         }
@@ -196,11 +253,13 @@
     public User User { get; set; } = null!;
 
     // ── State ────────────────────────────────────────────────────────
-    private string  _slug              = "";
+    private string  _slug             = "";
     private string? _slugError;
-    private string  _connectionString  = "";
+    private string  _connectionString = "";
     private string? _connectionStringError;
-    private SeedProfile _seedProfile   = SeedProfile.GenericStore;
+    private SeedProfile _seedProfile  = SeedProfile.GenericStore;
+    private bool    _confirmedVarsAdded = false;
+    private string? _copiedKey;
 
     private int  _step    = 1;
     private bool _running = false;
@@ -216,6 +275,14 @@
         new("Run Migrations")  { Status = StepStatus.Pending },
         new("Seed Database")   { Status = StepStatus.Pending },
         new("Activate Client") { Status = StepStatus.Pending },
+    };
+
+    // ── Railway variables computed from current slug/connection string ─
+    private Dictionary<string, string> RailwayVariables => new()
+    {
+        [$"Tenants__{_slug}__ConnectionString"] = _connectionString.Trim(),
+        [$"Tenants__{_slug}__Name"]             = User.StoreName ?? _slug,
+        [$"Tenants__{_slug}__SeedProfile"]      = _seedProfile.ToString(),
     };
 
     protected override void OnParametersSet()
@@ -239,7 +306,7 @@
     private void Cancel() => MudDialog.Cancel();
     private void Done()   => MudDialog.Close(DialogResult.Ok(true));
 
-    private void GoToConnectionString()
+    private void GoToStep2()
     {
         _slug = _slug.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(_slug) || _slug.Length < 2)
@@ -251,7 +318,7 @@
         _step = 2;
     }
 
-    private async Task StartProvisioning()
+    private void GoToStep3()
     {
         _connectionString = _connectionString.Trim();
         if (string.IsNullOrWhiteSpace(_connectionString))
@@ -260,14 +327,19 @@
             return;
         }
         _connectionStringError = null;
+        _confirmedVarsAdded = false; // reset checkbox if user goes back and changes values
         _step = 3;
+    }
+
+    private async Task StartProvisioning()
+    {
+        _step = 4;
         await RunProvisioningAsync();
     }
 
     private async Task RetryCurrentStep()
     {
         _failed = false;
-        // Reset failed steps so the UI shows Running again on retry
         if (_migrationResult is null || !_migrationResult.Succeeded)
         {
             _steps[0].Status = StepStatus.Pending; _steps[0].Error = null;
@@ -292,10 +364,10 @@
 
         try
         {
-            // ── Step 3: Register Tenant + Run Migrations ─────────────
+            // ── Step 4: Register Tenant + Run Migrations ─────────────
             if (_migrationResult is null || !_migrationResult.Succeeded)
             {
-                _step = 3;
+                _step = 4;
                 _steps[0].Status = StepStatus.Running;
                 _steps[0].Detail = "Registering tenant in StockShopOnline…";
                 _steps[0].Error  = null;
@@ -322,7 +394,6 @@
                     }
                     else
                     {
-                        // Registration succeeded, migrations failed
                         _steps[0].Status = StepStatus.Done;
                         _steps[0].Detail = "Tenant registered";
                         _steps[1].Status = StepStatus.Failed;
@@ -341,8 +412,8 @@
                 finally { StateHasChanged(); }
             }
 
-            // ── Step 4: Seed + Activate ───────────────────────────────
-            _step = 4;
+            // ── Step 5: Seed + Activate ───────────────────────────────
+            _step = 5;
 
             if (_seedResult is null || !_seedResult.Succeeded)
             {
@@ -414,8 +485,7 @@
                 finally { StateHasChanged(); }
             }
 
-            // All done
-            _step = 5;
+            _step = 6;
         }
         finally
         {
@@ -425,10 +495,37 @@
     }
 
     // ── Helpers ──────────────────────────────────────────────────────
+    private async Task CopyAsync(string key, string value)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", value);
+            _copiedKey = key;
+            StateHasChanged();
+            await Task.Delay(2000);
+            _copiedKey = null;
+            StateHasChanged();
+        }
+        catch { /* clipboard not available in all contexts */ }
+    }
+
+    private static string MaskConnectionString(string cs)
+    {
+        // Show host only, hide password
+        if (cs.StartsWith("postgresql://") || cs.StartsWith("postgres://"))
+        {
+            var atIdx = cs.LastIndexOf('@');
+            return atIdx > 0 ? $"postgresql://***@{cs[(atIdx + 1)..]}" : cs;
+        }
+        var parts = cs.Split(';');
+        var host  = Array.Find(parts, p => p.TrimStart().StartsWith("Host=", StringComparison.OrdinalIgnoreCase));
+        return host is not null ? $"{host.Trim()};Password=***;…" : "***";
+    }
+
     private static string StepTitle(int step) => step switch
     {
-        3 => "Register & Migrate",
-        4 => "Seed & Activate",
+        4 => "Register & Migrate",
+        5 => "Seed & Activate",
         _ => ""
     };
 
