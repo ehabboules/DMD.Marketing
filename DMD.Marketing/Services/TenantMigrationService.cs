@@ -43,10 +43,10 @@ public class TenantMigrationService
     {
         // 1. Register the tenant (idempotent — StockShopOnline overwrites if slug already exists)
         _logger.LogInformation("Registering tenant '{Slug}' before migration…", slug);
-        var registered = await _provisioning.RegisterTenantAsync(slug, connectionString);
+        var (registered, registerError) = await _provisioning.RegisterTenantAsync(slug, connectionString);
         if (!registered)
         {
-            var err = $"Failed to register tenant '{slug}' in StockShopOnline — cannot run migrations.";
+            var err = $"Registration failed: {registerError}";
             _logger.LogError("{Error}", err);
             return new MigrationStep(slug, MaskConnectionString(connectionString), "RegistrationFailed", err);
         }

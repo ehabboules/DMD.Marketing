@@ -266,12 +266,13 @@ public class ProvisioningService
     /// <summary>
     /// Registers a tenant's connection string in StockShopOnline so it can serve requests for that subdomain.
     /// </summary>
-    public async Task<bool> RegisterTenantAsync(
+    public async Task<(bool Success, string? Error)> RegisterTenantAsync(
         string slug, string connectionString, string? storeName = null,
         string? businessType = null, string? seedProfile = null)
     {
         var (client, baseUrl) = GetClient();
-        if (client is null) return false;
+        if (client is null)
+            return (false, "Provisioning not configured — check Provisioning:StockShopBaseUrl and Provisioning:ApiKey.");
 
         var payload = new { slug, connectionString, storeName, businessType, seedProfile };
 
@@ -280,16 +281,17 @@ public class ProvisioningService
             var response = await client.PostAsJsonAsync(
                 $"{baseUrl}/api/provisioning/tenants", payload);
 
-            if (response.IsSuccessStatusCode) return true;
+            if (response.IsSuccessStatusCode) return (true, null);
 
             var body = await response.Content.ReadAsStringAsync();
+            var err  = $"HTTP {(int)response.StatusCode} from StockShopOnline: {body}";
             _logger.LogError("RegisterTenant failed: {Status} — {Body}", response.StatusCode, body);
-            return false;
+            return (false, err);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error calling RegisterTenant API for {Slug}", slug);
-            return false;
+            return (false, ex.Message);
         }
     }
 

@@ -45,10 +45,10 @@ public class TenantSeederService
 
         // The tenant must already be registered (TenantMigrationService does this).
         // If not, registration is idempotent — register again just in case.
-        var registered = await _provisioning.RegisterTenantAsync(slug, connectionString);
+        var (registered, registerError) = await _provisioning.RegisterTenantAsync(slug, connectionString);
         if (!registered)
         {
-            var err = $"Failed to register tenant '{slug}' before seeding.";
+            var err = $"Registration failed before seeding: {registerError}";
             _logger.LogError("{Error}", err);
             return new SeedStep(slug, profileName, "RegistrationFailed", err);
         }
