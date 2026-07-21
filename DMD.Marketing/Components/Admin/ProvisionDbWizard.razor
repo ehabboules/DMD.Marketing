@@ -40,6 +40,14 @@
                         <MudSelectItem Value="SeedProfile.GroceryNuts">Grocery / Nuts</MudSelectItem>
                     </MudSelect>
                 </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_tenantName"
+                                  Label="Tenant Display Name"
+                                  Variant="Variant.Outlined"
+                                  HelperText="Used as Tenants__{slug}__Name in Railway. E.g. ShiryMobileShop"
+                                  Margin="Margin.Dense"
+                                  Immediate="true" />
+                </MudItem>
             </MudGrid>
 
             <MudPaper Elevation="0" Class="pa-3 mt-3" Style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
@@ -267,6 +275,7 @@
 
     // ── State ────────────────────────────────────────────────────────
     private string  _slug             = "";
+    private string  _tenantName       = "";
     private string? _slugError;
     private string  _connectionString = "";
     private string? _connectionStringError;
@@ -295,7 +304,7 @@
     private Dictionary<string, string> RailwayVariables => new()
     {
         [$"Tenants__{_slug}__ConnectionString"] = _connectionString,
-        [$"Tenants__{_slug}__Name"]             = User.StoreName ?? _slug,
+        [$"Tenants__{_slug}__Name"]             = string.IsNullOrWhiteSpace(_tenantName) ? _slug : _tenantName,
         [$"Tenants__{_slug}__SeedProfile"]      = _seedProfile.ToString(),
     };
 
@@ -307,6 +316,9 @@
                 .Replace(User.StoreName.Trim().ToLowerInvariant(), @"[^a-z0-9\-]", "-")
                 .Trim('-');
         }
+
+        if (string.IsNullOrEmpty(_tenantName))
+            _tenantName = User.StoreName ?? _slug;
 
         _seedProfile = (User.BusinessType?.ToLowerInvariant()) switch
         {
