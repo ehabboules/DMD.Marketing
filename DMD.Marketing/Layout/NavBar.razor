@@ -37,6 +37,10 @@
                     <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" /></span>
                     <span class="dmd-drop-text"><strong>Reports &amp; Analytics</strong><span>Profit, sales &amp; valuation reports</span></span>
                 </a>
+                <a href="/clover-app" class="dmd-drop-link @(IsPath("/clover-app") ? "dmd-drop-link--active" : "")" @onclick="Close">
+                    <span class="dmd-drop-icon" style="color:#00BFA5;"><MudIcon Icon="@Icons.Material.Filled.Devices" Size="Size.Small" /></span>
+                    <span class="dmd-drop-text"><strong>Clover App</strong><span>CloudMPOS on your Clover terminal</span></span>
+                </a>
             </div>
         </li>
 
@@ -305,7 +309,7 @@
 
     private bool IsPath(string path) => CurrentPath == path;
 
-    private bool IsProductRoute => new[] { "/features", "/pos-system", "/inventory-management", "/reports-analytics" }
+    private bool IsProductRoute => new[] { "/features", "/pos-system", "/inventory-management", "/reports-analytics", "/clover-app" }
         .Contains(CurrentPath);
 
     private bool IsSolutionsRoute => new[] { "/retail", "/dry-goods", "/restaurants" }

@@ -1,0 +1,664 @@
+@page "/clover-app"
+
+<PageTitle>Cloud Mobile POS for Clover — Scale without limits.</PageTitle>
+<HeadContent>
+    <meta name="description" content="Run your POS, inventory, purchasing, and reporting from one app on your Clover terminal. Install in minutes from the Clover App Market." />
+</HeadContent>
+
+<!-- SECTION 1: HERO -->
+<div class="clover-hero">
+    <div class="clover-hero-inner">
+        <div class="clover-hero-copy">
+            <div class="clover-eyebrow">
+                <span class="eyebrow-dot"></span>
+                Clover App Market
+            </div>
+            <h1 class="hero-title">Your whole store, running on your Clover terminal</h1>
+            <ul class="hero-bullets">
+                <li>Sell, return, and close out cash from one touch-friendly terminal</li>
+                <li>Real-time stock across every warehouse and location</li>
+                <li>Sales, expenses, and profit on one dashboard — from anywhere</li>
+            </ul>
+            <div class="cta-buttons">
+                <a href="{{CLOVER_APP_URL}}" class="btn-primary" target="_blank" rel="noopener">Install from Clover App Market</a>
+                <a href="/contact" class="btn-secondary">Talk to sales</a>
+            </div>
+            <p class="hero-note">Setup takes 5–10 minutes. Nothing to install on a server.</p>
+        </div>
+        <div class="clover-hero-art">
+            <svg viewBox="0 0 400 340" width="400" height="340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Clover terminal body -->
+                <rect x="80" y="60" width="240" height="180" rx="14" fill="#E8EAF6"/>
+                <rect x="90" y="70" width="220" height="140" rx="8" fill="#1A237E" opacity="0.15"/>
+                <!-- Screen -->
+                <rect x="100" y="80" width="200" height="120" rx="6" fill="#FFFFFF"/>
+                <!-- Screen content lines -->
+                <rect x="115" y="96" width="80" height="8" rx="3" fill="#00BFA5" opacity="0.6"/>
+                <rect x="115" y="112" width="120" height="6" rx="3" fill="#1A237E" opacity="0.2"/>
+                <rect x="115" y="124" width="100" height="6" rx="3" fill="#1A237E" opacity="0.15"/>
+                <rect x="115" y="136" width="110" height="6" rx="3" fill="#1A237E" opacity="0.12"/>
+                <!-- Cart icon on screen -->
+                <rect x="248" y="90" width="40" height="40" rx="8" fill="#E0F7F4"/>
+                <text x="268" y="116" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="18" fill="#00BFA5">$</text>
+                <!-- Total bar -->
+                <rect x="100" y="168" width="200" height="24" rx="4" fill="#00BFA5" opacity="0.15"/>
+                <text x="200" y="184" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#00897B" font-weight="600">TOTAL</text>
+                <!-- Terminal base -->
+                <rect x="120" y="240" width="160" height="20" rx="6" fill="#E5E7EB"/>
+                <rect x="160" y="252" width="80" height="28" rx="4" fill="#E8EAF6"/>
+                <!-- Card reader slot -->
+                <rect x="175" y="256" width="50" height="8" rx="3" fill="#1A237E" opacity="0.2"/>
+                <!-- Floating badge -->
+                <rect x="10" y="40" width="90" height="44" rx="8" fill="#1A237E"/>
+                <text x="55" y="58" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="7" fill="white" opacity="0.7">Installs in</text>
+                <text x="55" y="75" text-anchor="middle" font-family="Poppins, sans-serif" font-size="13" fill="#00BFA5" font-weight="700">5 min</text>
+                <!-- Decorative circles -->
+                <circle cx="370" cy="80" r="16" fill="#E0F7F4"/>
+                <circle cx="370" cy="80" r="9" fill="#00BFA5" opacity="0.25"/>
+                <circle cx="30" cy="200" r="14" fill="#E8EAF6"/>
+                <circle cx="30" cy="200" r="8" fill="#1A237E" opacity="0.2"/>
+                <!-- Ground -->
+                <rect x="60" y="290" width="280" height="4" rx="2" fill="#E5E7EB"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: INTRO -->
+<div class="clover-page">
+
+    <section class="clover-intro">
+        <p>Most shops run the register in one place, stock counts in a spreadsheet, and purchase orders in email. CloudMPOS puts all of it behind one login, so what sells on the floor updates your stock, your reports, and your books the moment it happens.</p>
+    </section>
+
+    <!-- SECTION 3: HOW IT WORKS -->
+    <section class="feature-section" id="how-it-works">
+        <div class="section-header">
+            <div class="section-icon pos-icon">
+                <MudIcon Icon="@Icons.Material.Filled.Rocket" Style="font-size:22px;" />
+            </div>
+            <div>
+                <h2 class="section-title">How it works</h2>
+                <p class="section-desc">Three steps from install to selling.</p>
+            </div>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <span class="step-number">1</span>
+                <h3>Install &amp; sign in</h3>
+                <p>Install from the Clover App Market and sign in. Your products, categories, and customers live in your own secure CloudMPOS account.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-number">2</span>
+                <h3>Sell from the terminal</h3>
+                <p>Staff sell from the Clover terminal — cash, card, or Stripe Terminal — with promotions, returns, and cash sessions handled in the same flow.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-number">3</span>
+                <h3>Track everything live</h3>
+                <p>Every sale writes straight to inventory. Owners and managers see live stock and financials from any device, at any location.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: FEATURES -->
+    <section class="feature-section alt" id="features">
+        <div class="section-header">
+            <div class="section-icon inv-icon">
+                <MudIcon Icon="@Icons.Material.Filled.GridView" Style="font-size:22px;" />
+            </div>
+            <div>
+                <h2 class="section-title">Everything you need in one app</h2>
+                <p class="section-desc">Built for retail. No bolt-ons, no extra subscriptions.</p>
+            </div>
+        </div>
+        <div class="feature-grid">
+            <div class="feat-card">
+                <div class="feat-icon pos-icon"><MudIcon Icon="@Icons.Material.Filled.PointOfSale" Style="font-size:18px;" /></div>
+                <h3>Point of Sale</h3>
+                <p>Product search, cart, specials, cash/card/Stripe Terminal</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon pur-icon"><MudIcon Icon="@Icons.Material.Filled.Undo" Style="font-size:18px;" /></div>
+                <h3>Returns &amp; Refunds</h3>
+                <p>Restore stock and auto-mark orders refunded or partial</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon fin-icon"><MudIcon Icon="@Icons.Material.Filled.PointOfSale" Style="font-size:18px;" /></div>
+                <h3>Cash Registers &amp; Sessions</h3>
+                <p>Open, close, and reconcile every shift</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon inv-icon"><MudIcon Icon="@Icons.Material.Filled.Inventory" Style="font-size:18px;" /></div>
+                <h3>Multi-Warehouse Inventory</h3>
+                <p>Live stock levels, adjustments, movement history</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon pur-icon"><MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Style="font-size:18px;" /></div>
+                <h3>Purchase Orders</h3>
+                <p>Create, receive in two steps, manage suppliers</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon sal-icon"><MudIcon Icon="@Icons.Material.Filled.Receipt" Style="font-size:18px;" /></div>
+                <h3>Sales Orders &amp; Customers</h3>
+                <p>Full order history and customer profiles</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon sal-icon"><MudIcon Icon="@Icons.Material.Filled.LocalOffer" Style="font-size:18px;" /></div>
+                <h3>Specials &amp; Promotions</h3>
+                <p>Three-step wizard with printable badges</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon fin-icon"><MudIcon Icon="@Icons.Material.Filled.AttachMoney" Style="font-size:18px;" /></div>
+                <h3>Financial Dashboard</h3>
+                <p>Revenue, expenses, and profit at a glance</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon rep-icon"><MudIcon Icon="@Icons.Material.Filled.FileDownload" Style="font-size:18px;" /></div>
+                <h3>Excel Export</h3>
+                <p>Stock, orders, and reports out in one click</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon plt-icon"><MudIcon Icon="@Icons.Material.Filled.Language" Style="font-size:18px;" /></div>
+                <h3>Multi-Language</h3>
+                <p>English, French, and Arabic with full RTL</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon fin-icon"><MudIcon Icon="@Icons.Material.Filled.AccountBalance" Style="font-size:18px;" /></div>
+                <h3>Canadian Tax Ready</h3>
+                <p>GST, PST, and provincial rates built in</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon inv-icon"><MudIcon Icon="@Icons.Material.Filled.Security" Style="font-size:18px;" /></div>
+                <h3>Role-Based Access</h3>
+                <p>Permissions per user, per location</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-icon plt-icon"><MudIcon Icon="@Icons.Material.Filled.Business" Style="font-size:18px;" /></div>
+                <h3>Multi-Location</h3>
+                <p>Every store and warehouse under one account</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: SETUP & SUPPORT -->
+    <section class="feature-section" id="setup">
+        <div class="section-header">
+            <div class="section-icon plt-icon">
+                <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Style="font-size:22px;" />
+            </div>
+            <div>
+                <h2 class="section-title">Setup &amp; support</h2>
+                <p class="section-desc">Up and running in minutes, not weeks.</p>
+            </div>
+        </div>
+        <div class="setup-text">
+            <p>One-time setup takes 5–10 minutes through the Clover App Market. You get {{TODO: confirm support channels per plan}} plus daily sales and inventory report emails and 24/7 access to your history.</p>
+        </div>
+    </section>
+
+    <!-- SECTION 6: PRICING & COMMITMENT -->
+    <section class="feature-section alt" id="pricing">
+        <div class="section-header">
+            <div class="section-icon fin-icon">
+                <MudIcon Icon="@Icons.Material.Filled.Payments" Style="font-size:22px;" />
+            </div>
+            <div>
+                <h2 class="section-title">Pricing &amp; commitment</h2>
+                <p class="section-desc">No hidden fees, no long-term contract.</p>
+            </div>
+        </div>
+        <div class="setup-text">
+            <p>{{TODO: confirm which tier table this page uses — Starter $59 / Business $89 / Enterprise $129, or Explorer $49 / Growth $99 / Pro. Use whichever matches the live /pricing page and link to it.}}</p>
+            <p>No hidden fees, no long-term contract.</p>
+            <div style="margin-top:1.5rem;">
+                <a href="/pricing" class="btn-secondary">View full pricing →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: WHY IT MATTERS -->
+    <section class="feature-section" id="why">
+        <div class="section-header">
+            <div class="section-icon pos-icon">
+                <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Style="font-size:22px;" />
+            </div>
+            <div>
+                <h2 class="section-title">Why it matters</h2>
+                <p class="section-desc">Stop reconciling. Start growing.</p>
+            </div>
+        </div>
+        <div class="why-grid">
+            <div class="feat-card">
+                <h3>No more manual counts</h3>
+                <p>No more manual counts or end-of-month spreadsheet reconciling — the numbers are already right.</p>
+            </div>
+            <div class="feat-card">
+                <h3>One view, every location</h3>
+                <p>One view across every location, so you can add the next store without adding another system.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 8: FOOTNOTE -->
+    <section class="clover-footnote">
+        <p class="footnote-text">{{TODO: trial and billing terms — do not invent these}}</p>
+    </section>
+
+    <!-- BOTTOM CTA -->
+    <section class="features-cta">
+        <h2>Ready to run your store on Clover?</h2>
+        <p>Install CloudMPOS from the Clover App Market and start selling in minutes.</p>
+        <div class="cta-buttons">
+            <a href="{{CLOVER_APP_URL}}" class="btn-primary" target="_blank" rel="noopener">Install from Clover App Market</a>
+            <a href="/contact" class="btn-secondary">Talk to sales</a>
+        </div>
+    </section>
+
+</div>
+
+<style>
+    :root {
+        --teal: #00BFA5;
+        --teal-dark: #00897B;
+        --teal-light: #E0F7F4;
+        --navy: #1A237E;
+        --navy-light: #E8EAF6;
+        --text: #1C1C1E;
+        --text-muted: #6B7280;
+        --border: #E5E7EB;
+        --surface: #F9FAFB;
+        --white: #FFFFFF;
+    }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .clover-hero {
+        background: #FFFFFF;
+        padding: 5rem 2rem 4rem;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .clover-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 55% at 50% 100%, rgba(0,191,165,0.07) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .clover-hero-inner {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .clover-hero-copy { text-align: left; }
+
+    .clover-hero-art {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .clover-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--teal-light);
+        color: var(--teal-dark);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,191,165,0.25);
+        margin-bottom: 1.5rem;
+    }
+
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--teal);
+        flex-shrink: 0;
+    }
+
+    .hero-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.75rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin: 0 0 1.25rem;
+    }
+
+    .hero-bullets {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem;
+    }
+
+    .hero-bullets li {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        padding-left: 1.5rem;
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-bullets li::before {
+        content: '·';
+        position: absolute;
+        left: 0;
+        color: var(--teal);
+        font-weight: 700;
+        font-size: 1.4rem;
+        line-height: 1.3;
+    }
+
+    .hero-note {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin: 1rem 0 0;
+    }
+
+    /* ── Page container ─────────────────────────────────────── */
+    .clover-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1.5rem 4rem;
+    }
+
+    /* ── Intro ───────────────────────────────────────────────── */
+    .clover-intro {
+        padding: 3rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .clover-intro p {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        line-height: 1.8;
+        max-width: 780px;
+        margin: 0;
+    }
+
+    /* ── Sections ────────────────────────────────────────────── */
+    .feature-section {
+        padding: 4rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .feature-section:last-of-type { border-bottom: none; }
+
+    .feature-section.alt {
+        background: var(--surface);
+        margin: 0 -1.5rem;
+        padding: 4rem 1.5rem;
+        border-radius: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .section-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .pos-icon { background: var(--teal-light); color: var(--teal-dark); }
+    .inv-icon { background: var(--navy-light); color: var(--navy); }
+    .pur-icon { background: #FFF3E0; color: #E65100; }
+    .sal-icon { background: #F3E5F5; color: #7B1FA2; }
+    .fin-icon { background: #E8F5E9; color: #2E7D32; }
+    .rep-icon { background: #E3F2FD; color: #1565C0; }
+    .plt-icon { background: var(--teal-light); color: var(--teal-dark); }
+
+    .section-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.25rem;
+    }
+
+    .section-desc {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* ── Steps grid ──────────────────────────────────────────── */
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .step-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    .step-card:hover {
+        border-color: var(--teal);
+        box-shadow: 0 4px 20px rgba(0,191,165,0.1);
+        transform: translateY(-2px);
+    }
+
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--teal);
+        color: #FFFFFF;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .step-card h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.6rem;
+    }
+
+    .step-card p {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.65;
+        margin: 0;
+    }
+
+    /* ── Feature grid ────────────────────────────────────────── */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .feat-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.4rem 1.5rem;
+        transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    .feat-card:hover {
+        border-color: var(--teal);
+        box-shadow: 0 4px 20px rgba(0,191,165,0.1);
+        transform: translateY(-2px);
+    }
+
+    .feat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .feat-card h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.6rem;
+    }
+
+    .feat-card p {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.65;
+        margin: 0;
+    }
+
+    /* ── Why grid ────────────────────────────────────────────── */
+    .why-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    /* ── Setup text ──────────────────────────────────────────── */
+    .setup-text {
+        max-width: 720px;
+    }
+
+    .setup-text p {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        color: var(--text-muted);
+        line-height: 1.75;
+        margin: 0 0 1rem;
+    }
+
+    /* ── Footnote ────────────────────────────────────────────── */
+    .clover-footnote {
+        padding: 2rem 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .footnote-text {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ── CTA buttons ─────────────────────────────────────────── */
+    .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: var(--teal);
+        color: #FFFFFF;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        padding: 0.8rem 1.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.8rem 1.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--teal);
+        background: var(--teal-light);
+    }
+
+    /* ── Bottom CTA block ────────────────────────────────────── */
+    .features-cta {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 3.5rem 2rem;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .features-cta h2 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0 0 0.75rem;
+    }
+
+    .features-cta p {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin: 0 0 2rem;
+    }
+
+    .features-cta .cta-buttons { justify-content: center; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @@media (max-width: 768px) {
+        .clover-hero-inner { grid-template-columns: 1fr; }
+        .clover-hero-art { display: none; }
+        .steps-grid { grid-template-columns: 1fr; }
+    }
+
+    @@media (max-width: 640px) {
+        .feature-grid, .why-grid { grid-template-columns: 1fr; }
+        .section-header { flex-direction: column; }
+        .hero-title { font-size: 2rem; }
+    }
+</style>
