@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DMD.Marketing.Tests.Helpers;
 
@@ -73,6 +75,7 @@ public static class DbHelper
         return new UserService(
             db,
             new PasswordHasher<User>(),
-            (httpAccessor ?? MockHttpContext()).Object);
+            (httpAccessor ?? MockHttpContext()).Object,
+            NullLogger<UserService>.Instance);
     }
 }

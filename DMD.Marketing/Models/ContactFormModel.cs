@@ -16,6 +16,9 @@ public class ContactFormModel
     [StringLength(150)]
     public string Company { get; set; } = string.Empty;
 
+    [StringLength(5)]
+    public string CountryCode { get; set; } = "+1";
+
     [StringLength(20)]
     public string? Phone { get; set; }
 

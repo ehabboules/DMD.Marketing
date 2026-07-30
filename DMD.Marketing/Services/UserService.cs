@@ -69,7 +69,7 @@ public class UserService
     // ── Register ──────────────────────────────────────────────────────
     public async Task<(User? User, string? Error)> CreateAsync(
         string email, string firstName, string lastName, string password,
-        string? termsVersion = null)
+        string? termsVersion = null, string countryCode = "+1", string? phone = null)
     {
         _logger.LogInformation("CreateUser: {Email}", email);
 
@@ -87,6 +87,8 @@ public class UserService
             IsActive         = true,
             SecurityStamp    = Guid.NewGuid().ToString("N"),
             CreatedAt        = DateTime.UtcNow,
+            CountryCode      = countryCode,
+            Phone            = phone?.Trim(),
             TermsAcceptedAt  = termsVersion is not null ? DateTime.UtcNow : null,
             TermsVersion     = termsVersion,
         };

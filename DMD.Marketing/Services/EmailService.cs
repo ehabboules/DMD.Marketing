@@ -298,7 +298,7 @@ public class EmailService
         Name:          {model.Name}
         Email:         {model.Email}
         Company:       {model.Company}
-        Phone:         {model.Phone ?? "N/A"}
+        Phone:         {model.CountryCode} {model.Phone ?? "N/A"}
         Business Type: {model.BusinessType}
 
         Message:
@@ -317,7 +317,7 @@ public class EmailService
               <tr><td style="padding:8px 0;color:#666;width:140px;">Name</td><td style="padding:8px 0;font-weight:600;">{model.Name}</td></tr>
               <tr><td style="padding:8px 0;color:#666;">Email</td><td style="padding:8px 0;font-weight:600;"><a href="mailto:{model.Email}">{model.Email}</a></td></tr>
               <tr><td style="padding:8px 0;color:#666;">Company</td><td style="padding:8px 0;font-weight:600;">{model.Company}</td></tr>
-              <tr><td style="padding:8px 0;color:#666;">Phone</td><td style="padding:8px 0;">{model.Phone ?? "N/A"}</td></tr>
+              <tr><td style="padding:8px 0;color:#666;">Phone</td><td style="padding:8px 0;">{model.CountryCode} {model.Phone ?? "N/A"}</td></tr>
               <tr><td style="padding:8px 0;color:#666;">Business Type</td><td style="padding:8px 0;">{model.BusinessType}</td></tr>
             </table>
             <hr style="margin:24px 0;border:none;border-top:1px solid #eee;" />

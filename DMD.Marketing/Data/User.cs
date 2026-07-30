@@ -20,6 +20,12 @@ public class User
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
 
+    [MaxLength(5)]
+    public string CountryCode { get; set; } = "+1";
+
+    [MaxLength(20)]
+    public string? Phone { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     [MaxLength(256)]

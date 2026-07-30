@@ -104,7 +104,29 @@
                                                   Variant="Variant.Outlined"
                                                   FullWidth="true" />
                                 </MudItem>
-                                <MudItem xs="12" sm="6">
+                                <MudItem xs="4" sm="2">
+                                    <MudSelect @bind-Value="_model.CountryCode"
+                                               Label="Code"
+                                               Variant="Variant.Outlined"
+                                               T="string"
+                                               FullWidth="true">
+                                        <MudSelectItem Value="@("+1")">+1 (US/CA)</MudSelectItem>
+                                        <MudSelectItem Value="@("+44")">+44 (UK)</MudSelectItem>
+                                        <MudSelectItem Value="@("+33")">+33 (FR)</MudSelectItem>
+                                        <MudSelectItem Value="@("+49")">+49 (DE)</MudSelectItem>
+                                        <MudSelectItem Value="@("+61")">+61 (AU)</MudSelectItem>
+                                        <MudSelectItem Value="@("+971")">+971 (UAE)</MudSelectItem>
+                                        <MudSelectItem Value="@("+20")">+20 (EG)</MudSelectItem>
+                                        <MudSelectItem Value="@("+966")">+966 (SA)</MudSelectItem>
+                                        <MudSelectItem Value="@("+962")">+962 (JO)</MudSelectItem>
+                                        <MudSelectItem Value="@("+961")">+961 (LB)</MudSelectItem>
+                                        <MudSelectItem Value="@("+974")">+974 (QA)</MudSelectItem>
+                                        <MudSelectItem Value="@("+973")">+973 (BH)</MudSelectItem>
+                                        <MudSelectItem Value="@("+968")">+968 (OM)</MudSelectItem>
+                                        <MudSelectItem Value="@("+965")">+965 (KW)</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="8" sm="4">
                                     <MudTextField @bind-Value="_model.Phone"
                                                   For="() => _model.Phone"
                                                   Label="Phone (optional)"

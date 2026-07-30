@@ -9,7 +9,9 @@ public class EmailServiceTests
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(configValues)
             .Build();
-        return new EmailService(config, NullLogger<EmailService>.Instance);
+        var httpFactory = new Mock<IHttpClientFactory>();
+        httpFactory.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+        return new EmailService(config, httpFactory.Object, NullLogger<EmailService>.Instance);
     }
 
     // ── Config validation ───────────────────────────────────────────────────
