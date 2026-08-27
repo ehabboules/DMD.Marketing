@@ -247,7 +247,7 @@
                         }
                     </div>
                     <div class="ob-plan-cycle-badge @(_isAnnual ? "annual" : "monthly")">
-                        @(_isAnnual ? "Annual billing · save 10%" : "Monthly billing")
+                        @(_isAnnual ? "Annual billing · save up to 9%" : "Monthly billing")
                     </div>
                 </div>
 
@@ -334,8 +334,8 @@
     private readonly List<PlanDef> _planDefs = new()
     {
         new(PlanSlug.Starter,    "Starter",    54.99m,  49.99m,  false),
-        new(PlanSlug.Growth,     "Growth",     99.99m,  89.99m,  false),
-        new(PlanSlug.Pro,        "Pro",        199.99m, 179.99m, false),
+        new(PlanSlug.Growth,     "Growth",     99.99m,  95.99m,  false),
+        new(PlanSlug.Pro,        "Pro",        199.99m, 190.99m, false),
         new(PlanSlug.Enterprise, "Enterprise", 0m,      0m,      true),
     };
 

@@ -48,7 +48,7 @@
                 <MudItem xs="6" sm="3">
                     <MudText Typo="Typo.caption" Color="Color.Inherit">Total Paid</MudText>
                     <MudText Typo="Typo.body2" Class="font-weight-bold" Color="Color.Success">
-                        @(Client.Currency ?? "CAD") @TotalPaid.ToString("N2")
+                        @(Client.Currency ?? "USD") @TotalPaid.ToString("N2")
                     </MudText>
                 </MudItem>
             </MudGrid>

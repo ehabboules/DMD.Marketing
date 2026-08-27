@@ -166,15 +166,21 @@ All solution pages share: pain points grid (red-tinted), feature cards with hove
 
 ## Pricing plans
 
+All prices are in **USD**.
+
 | Plan | Monthly | Annual | Key limits |
 |---|---|---|---|
-| Starter | $54.99 | $49.99 | 1 register, 1 warehouse, unlimited products, unlimited user |
-| Growth | $99.99 | $89.99 | 3 registers, 3 warehouses, unlimited products, unlimited user |
-| Pro | $199.99 | $179.99 | Unlimited everything, multi-language |
+| Starter | $54.99 | $49.99 | 1 register, 1 warehouse, unlimited products, unlimited users |
+| Growth | $99.99 | $95.99 | 4 registers, 2 warehouses, unlimited products, unlimited users |
+| Pro | $199.99 | $190.99 | 6 registers, 4 warehouses, unlimited products, multi-language |
 | Enterprise | Custom | Custom | Dedicated infra, SLA, custom integrations |
 
 Add-ons: warehouses ($15/ monthly), registers ($10), Stripe Terminal reader ($399 one-time).
-Annual billing saves 10%. Toggle is interactive on both `Pricing.razor` and `Profile.razor`.
+Annual billing saves up to 9% (Starter). Toggle is interactive on both `Pricing.razor` and `Profile.razor`.
+
+Source of truth: `Models/PricingData.cs`. Mirrored (must be kept in sync manually) in
+`Pages/Payment.razor` (`GetPriceDisplay`), `Pages/Onboarding.razor` (`_planDefs`), and
+`Pages/Terms.razor` (EN + FR plan tables).
 
 ---
 

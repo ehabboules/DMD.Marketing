@@ -30,8 +30,8 @@
             </MudItem>
             <MudItem xs="12" sm="6">
                 <MudSelect @bind-Value="_currency" Label="Currency" Variant="Variant.Outlined" Dense="true">
-                    <MudSelectItem Value="@("CAD")">CAD</MudSelectItem>
                     <MudSelectItem Value="@("USD")">USD</MudSelectItem>
+                    <MudSelectItem Value="@("CAD")">CAD</MudSelectItem>
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6">
@@ -77,7 +77,7 @@
     private string    _planSlug      = "";
     private string    _billingCycle  = "Monthly";
     private decimal   _amount        = 0m;
-    private string    _currency      = "CAD";
+    private string    _currency      = "USD";
     private DateTime? _paidAt        = DateTime.Today;
     private DateTime? _periodStart   = DateTime.Today;
     private DateTime? _periodEnd     = DateTime.Today.AddMonths(1);
@@ -90,7 +90,7 @@
     {
         _planSlug     = Request.PlanSlug;
         _billingCycle = Request.BillingCycle;
-        _currency     = Request.Currency ?? "CAD";
+        _currency     = Request.Currency ?? "USD";
         _periodEnd    = _billingCycle == "Annual"
             ? DateTime.Today.AddYears(1)
             : DateTime.Today.AddMonths(1);
