@@ -8,7 +8,10 @@
     <!-- Logo -->
     <a href="/" class="dmd-logo">
         <img src="images/DMD_POS_scalable.svg" alt="Cloud Mobil POS" width="32" height="32" />
-        <span class="dmd-logo-text">Cloud Mobil POS</span>
+        <span class="dmd-logo-stack">
+            <span class="dmd-logo-text">Cloud Mobil POS</span>
+            <span class="dmd-logo-slogan">Scale without limit</span>
+        </span>
     </a>
 
     <!-- Desktop menu -->
@@ -183,8 +186,13 @@
 
     /* ── Logo ────────────────────────────────────────────────────── */
     .dmd-logo { display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:36px;flex-shrink:0; }
+    .dmd-logo-stack { display:flex;flex-direction:column;line-height:1.15; }
     .dmd-logo-text { font-family:'Poppins',sans-serif;font-size:1.1rem;color:#1A237E;letter-spacing:-0.01em; }
     .dmd-logo-text strong { color:#00BFA5; }
+    .dmd-logo-slogan {
+        font-family:'DM Sans',sans-serif;font-size:0.62rem;font-weight:500;color:#6B7280;
+        letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;
+    }
 
     /* ── Nav link list ───────────────────────────────────────────── */
     .dmd-nav-links { display:flex;align-items:center;list-style:none;margin:0;padding:0;gap:2px;flex:1; }
